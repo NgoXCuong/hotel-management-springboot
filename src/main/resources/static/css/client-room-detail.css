@@ -1,0 +1,57 @@
+/* ==========================================================================
+   GRAND HOTEL - ROOM DETAIL STYLES
+   Quiet Luxury & Warm Editorial Theme (Aman & Six Senses Style)
+   ========================================================================== */
+
+.detail-gallery-main {
+    height: 460px;
+    width: 100%;
+    object-fit: cover;
+    border-radius: 18px;
+    box-shadow: var(--lux-shadow-md);
+    transition: opacity 0.3s ease;
+    border: 1px solid var(--lux-border);
+}
+
+.gallery-thumb {
+    height: 95px;
+    width: 100%;
+    object-fit: cover;
+    border-radius: 12px;
+    cursor: pointer;
+    border: 1.5px solid var(--lux-border);
+    transition: var(--lux-transition);
+}
+
+.gallery-thumb:hover, .gallery-thumb.active {
+    border-color: var(--lux-gold);
+    transform: scale(1.03);
+    box-shadow: 0 4px 14px var(--lux-gold-glow);
+}
+
+.sticky-booking-card {
+    background: #FFFFFF;
+    border: 1px solid var(--lux-border);
+    border-radius: 20px;
+    padding: 32px;
+    box-shadow: var(--lux-shadow-md);
+    position: sticky;
+    top: 90px;
+}
+
+.amenity-card-lg {
+    background: #FFFFFF;
+    border: 1px solid var(--lux-border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: var(--lux-transition);
+}
+
+.amenity-card-lg:hover {
+    background: var(--lux-gold-light);
+    border-color: var(--lux-gold);
+    transform: translateY(-2px);
+}

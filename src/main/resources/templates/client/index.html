@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/client-layout}">
+<head>
+    <title layout:fragment="title">Grand Hotel - Khu Nghỉ Dưỡng Thượng Lưu 5 Sao Bên Vịnh Nha Trang</title>
+    <link rel="stylesheet" th:href="@{/css/client-index.css}">
+</head>
+<body>
+    <div layout:fragment="content">
+
+        <!-- 1. Hero Banner (Quiet Luxury Editorial) -->
+        <section class="hero-banner">
+            <div class="container" style="max-width: 960px;">
+                <div class="hero-editorial-badge">
+                    <i class="fa-solid fa-crown me-1" style="color: #E7D7C1;"></i> Biểu Tượng Nghỉ Dưỡng 5 Sao Quốc Tế
+                </div>
+                <h1 class="hero-title">
+                    Nơi Thiên Nhiên Giao Hòa Cùng Đẳng Cấp Thượng Lưu
+                </h1>
+                <p class="hero-subtitle">
+                    Grand Hotel mang đến trải nghiệm lưu trú tinh tế với các phòng nghỉ cao cấp hướng biển tuyệt mỹ, nghệ thuật ẩm thực đỉnh cao cùng dịch vụ quản gia tận tâm bên bờ vịnh Nha Trang.
+                </p>
+                <div class="d-flex justify-content-center gap-3 flex-wrap">
+                    <a href="#rooms-section" class="gold-btn">
+                        <i class="fa-solid fa-bed me-2"></i> Khám phá Bộ sưu tập Phòng
+                    </a>
+                    <a href="#about" class="dark-luxury-btn">
+                        <i class="fa-solid fa-compass me-2"></i> Câu chuyện Grand Hotel
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. Floating Search Widget (Minimalist Luxury Capsule) -->
+        <div class="container">
+            <div class="search-widget-card mx-auto" style="max-width: 1080px;">
+                <form th:action="@{/rooms}" method="get" class="row g-3 align-items-end">
+                    <!-- Ngày nhận phòng -->
+                    <div class="col-12 col-md-3">
+                        <div class="search-label">
+                            <i class="fa-regular fa-calendar-check" style="color: #9A7B56;"></i> Ngày nhận phòng
+                        </div>
+                        <input type="date" name="checkIn" class="form-control" 
+                               th:value="${defaultCheckIn}" required>
+                    </div>
+
+                    <!-- Ngày trả phòng -->
+                    <div class="col-12 col-md-3">
+                        <div class="search-label">
+                            <i class="fa-regular fa-calendar-xmark" style="color: #9A7B56;"></i> Ngày trả phòng
+                        </div>
+                        <input type="date" name="checkOut" class="form-control" 
+                               th:value="${defaultCheckOut}" required>
+                    </div>
+
+                    <!-- Số lượng khách -->
+                    <div class="col-12 col-md-3">
+                        <div class="search-label">
+                            <i class="fa-solid fa-user-group" style="color: #9A7B56;"></i> Số lượng khách
+                        </div>
+                        <select name="guests" class="form-select">
+                            <option value="1">1 Khách (Single)</option>
+                            <option value="2" selected>2 Khách (Couple / Twin)</option>
+                            <option value="3">3 Khách (Triple)</option>
+                            <option value="4">4 Khách (Family)</option>
+                            <option value="5">5+ Khách</option>
+                        </select>
+                    </div>
+
+                    <!-- Nút Tìm phòng -->
+                    <div class="col-12 col-md-3">
+                        <button type="submit" class="gold-btn search-submit-btn">
+                            <i class="fa-solid fa-magnifying-glass me-2"></i> Tìm phòng ngay
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 3. Giới thiệu Về Khách Sạn (#about) - Editorial Story -->
+        <section id="about" class="py-5 my-4">
+            <div class="container py-3">
+                <div class="row g-5 align-items-center">
+                    <div class="col-12 col-lg-6">
+                        <div class="about-image-wrapper">
+                            <img src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1200&q=85" 
+                                 class="about-img" alt="Grand Hotel Architecture">
+                            <div class="about-award-badge">
+                                <div class="award-icon-box">
+                                    <i class="fa-solid fa-award"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-dark small mb-0">World Luxury Hotel Awards</div>
+                                    <div class="text-muted" style="font-size: 11.5px;">Top 10 Khu nghỉ dưỡng hàng đầu Châu Á</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-lg-6 ps-lg-4">
+                        <div class="editorial-tag">Về Grand Hotel &bull; Di Sản & Tinh Hoa</div>
+                        <h2 class="luxury-heading display-6 mb-3">Kiệt Tác Kiến Trúc Giữa Lòng Vịnh Biển Nha Trang</h2>
+                        <p class="text-muted" style="line-height: 1.85; font-size: 14.5px;">
+                            Grand Hotel tự hào là biểu tượng nghỉ dưỡng sang trọng bậc nhất tại vịnh biển Nha Trang. Được thiết kế theo ngôn ngữ Tân Cổ Điển tinh tế giao thoa cùng phong cách nhiệt đới đương đại, nơi đây mang đến không gian an yên tuyệt đối cho những tâm hồn kiếm tìm sự thanh thản và phong vị sống thượng lưu.
+                        </p>
+                        <p class="text-muted mb-4" style="line-height: 1.85; font-size: 14.5px;">
+                            Từng chi tiết trong gian phòng, nghệ thuật ẩm thực tinh hoa từ các đầu bếp danh tiếng đến liệu trình Spa tái tạo năng lượng đều được trau chuốt tỉ mỉ để mang đến một kỳ nghỉ viên mãn.
+                        </p>
+                        <div class="row g-3 pt-1">
+                            <div class="col-4">
+                                <div class="stat-counter-box">
+                                    <div class="stat-number">150+</div>
+                                    <div class="text-muted" style="font-size: 11.5px; font-weight: 600;">Phòng Suite & Villa</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="stat-counter-box">
+                                    <div class="stat-number">98%</div>
+                                    <div class="text-muted" style="font-size: 11.5px; font-weight: 600;">Khách Hài Lòng</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="stat-counter-box">
+                                    <div class="stat-number">24/7</div>
+                                    <div class="text-muted" style="font-size: 11.5px; font-weight: 600;">Quản Gia & Phục Vụ</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. Hạng phòng Tiêu biểu (#rooms-section) - Signature Collection -->
+        <section id="rooms-section" class="rooms-showcase-section">
+            <div class="container">
+                <div class="text-center mb-5">
+                    <div class="editorial-tag justify-content-center">Bộ Sưu Tập Không Gian Nghỉ Dưỡng</div>
+                    <h2 class="luxury-heading display-6 mt-1 mb-2">Các Hạng Phòng Nghỉ Thượng Lưu</h2>
+                    <p class="text-muted mx-auto" style="max-width: 600px; font-size: 14.5px;">
+                        Mỗi gian phòng là một ốc đảo riêng tư với thiết kế mở đón trọn ánh nắng biển và làn gió mát lành từ vịnh Nha Trang.
+                    </p>
+                </div>
+
+                <div class="row g-4">
+                    <div th:each="rt, iter : ${featuredRoomTypes}" th:if="${iter.index < 6}" class="col-12 col-md-6 col-lg-4">
+                        <div class="room-card-lux">
+                            <!-- Ảnh phòng -->
+                            <div class="room-card-img-wrap">
+                                <img th:if="${rt.images != null and !rt.images.isEmpty()}" th:src="${rt.images[0].imageUrl}" class="room-card-img" th:alt="${rt.name}">
+                                <img th:unless="${rt.images != null and !rt.images.isEmpty()}" src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80" class="room-card-img" th:alt="${rt.name}">
+                                <div class="room-guest-badge">
+                                    <i class="fa-solid fa-user-group me-1"></i> Tối đa <span th:text="${rt.maxGuests}">2</span> khách
+                                </div>
+                            </div>
+
+                            <!-- Nội dung phòng -->
+                            <div class="room-card-body">
+                                <div>
+                                    <h3 class="room-card-title" th:text="${rt.name}">Deluxe King Room</h3>
+                                    <p class="room-card-desc" th:text="${rt.description != null ? #strings.abbreviate(rt.description, 105) : 'Không gian nghỉ dưỡng sang trọng với tầm nhìn hướng biển tuyệt đẹp và tiện nghi đẳng cấp 5 sao.'}">
+                                        Không gian nghỉ dưỡng sang trọng...
+                                    </p>
+
+                                    <!-- Tiện nghi tiêu biểu -->
+                                    <div class="d-flex flex-wrap gap-2 mb-3">
+                                        <span th:each="am, iter : ${rt.amenities}" th:if="${iter.index < 3}" class="amenity-pill-sm">
+                                            <i th:classappend="${am.icon != null ? am.icon : 'fa-solid fa-check'}" style="color: #9A7B56;"></i>
+                                            <span th:text="${am.name}">Wifi</span>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- Giá & Nút Đặt -->
+                                <div class="room-card-price-row">
+                                    <div class="d-flex justify-content-between align-items-end mb-3">
+                                        <div>
+                                            <div class="text-muted" style="font-size: 11px;">Giá niêm yết từ</div>
+                                            <div class="room-price-amount" 
+                                                 th:text="${#numbers.formatDecimal(rt.pricePerNight, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                                1,200,000 đ
+                                            </div>
+                                        </div>
+                                        <div class="text-muted small pb-1">/ đêm</div>
+                                    </div>
+
+                                    <div class="d-flex gap-2 w-100">
+                                        <a th:href="@{/rooms/{id}(id=${rt.id})}" class="gold-outline-btn px-3 py-2 small flex-grow-1 text-center justify-content-center">
+                                            Chi tiết
+                                        </a>
+                                        <a th:href="@{/booking/checkout(roomTypeId=${rt.id}, checkIn=${defaultCheckIn}, checkOut=${defaultCheckOut})}" class="gold-btn px-3 py-2 small flex-grow-1 text-center justify-content-center">
+                                            <i class="fa-solid fa-calendar-check me-1.5"></i>Đặt ngay
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-5 pt-2">
+                    <a th:href="@{/rooms}" class="gold-btn px-4 py-2.5">
+                        <i class="fa-solid fa-list me-2"></i> Khám phá tất cả các hạng phòng &rarr;
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. Dịch vụ & Tiện ích Nghỉ dưỡng (#services) -->
+        <section id="services" class="py-5 my-4">
+            <div class="container py-3">
+                <div class="text-center mb-5">
+                    <div class="editorial-tag justify-content-center">Đặc Quyền Nghỉ Dưỡng</div>
+                    <h2 class="luxury-heading display-6 mt-1 mb-2">Trải Nghiệm Thượng Lưu Hoàn Hảo</h2>
+                    <p class="text-muted mx-auto" style="max-width: 600px; font-size: 14.5px;">
+                        Tận hưởng chuỗi dịch vụ cá nhân hóa và tiện ích chuẩn mực quốc tế trong từng khoảnh khắc lưu trú.
+                    </p>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-12 col-sm-6 col-lg-3">
+                        <div class="service-feature-card">
+                            <div class="service-icon-wrap">
+                                <i class="fa-solid fa-water-ladder"></i>
+                            </div>
+                            <h4 class="service-card-title">Hồ Bơi Vô Cực</h4>
+                            <p class="text-muted small mb-0" style="line-height: 1.6;">
+                                Bể bơi tràn bờ tầng thượng ngắm trọn hoàng hôn vịnh biển Nha Trang cùng quầy bar nhiệt đới thanh lịch.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-lg-3">
+                        <div class="service-feature-card">
+                            <div class="service-icon-wrap">
+                                <i class="fa-solid fa-utensils"></i>
+                            </div>
+                            <h4 class="service-card-title">Ẩm Thực Tinh Hoa</h4>
+                            <p class="text-muted small mb-0" style="line-height: 1.6;">
+                                Thực đơn Fine Dining kết hợp hải sản Nha Trang tươi ngon cùng bộ sưu tập rượu vang danh tiếng thế giới.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-lg-3">
+                        <div class="service-feature-card">
+                            <div class="service-icon-wrap">
+                                <i class="fa-solid fa-spa"></i>
+                            </div>
+                            <h4 class="service-card-title">Spa & Trị Liệu</h4>
+                            <p class="text-muted small mb-0" style="line-height: 1.6;">
+                                Liệu pháp thảo dược cổ truyền và tinh dầu tự nhiên giúp xua tan mệt mỏi, tái tạo năng lượng thể chất và tinh thần.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-lg-3">
+                        <div class="service-feature-card">
+                            <div class="service-icon-wrap">
+                                <i class="fa-solid fa-van-shuttle"></i>
+                            </div>
+                            <h4 class="service-card-title">Đưa Đón Sân Bay VIP</h4>
+                            <p class="text-muted small mb-0" style="line-height: 1.6;">
+                                Dịch vụ xe sang đưa đón chuyên biệt sân bay Cam Ranh &ndash; Khách sạn đúng giờ, êm ái và chu đáo.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. Đánh giá Thực tế từ Khách hàng (#reviews) -->
+        <section id="reviews" class="reviews-section">
+            <div class="container">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-5">
+                    <div>
+                        <div class="editorial-tag">Cảm Nhận Từ Trái Tim Du Khách</div>
+                        <h2 class="luxury-heading display-6 mt-1 mb-0">Những Đánh Giá Đáng Trân Quý</h2>
+                    </div>
+                    <div class="mt-3 mt-md-0 d-flex align-items-center gap-3 p-3 bg-white rounded-3 border" style="border-color: var(--lux-border) !important;">
+                        <div class="stat-number mb-0" style="font-size: 34px;" th:text="${reviewStats.averageRating}">4.8</div>
+                        <div>
+                            <div class="review-stars">
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                            </div>
+                            <div class="text-muted small"><strong class="text-dark" th:text="${reviewStats.totalReviews}">0</strong> đánh giá xác thực</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <div th:each="rev, iter : ${reviews}" th:if="${iter.index < 6}" class="col-12 col-md-6 col-lg-4">
+                        <div class="review-card-client">
+                            <div>
+                                <div class="d-flex align-items-center justify-content-between mb-3">
+                                    <div class="d-flex align-items-center gap-2.5">
+                                        <div class="review-avatar-char">
+                                            <span th:text="${#strings.substring(rev.customer.fullName, 0, 1)}">A</span>
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold text-dark small" th:text="${rev.customer.fullName}">Nguyễn Văn An</div>
+                                            <div class="text-muted" style="font-size: 11px;" th:text="${#temporals.format(rev.createdAt, 'dd/MM/yyyy')}">23/08/2026</div>
+                                        </div>
+                                    </div>
+                                    <div class="review-stars">
+                                        <th:block th:each="i : ${#numbers.sequence(1, rev.rating)}">
+                                            <i class="fa-solid fa-star"></i>
+                                        </th:block>
+                                    </div>
+                                </div>
+
+                                <p class="review-comment-text mb-0" th:text="'&ldquo;' + ${rev.comment} + '&rdquo;'">
+                                    &ldquo;Phòng rất đẹp, view hướng biển tuyệt đẹp và nhân viên lễ tân chu đáo.&rdquo;
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fallback default review if empty -->
+                    <div th:if="${#lists.isEmpty(reviews)}" class="col-12 col-md-4">
+                        <div class="review-card-client">
+                            <div>
+                                <div class="d-flex align-items-center justify-content-between mb-3">
+                                    <div class="d-flex align-items-center gap-2.5">
+                                        <div class="review-avatar-char">H</div>
+                                        <div>
+                                            <div class="fw-bold text-dark small">Hoàng Yến</div>
+                                            <div class="text-muted" style="font-size: 11px;">Hà Nội</div>
+                                        </div>
+                                    </div>
+                                    <div class="review-stars">
+                                        <i class="fa-solid fa-star"></i>
+                                        <i class="fa-solid fa-star"></i>
+                                        <i class="fa-solid fa-star"></i>
+                                        <i class="fa-solid fa-star"></i>
+                                        <i class="fa-solid fa-star"></i>
+                                    </div>
+                                </div>
+                                <p class="review-comment-text mb-0">
+                                    &ldquo;Trải nghiệm nghỉ dưỡng tuyệt vời! Hồ bơi vô cực ngắm biển đẹp ngỡ ngàng, phòng êm ái và nhân viên luôn nở nụ cười hiền hậu.&rdquo;
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 7. Liên hệ & Bản đồ Vị trí (#contact) -->
+        <section id="contact" class="py-5 my-4">
+            <div class="container py-2">
+                <div class="row g-5">
+                    
+                    <!-- Left: Contact Form -->
+                    <div class="col-12 col-lg-6">
+                        <div class="contact-form-card">
+                            <div class="editorial-tag">Kết Nối Với Chúng Tôi</div>
+                            <h2 class="luxury-heading display-6 mb-3">Gửi Yêu Cầu Tư Vấn & Hỗ Trợ</h2>
+                            <p class="text-muted small mb-4">Đội ngũ Chăm sóc Khách hàng 24/7 của Grand Hotel hân hạnh được giải đáp mọi thắc mắc của Quý khách.</p>
+
+                            <form onsubmit="event.preventDefault(); alert('Cảm ơn Quý khách! Đội ngũ tư vấn sẽ liên hệ lại trong thời gian sớm nhất.'); this.reset();" class="row g-3">
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label small fw-semibold text-dark">Họ và tên <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" placeholder="Nguyễn Văn A" required>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label small fw-semibold text-dark">Số điện thoại <span class="text-danger">*</span></label>
+                                    <input type="tel" class="form-control" placeholder="0912 345 678" required>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label small fw-semibold text-dark">Địa chỉ Email</label>
+                                    <input type="email" class="form-control" placeholder="email@example.com">
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label small fw-semibold text-dark">Nội dung yêu cầu / Ghi chú đặc biệt</label>
+                                    <textarea class="form-control" rows="3" placeholder="Nhập chi tiết yêu cầu của Quý khách..." required></textarea>
+                                </div>
+                                <div class="col-12 pt-1">
+                                    <button type="submit" class="gold-btn px-4 py-2.5">
+                                        <i class="fa-solid fa-paper-plane me-2"></i> Gửi tin nhắn
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Right: Contact info & Location Box -->
+                    <div class="col-12 col-lg-6">
+                        <div class="contact-info-card h-100 d-flex flex-column">
+                            <h3 class="luxury-heading fs-4 mb-4 pb-2 border-bottom" style="border-color: var(--lux-border) !important;">
+                                <i class="fa-solid fa-location-dot me-2" style="color: #9A7B56;"></i> Địa Chỉ & Chỉ Dẫn Vị Trí
+                            </h3>
+
+                            <div class="d-flex align-items-start gap-3 mb-3">
+                                <div class="award-icon-box flex-shrink-0">
+                                    <i class="fa-solid fa-map-location-dot"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-dark small">Địa chỉ khách sạn</div>
+                                    <div class="text-muted small">123 Trần Phú, Phường Lộc Thọ, TP. Nha Trang, Khánh Hòa</div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex align-items-start gap-3 mb-3">
+                                <div class="award-icon-box flex-shrink-0">
+                                    <i class="fa-solid fa-phone-volume"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-dark small">Hotline tư vấn & Đặt phòng</div>
+                                    <div class="text-muted small">1900 8888 &bull; (0258) 3888 999 (Phục vụ 24/7)</div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex align-items-start gap-3 mb-4">
+                                <div class="award-icon-box flex-shrink-0">
+                                    <i class="fa-solid fa-envelope-open-text"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-dark small">Hòm thư điện tử</div>
+                                    <div class="text-muted small">reservation@grandhotel.vn &bull; concierge@grandhotel.vn</div>
+                                </div>
+                            </div>
+
+                            <!-- Styled Map Iframe -->
+                            <div class="rounded-3 overflow-hidden border flex-grow-1" style="min-height: 180px; border-color: var(--lux-border) !important;">
+                                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3899.043232810332!2d109.1967!3d12.2388!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x317067756f962d31%3A0x7d3a0429f0e1f37!2zVHLhuqduIFBow7osIE5oYSBUcmFuZywgS2jDoW5oIEjDsmE!5e0!3m2!1svi!2svn!4v1700000000000!5m2!1svi!2svn" 
+                                        width="100%" height="100%" style="border:0; min-height: 180px;" allowfullscreen="" loading="lazy"></iframe>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+    </div>
+</body>
+</html>

@@ -1,0 +1,67 @@
+.gold-btn {
+    background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+    color: #ffffff !important;
+    border: none;
+    box-shadow: 0 4px 12px rgba(217, 119, 6, 0.25);
+    transition: all 0.25s ease;
+}
+.gold-btn:hover {
+    background: linear-gradient(135deg, #b45309 0%, #92400e 100%);
+    box-shadow: 0 6px 16px rgba(217, 119, 6, 0.35);
+    transform: translateY(-1px);
+}
+.form-section-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1e293b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1.5px solid #f1f5f9;
+    display: flex;
+    align-items: center;
+}
+.avatar-upload-wrapper {
+    width: 100px;
+    height: 100px;
+    position: relative;
+    margin: 0 auto 12px;
+    cursor: pointer;
+}
+.avatar-preview-img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #fef3c7;
+    box-shadow: 0 4px 10px rgba(217, 119, 6, 0.15);
+}
+.avatar-placeholder {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: #fffbeb;
+    border: 2px dashed #d97706;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #d97706;
+}
+.avatar-edit-badge {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 28px;
+    height: 28px;
+    background: #d97706;
+    color: #ffffff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    border: 2px solid #ffffff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}

@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin-layout}">
+<head>
+    <title layout:fragment="title">Quản lý Đánh giá & Phản hồi - Grand Hotel</title>
+    <link rel="stylesheet" th:href="@{/css/admin/review-list.css}">
+</head>
+<body>
+    <div layout:fragment="content">
+
+        <!-- 1. Header Toolbar -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+            <div>
+                <h4 class="fw-bold text-dark mb-1" style="letter-spacing: -0.5px;">
+                    <i class="fa-solid fa-star text-warning me-2" style="color: #f59e0b !important;"></i> Quản lý Đánh giá & Phản hồi
+                </h4>
+                <p class="text-muted small mb-0">Theo dõi trải nghiệm khách hàng, kiểm duyệt bình luận và nâng cao chất lượng dịch vụ</p>
+            </div>
+            <div class="d-flex gap-2">
+                <span class="badge bg-light text-secondary border px-3 py-2 rounded-3 d-flex align-items-center">
+                    <i class="fa-solid fa-comments me-2 text-warning" style="color: #d97706 !important;"></i>
+                    Tổng cộng: <strong class="text-dark ms-1" th:text="${stats.totalReviews}">0</strong> phản hồi
+                </span>
+            </div>
+        </div>
+
+
+
+        <!-- 2. Header Summary KPI Cards (Điểm số, Tỷ lệ hài lòng, Đánh giá cần chú ý, Phân bố sao) -->
+        <div class="row g-3 mb-4">
+            
+            <!-- THẺ 1: Điểm trung bình -->
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="kpi-card-luxury d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="text-muted small fw-semibold text-uppercase mb-2" style="font-size: 11px;">ĐIỂM ĐÁNH GIÁ TRUNG BÌNH</div>
+                        <div class="d-flex align-items-baseline gap-2 mb-1">
+                            <div class="gold-score" th:text="${stats.averageRating}">4.8</div>
+                            <div class="text-muted fw-bold">/ 5.0</div>
+                        </div>
+                        <div class="mb-2">
+                            <i class="fa-solid fa-star star-gold"></i>
+                            <i class="fa-solid fa-star star-gold"></i>
+                            <i class="fa-solid fa-star star-gold"></i>
+                            <i class="fa-solid fa-star star-gold"></i>
+                            <i class="fa-solid fa-star star-gold"></i>
+                        </div>
+                    </div>
+                    <div class="text-muted small" style="font-size: 11.5px;">
+                        Dựa trên <strong class="text-dark" th:text="${stats.totalReviews}">0</strong> lượt đánh giá
+                    </div>
+                </div>
+            </div>
+
+            <!-- THẺ 2: Tỷ lệ hài lòng -->
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="kpi-card-luxury d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="text-muted small fw-semibold text-uppercase mb-2" style="font-size: 11px;">TỶ LỆ HÀI LÒNG KHÁCH HÀNG</div>
+                        <div class="d-flex align-items-baseline gap-1 mb-2">
+                            <div class="fw-bold fs-2 text-success" th:text="${stats.satisfactionRate} + '%'">95%</div>
+                            <div class="text-muted small ms-1">(4 - 5 sao)</div>
+                        </div>
+                        <div class="progress mb-2" style="height: 8px; border-radius: 4px; background-color: #f1f5f9;">
+                            <div class="progress-bar bg-success" role="progressbar" 
+                                 th:style="'width: ' + ${stats.satisfactionRate} + '%'" 
+                                 th:aria-valuenow="${stats.satisfactionRate}" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+                    <div class="text-muted small" style="font-size: 11.5px;">
+                        <span class="text-success fw-bold"><i class="fa-solid fa-circle-check me-2"></i> Xuất sắc</span> - Khách có trải nghiệm tốt
+                    </div>
+                </div>
+            </div>
+
+            <!-- THẺ 3: Cần chú ý / giải quyết -->
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="kpi-card-luxury d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="text-muted small fw-semibold text-uppercase mb-2" style="font-size: 11px;">ĐÁNH GIÁ CẦN CHÚ Ý (&le; 3 SAO)</div>
+                        <div class="d-flex align-items-baseline gap-2 mb-2">
+                            <div class="fw-bold fs-2 text-danger" th:text="${stats.needsAttentionCount}">0</div>
+                            <div class="text-muted small">phản hồi</div>
+                        </div>
+                        <div class="p-2 rounded-3 bg-danger-subtle text-danger small border border-danger-subtle" style="font-size: 11px;">
+                            <i class="fa-solid fa-triangle-exclamation me-2"></i> Cần liên hệ hỗ trợ hoặc cải thiện chất lượng
+                        </div>
+                    </div>
+                    <div class="text-muted small" style="font-size: 11.5px;">
+                        Đã xử lý: <strong class="text-dark">100%</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- THẺ 4: Phân bố số sao (Rating Breakdown) -->
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="kpi-card-luxury">
+                    <div class="text-muted small fw-semibold text-uppercase mb-2" style="font-size: 11px;">PHÂN BỐ SỐ SAO</div>
+                    
+                    <!-- 5 sao -->
+                    <div class="rating-bar-row">
+                        <span style="width: 32px;">5 <i class="fa-solid fa-star star-gold" style="font-size: 10px;"></i></span>
+                        <div class="rating-bar-progress">
+                            <div class="rating-bar-fill" th:style="'width: ' + ${stats.getPercent5Star()} + '%'"></div>
+                        </div>
+                        <span class="text-muted" style="width: 28px; text-align: right;" th:text="${stats.count5Star}">0</span>
+                    </div>
+
+                    <!-- 4 sao -->
+                    <div class="rating-bar-row">
+                        <span style="width: 32px;">4 <i class="fa-solid fa-star star-gold" style="font-size: 10px;"></i></span>
+                        <div class="rating-bar-progress">
+                            <div class="rating-bar-fill" th:style="'width: ' + ${stats.getPercent4Star()} + '%'"></div>
+                        </div>
+                        <span class="text-muted" style="width: 28px; text-align: right;" th:text="${stats.count4Star}">0</span>
+                    </div>
+
+                    <!-- 3 sao -->
+                    <div class="rating-bar-row">
+                        <span style="width: 32px;">3 <i class="fa-solid fa-star star-gold" style="font-size: 10px;"></i></span>
+                        <div class="rating-bar-progress">
+                            <div class="rating-bar-fill" style="background-color: #fbbf24;" th:style="'width: ' + ${stats.getPercent3Star()} + '%; background-color: #fbbf24;'"></div>
+                        </div>
+                        <span class="text-muted" style="width: 28px; text-align: right;" th:text="${stats.count3Star}">0</span>
+                    </div>
+
+                    <!-- 2 sao -->
+                    <div class="rating-bar-row">
+                        <span style="width: 32px;">2 <i class="fa-solid fa-star star-gold" style="font-size: 10px;"></i></span>
+                        <div class="rating-bar-progress">
+                            <div class="rating-bar-fill" style="background-color: #f87171;" th:style="'width: ' + ${stats.getPercent2Star()} + '%; background-color: #f87171;'"></div>
+                        </div>
+                        <span class="text-muted" style="width: 28px; text-align: right;" th:text="${stats.count2Star}">0</span>
+                    </div>
+
+                    <!-- 1 sao -->
+                    <div class="rating-bar-row">
+                        <span style="width: 32px;">1 <i class="fa-solid fa-star star-gold" style="font-size: 10px;"></i></span>
+                        <div class="rating-bar-progress">
+                            <div class="rating-bar-fill" style="background-color: #ef4444;" th:style="'width: ' + ${stats.getPercent1Star()} + '%; background-color: #ef4444;'"></div>
+                        </div>
+                        <span class="text-muted" style="width: 28px; text-align: right;" th:text="${stats.count1Star}">0</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 3. Thanh tìm kiếm & Bộ lọc -->
+        <div class="card border-0 shadow-sm rounded-4 p-3 mb-4" style="background: #ffffff;">
+            <form th:action="@{/admin/reviews}" method="get" class="row g-2 align-items-center">
+                <!-- Từ khóa -->
+                <div class="col-12 col-md-5">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-light border-end-0 text-muted"><i class="fa-solid fa-magnifying-glass"></i></span>
+                        <input type="text" name="keyword" class="form-control bg-light border-start-0 ps-0" 
+                               placeholder="Tìm theo tên khách, mã booking hoặc nội dung bình luận..." th:value="${keyword}">
+                    </div>
+                </div>
+
+                <!-- Lọc số sao -->
+                <div class="col-6 col-md-2">
+                    <select name="rating" class="form-select form-select-sm bg-light">
+                        <option value="">-- Tất cả số sao --</option>
+                        <option value="5" th:selected="${rating == 5}">5 sao (⭐⭐⭐⭐⭐)</option>
+                        <option value="4" th:selected="${rating == 4}">4 sao (⭐⭐⭐⭐)</option>
+                        <option value="3" th:selected="${rating == 3}">3 sao (⭐⭐⭐)</option>
+                        <option value="2" th:selected="${rating == 2}">2 sao (⭐⭐)</option>
+                        <option value="1" th:selected="${rating == 1}">1 sao (⭐)</option>
+                    </select>
+                </div>
+
+                <!-- Lọc hiển thị -->
+                <div class="col-6 col-md-3">
+                    <select name="isVisible" class="form-select form-select-sm bg-light">
+                        <option value="">-- Tất cả trạng thái --</option>
+                        <option value="true" th:selected="${isVisible != null and isVisible == true}">Công khai (Hiển thị)</option>
+                        <option value="false" th:selected="${isVisible != null and isVisible == false}">Đã ẩn khỏi trang chủ</option>
+                    </select>
+                </div>
+
+                <!-- Nút thao tác -->
+                <div class="col-12 col-md-2 d-flex gap-1">
+                    <button type="submit" class="btn btn-sm btn-dark rounded-2 w-100 fw-semibold">
+                        <i class="fa-solid fa-filter me-2"></i> Lọc
+                    </button>
+                    <a th:href="@{/admin/reviews}" class="btn btn-sm btn-outline-secondary rounded-2">
+                        <i class="fa-solid fa-rotate-left"></i>
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- 4. Bảng dữ liệu Đánh giá chuẩn UI/UX -->
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden" style="background: #ffffff;">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0" style="font-size: 13.5px;">
+                    <thead style="background-color: #f8fafc; border-bottom: 1px solid #e2e8f0; font-size: 12px; color: #475569; text-transform: uppercase; letter-spacing: 0.5px;">
+                        <tr>
+                            <th class="ps-4 py-3 text-center" style="width: 50px;">ID</th>
+                            <th class="py-3" style="width: 220px;">Khách hàng & Mã Booking</th>
+                            <th class="py-3" style="width: 140px;">Xếp hạng</th>
+                            <th class="py-3">Nội dung phản hồi</th>
+                            <th class="py-3 text-center" style="width: 140px;">Trạng thái</th>
+                            <th class="pe-4 py-3 text-center" style="width: 130px;">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="r : ${reviews}">
+                            <!-- ID -->
+                            <td class="ps-4 text-center text-muted small" th:text="'#' + ${r.id}">#1</td>
+
+                            <!-- Khách hàng & Mã Booking -->
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="rounded-circle bg-light d-flex align-items-center justify-content-center text-secondary border fw-bold small" style="width: 34px; height: 34px; flex-shrink: 0;">
+                                        <span th:text="${#strings.substring(r.customer.fullName, 0, 1)}">A</span>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-dark" th:text="${r.customer.fullName}">Nguyễn Văn An</div>
+                                        <div class="small">
+                                            <a th:href="@{/admin/bookings/{id}(id=${r.booking.id})}" class="text-decoration-none text-muted" style="font-family: monospace;" th:text="${r.booking.bookingCode}">
+                                                BK-20260821-0892
+                                            </a>
+                                        </div>
+                                        <div class="text-muted" style="font-size: 11px;" th:text="${#temporals.format(r.createdAt, 'dd/MM/yyyy HH:mm')}">
+                                            21/08/2026 14:30
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- Xếp hạng số sao -->
+                            <td>
+                                <div class="d-flex align-items-center gap-1 mb-1">
+                                    <th:block th:each="i : ${#numbers.sequence(1, 5)}">
+                                        <i class="fa-solid fa-star" th:classappend="${i <= r.rating ? 'star-gold' : 'star-gray'}" style="font-size: 12px;"></i>
+                                    </th:block>
+                                </div>
+                                <span class="badge rounded-pill px-2 py-0.5" 
+                                      th:classappend="${r.rating >= 4 ? 'bg-success-subtle text-success' : (r.rating == 3 ? 'bg-warning-subtle text-warning' : 'bg-danger-subtle text-danger')}" 
+                                      style="font-size: 11px;" th:text="${r.rating} + ' / 5 sao'">5 / 5 sao</span>
+                            </td>
+
+                            <!-- Nội dung phản hồi -->
+                            <td>
+                                <div class="comment-truncate text-dark" th:text="${r.comment != null and !r.comment.isEmpty() ? r.comment : 'Khách hàng không để lại nhận xét văn bản.'}">
+                                    Phòng rất đẹp, view biển tuyệt vời và nhân viên lễ tân cực kỳ chu đáo. Chắc chắn sẽ quay lại!
+                                </div>
+                            </td>
+
+                            <!-- Trạng thái Hiển thị -->
+                            <td class="text-center">
+                                <span th:if="${r.isVisible}" class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2.5 py-1.5" style="font-size: 11.5px;">
+                                    <i class="fa-solid fa-circle-check me-2"></i> Công khai
+                                </span>
+                                <span th:unless="${r.isVisible}" class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill px-2.5 py-1.5" style="font-size: 11.5px;">
+                                    <i class="fa-solid fa-eye-slash me-2"></i> Đã ẩn
+                                </span>
+                            </td>
+
+                            <!-- Thao tác -->
+                            <td class="pe-4 text-center">
+                                <div class="d-inline-flex gap-1">
+                                    <!-- Xem chi tiết modal -->
+                                    <button type="button" class="btn btn-sm btn-light border text-primary" title="Xem chi tiết phản hồi"
+                                            th:data-id="${r.id}"
+                                            th:data-customer="${r.customer.fullName}"
+                                            th:data-phone="${r.customer.phone}"
+                                            th:data-booking="${r.booking.bookingCode}"
+                                            th:data-rating="${r.rating}"
+                                            th:data-comment="${r.comment}"
+                                            th:data-visible="${r.isVisible}"
+                                            th:data-date="${#temporals.format(r.createdAt, 'dd/MM/yyyy HH:mm')}"
+                                            onclick="openReviewDetailModal(this)">
+                                        <i class="fa-regular fa-comment-dots"></i>
+                                    </button>
+
+                                    <!-- Bật / Tắt hiển thị nhanh -->
+                                    <form th:action="@{/admin/reviews/toggle-visibility/{id}(id=${r.id})}" method="post" style="display:inline;">
+                                        <button type="submit" class="btn btn-sm btn-light border text-warning" 
+                                                th:title="${r.isVisible ? 'Ẩn khỏi trang chủ' : 'Hiển thị ra trang chủ'}">
+                                            <i class="fa-solid" th:classappend="${r.isVisible ? 'fa-eye-slash' : 'fa-eye'}"></i>
+                                        </button>
+                                    </form>
+
+                                    <!-- Xóa phản hồi vi phạm -->
+                                    <form th:action="@{/admin/reviews/delete/{id}(id=${r.id})}" method="post" style="display:inline;"
+                                          onsubmit="return confirm('Bạn có chắc chắn muốn xóa phản hồi này vĩnh viễn?');">
+                                        <button type="submit" class="btn btn-sm btn-light border text-danger" title="Xóa phản hồi vi phạm">
+                                            <i class="fa-regular fa-trash-can"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Empty State -->
+                        <tr th:if="${#lists.isEmpty(reviews)}">
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <i class="fa-regular fa-star text-muted mb-2" style="font-size: 40px; opacity: 0.3;"></i>
+                                <div>Chưa có đánh giá nào từ khách hàng hoặc không khớp với bộ lọc.</div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Table Footer / Pagination -->
+            <div class="px-4 py-3 bg-light border-top d-flex flex-column flex-md-row justify-content-between align-items-center gap-3" style="font-size: 13px; color: #64748b;">
+                <div>
+                    <span th:if="${reviewsPage != null and reviewsPage.totalElements > 0}">
+                        Hiển thị <strong class="text-dark" th:text="${reviewsPage.number * reviewsPage.size + 1}">1</strong>
+                        - <strong class="text-dark" th:text="${reviewsPage.number * reviewsPage.size + #lists.size(reviews)}">10</strong>
+                        trong tổng số <strong class="text-dark" th:text="${reviewsPage.totalElements}">25</strong> đánh giá
+                    </span>
+                    <span th:if="${reviewsPage == null or reviewsPage.totalElements == 0}">
+                        Hiển thị <strong class="text-dark">0</strong> đánh giá
+                    </span>
+                </div>
+
+                <!-- Navigation Pagination Controls -->
+                <nav th:if="${reviewsPage != null and reviewsPage.totalPages > 1}" aria-label="Phân trang đánh giá">
+                    <ul class="pagination pagination-sm mb-0">
+                        <!-- Trang đầu -->
+                        <li class="page-item" th:classappend="${reviewsPage.first ? 'disabled' : ''}">
+                            <a class="page-link" th:href="@{/admin/reviews(keyword=${keyword}, rating=${rating}, isVisible=${isVisible}, page=1)}" title="Trang đầu">
+                                <i class="fa-solid fa-angles-left"></i>
+                            </a>
+                        </li>
+                        <!-- Trang trước -->
+                        <li class="page-item" th:classappend="${reviewsPage.first ? 'disabled' : ''}">
+                            <a class="page-link" th:href="@{/admin/reviews(keyword=${keyword}, rating=${rating}, isVisible=${isVisible}, page=${reviewsPage.number})}" title="Trang trước">
+                                <i class="fa-solid fa-chevron-left"></i>
+                            </a>
+                        </li>
+
+                        <!-- Các số trang -->
+                        <li th:each="p : ${#numbers.sequence(T(java.lang.Math).max(1, reviewsPage.number + 1 - 2), T(java.lang.Math).min(reviewsPage.totalPages, reviewsPage.number + 1 + 2))}"
+                            class="page-item" th:classappend="${p == reviewsPage.number + 1 ? 'active' : ''}">
+                            <a class="page-link" th:text="${p}" th:href="@{/admin/reviews(keyword=${keyword}, rating=${rating}, isVisible=${isVisible}, page=${p})}">1</a>
+                        </li>
+
+                        <!-- Trang sau -->
+                        <li class="page-item" th:classappend="${reviewsPage.last ? 'disabled' : ''}">
+                            <a class="page-link" th:href="@{/admin/reviews(keyword=${keyword}, rating=${rating}, isVisible=${isVisible}, page=${reviewsPage.number + 2})}" title="Trang sau">
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </a>
+                        </li>
+                        <!-- Trang cuối -->
+                        <li class="page-item" th:classappend="${reviewsPage.last ? 'disabled' : ''}">
+                            <a class="page-link" th:href="@{/admin/reviews(keyword=${keyword}, rating=${rating}, isVisible=${isVisible}, page=${reviewsPage.totalPages})}" title="Trang cuối">
+                                <i class="fa-solid fa-angles-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+
+        <!-- 5. MODAL XEM CHI TIẾT PHẢN HỒI (#reviewDetailModal) -->
+        <div class="modal fade" id="reviewDetailModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content rounded-4 border-0 shadow">
+                    <div class="modal-header border-0 pb-0">
+                        <h5 class="modal-title fw-bold text-dark">
+                            <i class="fa-solid fa-comment-dots text-warning me-2" style="color: #f59e0b !important;"></i> Chi tiết Phản hồi của Khách
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    
+                    <div class="modal-body py-4">
+                        <!-- Thông tin khách -->
+                        <div class="p-3 bg-light rounded-3 border mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <h6 class="fw-bold text-dark mb-0" id="modalCustomerName">Nguyễn Văn An</h6>
+                                <span class="badge bg-white text-dark border mono small" id="modalBookingCode">BK-20260821-0892</span>
+                            </div>
+                            <div class="text-muted small d-flex justify-content-between">
+                                <span>SĐT: <strong class="text-dark" id="modalPhone">0912345678</strong></span>
+                                <span>Thời gian: <span id="modalDate">21/08/2026 14:30</span></span>
+                            </div>
+                        </div>
+
+                        <!-- Điểm số sao -->
+                        <div class="mb-3">
+                            <div class="text-muted small fw-semibold mb-1">XẾP HẠNG TRẢI NGHIỆM:</div>
+                            <div class="d-flex align-items-center gap-2">
+                                <div id="modalStarContainer" class="fs-5">
+                                    <!-- Render stars dynamically -->
+                                </div>
+                                <span class="badge bg-light text-dark border fs-6 px-2.5 py-1" id="modalRatingText">5 / 5 sao</span>
+                            </div>
+                        </div>
+
+                        <!-- Nội dung cảm nhận -->
+                        <div class="mb-3">
+                            <div class="text-muted small fw-semibold mb-1">NỘI DUNG NHẬN XÉT:</div>
+                            <div class="p-3 bg-white rounded-3 border text-dark" style="min-height: 90px; line-height: 1.6; font-size: 14px;" id="modalCommentText">
+                                <!-- Comment content -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer border-0 pt-0">
+                        <form id="modalToggleForm" method="post" class="me-auto">
+                            <button type="submit" class="btn btn-outline-warning text-dark border-warning rounded-3 px-3 fw-semibold" id="modalToggleBtn">
+                                <i class="fa-solid fa-eye-slash me-2"></i> Ẩn khỏi trang chủ
+                            </button>
+                        </form>
+                        <button type="button" class="btn btn-light rounded-3 px-3" data-bs-dismiss="modal">Đóng</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Script tương tác Modal -->
+    <th:block layout:fragment="script">
+        <script th:src="@{/js/admin/review-list.js}"></script>
+    </th:block>
+</body>
+</html>

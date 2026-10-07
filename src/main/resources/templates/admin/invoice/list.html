@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin-layout}">
+<head>
+    <title layout:fragment="title">Quản lý Hóa đơn & Thu ngân - Grand Hotel</title>
+    <link rel="stylesheet" th:href="@{/css/admin/invoice-list.css}">
+</head>
+<body>
+    <div layout:fragment="content">
+        
+        <!-- 1. Header Toolbar -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+            <div>
+                <h4 class="fw-bold text-dark mb-1" style="letter-spacing: -0.5px;">
+                    <i class="fa-solid fa-file-invoice-dollar text-warning me-2" style="color: #d97706 !important;"></i>Quản lý Hóa đơn & Thu ngân
+                </h4>
+                <p class="text-muted small mb-0">Theo dõi chứng từ thanh toán, doanh thu phát sinh và xuất hóa đơn lưu trú</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a th:href="@{/admin/bookings}" class="btn gold-btn px-3 py-2 rounded-3 fw-semibold">
+                    <i class="fa-solid fa-receipt me-2"></i> Lập Hóa đơn từ Booking
+                </a>
+            </div>
+        </div>
+
+
+
+        <!-- 2. KPI Stat Chips -->
+        <div class="row g-2 mb-4">
+            <div class="col-6 col-sm-4 col-lg-2">
+                <div class="kpi-stat-chip">
+                    <div class="rounded-3 p-2 text-dark bg-light"><i class="fa-solid fa-file-invoice"></i></div>
+                    <div>
+                        <div class="text-muted" style="font-size: 11px;">TỔNG HÓA ĐƠN</div>
+                        <div class="fw-bold fs-5 text-dark" th:text="${totalInvoices}">0</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-sm-4 col-lg-2">
+                <div class="kpi-stat-chip">
+                    <div class="rounded-3 p-2" style="background: #ecfdf5; color: #10b981;"><i class="fa-solid fa-circle-check"></i></div>
+                    <div>
+                        <div class="text-muted" style="font-size: 11px;">ĐÃ PHÁT HÀNH</div>
+                        <div class="fw-bold fs-5 text-success" th:text="${issuedCount}">0</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-sm-4 col-lg-2">
+                <div class="kpi-stat-chip">
+                    <div class="rounded-3 p-2" style="background: #fffbeb; color: #d97706;"><i class="fa-solid fa-file-pen"></i></div>
+                    <div>
+                        <div class="text-muted" style="font-size: 11px;">BẢN NHÁP</div>
+                        <div class="fw-bold fs-5 text-warning" style="color: #d97706 !important;" th:text="${draftCount}">0</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-sm-4 col-lg-2">
+                <div class="kpi-stat-chip">
+                    <div class="rounded-3 p-2" style="background: #fef2f2; color: #ef4444;"><i class="fa-solid fa-ban"></i></div>
+                    <div>
+                        <div class="text-muted" style="font-size: 11px;">ĐÃ HỦY</div>
+                        <div class="fw-bold fs-5 text-danger" th:text="${cancelledCount}">0</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-8 col-lg-4">
+                <div class="kpi-stat-chip">
+                    <div class="rounded-3 p-2" style="background: #fffbeb; color: #b45309;"><i class="fa-solid fa-sack-dollar"></i></div>
+                    <div>
+                        <div class="text-muted" style="font-size: 11px;">DOANH THU ĐÃ THU (ISSUED)</div>
+                        <div class="fw-bold fs-5" style="color: #b45309;" 
+                             th:text="${#numbers.formatDecimal(totalRevenue, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">0 VNĐ</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Thanh tìm kiếm & Lọc đa chiều -->
+        <div class="card border-0 shadow-sm rounded-4 p-3 mb-4" style="background: #ffffff;">
+            <form th:action="@{/admin/invoices}" method="get" class="row g-2 align-items-center">
+                <!-- Từ khóa -->
+                <div class="col-12 col-md-4">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-light border-end-0 text-muted"><i class="fa-solid fa-magnifying-glass"></i></span>
+                        <input type="text" name="keyword" class="form-control bg-light border-start-0 ps-0" 
+                               placeholder="Mã hóa đơn, mã booking hoặc tên khách..." th:value="${keyword}">
+                    </div>
+                </div>
+
+                <!-- Trạng thái -->
+                <div class="col-6 col-md-2">
+                    <select name="status" class="form-select form-select-sm bg-light">
+                        <option value="">Tất cả trạng thái</option>
+                        <option th:each="st : ${statuses}" th:value="${st.name()}" th:text="${st.displayName}" th:selected="${st == status}"></option>
+                    </select>
+                </div>
+
+                <!-- Từ ngày -->
+                <div class="col-6 col-md-2">
+                    <input type="date" name="fromDate" class="form-control form-control-sm bg-light" 
+                           th:value="${fromDate}" placeholder="Từ ngày">
+                </div>
+
+                <!-- Đến ngày -->
+                <div class="col-6 col-md-2">
+                    <input type="date" name="toDate" class="form-control form-control-sm bg-light" 
+                           th:value="${toDate}" placeholder="Đến ngày">
+                </div>
+
+                <!-- Nút thao tác -->
+                <div class="col-6 col-md-2 d-flex gap-1">
+                    <button type="submit" class="btn btn-sm btn-dark rounded-2 w-100">
+                        <i class="fa-solid fa-filter me-2"></i> Lọc
+                    </button>
+                    <a th:href="@{/admin/invoices}" class="btn btn-sm btn-outline-secondary rounded-2">
+                        <i class="fa-solid fa-rotate-left"></i>
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- 4. Bảng danh sách Hóa đơn chuẩn UI/UX -->
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden" style="background: #ffffff;">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0" style="font-size: 14px;">
+                    <thead style="background-color: #f8fafc; border-bottom: 1px solid #e2e8f0; font-size: 12px; color: #475569; text-transform: uppercase; letter-spacing: 0.5px;">
+                        <tr>
+                            <th class="ps-4 py-3">Mã Hóa đơn</th>
+                            <th class="py-3">Mã Booking & Khách hàng</th>
+                            <th class="py-3">Người lập (Thu ngân)</th>
+                            <th class="py-3">Ngày phát hành</th>
+                            <th class="py-3 text-end">Tổng tiền (gồm VAT)</th>
+                            <th class="py-3 text-center">Trạng thái</th>
+                            <th class="pe-4 py-3 text-center">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="inv : ${invoices}">
+                            <!-- Mã Hóa đơn -->
+                            <td class="ps-4">
+                                <span class="invoice-code-badge" th:text="${inv.invoiceCode}">INV-20260823-1001</span>
+                            </td>
+
+                            <!-- Mã Booking & Khách hàng -->
+                            <td>
+                                <div>
+                                    <a th:href="@{/admin/bookings/{id}(id=${inv.booking.id})}" class="text-decoration-none fw-bold text-dark" style="font-family: monospace;" th:text="${inv.booking.bookingCode}">
+                                        BK-20260823-1001
+                                    </a>
+                                </div>
+                                <div class="text-muted small" th:text="${inv.booking.customer != null ? inv.booking.customer.fullName : 'Khách vãng lai'}">
+                                    Nguyễn Văn An
+                                </div>
+                            </td>
+
+                            <!-- Người lập -->
+                            <td>
+                                <div class="small fw-medium text-dark" th:text="${inv.issuedBy != null ? inv.issuedBy.fullName : 'Hệ thống'}">
+                                    Lễ tân thu ngân
+                                </div>
+                            </td>
+
+                            <!-- Ngày phát hành -->
+                            <td class="small text-muted">
+                                <span th:if="${inv.issuedAt != null}" th:text="${#temporals.format(inv.issuedAt, 'dd/MM/yyyy HH:mm')}">23/08/2026 10:30</span>
+                                <span th:unless="${inv.issuedAt != null}" class="fst-italic text-muted" th:text="${#temporals.format(inv.createdAt, 'dd/MM/yyyy HH:mm')}">Chưa phát hành</span>
+                            </td>
+
+                            <!-- Tổng tiền -->
+                            <td class="text-end">
+                                <div class="fw-bold" style="color: #b45309; font-size: 14.5px;" 
+                                     th:text="${#numbers.formatDecimal(inv.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                    2,440,000 đ
+                                </div>
+                                <div class="text-muted" style="font-size: 11px;" th:if="${inv.tax != null and inv.tax > 0}">
+                                    (VAT: <span th:text="${#numbers.formatDecimal(inv.tax, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>)
+                                </div>
+                            </td>
+
+                            <!-- Trạng thái -->
+                            <td class="text-center">
+                                <span class="badge rounded-pill px-3 py-1.5 border" 
+                                      th:classappend="${inv.status.badgeClass}" style="font-size: 12px;">
+                                    <i class="fa-solid me-2" th:classappend="${inv.status.icon}"></i>
+                                    <span th:text="${inv.status.displayName}">Đã phát hành</span>
+                                </span>
+                            </td>
+
+                            <!-- Thao tác -->
+                            <td class="pe-4 text-center">
+                                <div class="d-inline-flex gap-1">
+                                    <!-- Xem chi tiết -->
+                                    <a th:href="@{/admin/invoices/view/{id}(id=${inv.id})}" 
+                                       class="btn btn-sm btn-light text-primary border" title="Xem chi tiết hóa đơn">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </a>
+
+                                    <!-- In hóa đơn A4 -->
+                                    <a th:href="@{/admin/invoices/print/{id}(id=${inv.id})}" target="_blank"
+                                       class="btn btn-sm btn-light text-dark border" title="In phiếu hóa đơn A4">
+                                        <i class="fa-solid fa-print"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Empty state -->
+                        <tr th:if="${#lists.isEmpty(invoices)}">
+                            <td colspan="7" class="text-center py-5 text-muted">
+                                <i class="fa-solid fa-file-invoice text-muted mb-2" style="font-size: 40px; opacity: 0.3;"></i>
+                                <div>Chưa có hóa đơn nào trong hệ thống hoặc không khớp bộ lọc.</div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Footer / Pagination -->
+            <div class="px-4 py-3 bg-light border-top d-flex flex-column flex-md-row justify-content-between align-items-center gap-3" style="font-size: 13px; color: #64748b;">
+                <div>
+                    <span th:if="${invoicesPage != null and invoicesPage.totalElements > 0}">
+                        Hiển thị <strong class="text-dark" th:text="${invoicesPage.number * invoicesPage.size + 1}">1</strong>
+                        - <strong class="text-dark" th:text="${invoicesPage.number * invoicesPage.size + #lists.size(invoices)}">10</strong>
+                        trong tổng số <strong class="text-dark" th:text="${invoicesPage.totalElements}">25</strong> hóa đơn
+                    </span>
+                    <span th:if="${invoicesPage == null or invoicesPage.totalElements == 0}">
+                        Hiển thị <strong class="text-dark">0</strong> hóa đơn
+                    </span>
+                </div>
+
+                <!-- Navigation Pagination Controls -->
+                <nav th:if="${invoicesPage != null and invoicesPage.totalPages > 1}" aria-label="Phân trang hóa đơn">
+                    <ul class="pagination pagination-sm mb-0">
+                        <!-- Trang đầu -->
+                        <li class="page-item" th:classappend="${invoicesPage.first ? 'disabled' : ''}">
+                            <a class="page-link" th:href="@{/admin/invoices(keyword=${keyword}, status=${status}, fromDate=${fromDate}, toDate=${toDate}, page=1)}" title="Trang đầu">
+                                <i class="fa-solid fa-angles-left"></i>
+                            </a>
+                        </li>
+                        <!-- Trang trước -->
+                        <li class="page-item" th:classappend="${invoicesPage.first ? 'disabled' : ''}">
+                            <a class="page-link" th:href="@{/admin/invoices(keyword=${keyword}, status=${status}, fromDate=${fromDate}, toDate=${toDate}, page=${invoicesPage.number})}" title="Trang trước">
+                                <i class="fa-solid fa-chevron-left"></i>
+                            </a>
+                        </li>
+
+                        <!-- Các số trang -->
+                        <li th:each="p : ${#numbers.sequence(T(java.lang.Math).max(1, invoicesPage.number + 1 - 2), T(java.lang.Math).min(invoicesPage.totalPages, invoicesPage.number + 1 + 2))}"
+                            class="page-item" th:classappend="${p == invoicesPage.number + 1 ? 'active' : ''}">
+                            <a class="page-link" th:text="${p}" th:href="@{/admin/invoices(keyword=${keyword}, status=${status}, fromDate=${fromDate}, toDate=${toDate}, page=${p})}">1</a>
+                        </li>
+
+                        <!-- Trang sau -->
+                        <li class="page-item" th:classappend="${invoicesPage.last ? 'disabled' : ''}">
+                            <a class="page-link" th:href="@{/admin/invoices(keyword=${keyword}, status=${status}, fromDate=${fromDate}, toDate=${toDate}, page=${invoicesPage.number + 2})}" title="Trang sau">
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </a>
+                        </li>
+                        <!-- Trang cuối -->
+                        <li class="page-item" th:classappend="${invoicesPage.last ? 'disabled' : ''}">
+                            <a class="page-link" th:href="@{/admin/invoices(keyword=${keyword}, status=${status}, fromDate=${fromDate}, toDate=${toDate}, page=${invoicesPage.totalPages})}" title="Trang cuối">
+                                <i class="fa-solid fa-angles-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

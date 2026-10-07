@@ -1,0 +1,597 @@
+/* ==========================================================================
+   GRAND HOTEL - CLIENT ROOMS CATALOG STYLES
+   Quiet Luxury & Warm Editorial Theme (Đồng nhất 1 font Plus Jakarta Sans)
+   ========================================================================== */
+
+.rooms-header-banner {
+    position: relative;
+    background: linear-gradient(180deg, rgba(23, 21, 19, 0.6) 0%, rgba(23, 21, 19, 0.82) 100%),
+                url('https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=2000&q=85') center center / cover no-repeat;
+    padding: 65px 0 85px;
+    color: #FAF8F5;
+    text-align: center;
+}
+
+.rooms-header-badge {
+    background: rgba(250, 248, 245, 0.15);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(247, 243, 236, 0.3);
+    color: #F7F3EC;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 6px 18px;
+    border-radius: var(--lux-radius-pill);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+.rooms-header-title {
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
+    font-size: clamp(2rem, 3.8vw, 3rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: #FAF8F5;
+    margin-bottom: 10px;
+}
+
+/* ============ LUXURY 3-TIER FILTER SUITE (AMAN & FOUR SEASONS STYLE) ============ */
+.luxury-filter-suite {
+    background: #FFFFFF;
+    border-radius: 24px;
+    padding: 22px 26px 18px;
+    box-shadow: 0 20px 48px -12px rgba(28, 25, 23, 0.12), 0 0 0 1px rgba(212, 196, 176, 0.32);
+    border: 1px solid var(--lux-border);
+    margin-top: -55px;
+    position: relative;
+    z-index: 25;
+}
+
+/* --- TIER 1: FLOATING SEARCH CAPSULE --- */
+.luxury-search-capsule {
+    background: #FAF8F5;
+    border: 1px solid var(--lux-border);
+    border-radius: 18px;
+    display: flex;
+    align-items: stretch;
+    padding: 6px;
+    box-shadow: inset 0 2px 5px rgba(28, 25, 23, 0.03);
+    transition: var(--lux-transition);
+}
+
+.luxury-search-capsule:focus-within {
+    border-color: var(--lux-gold);
+    box-shadow: 0 0 0 3px var(--lux-gold-glow), inset 0 2px 5px rgba(28, 25, 23, 0.03);
+    background: #FFFFFF;
+}
+
+.search-segment {
+    padding: 9px 18px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border-radius: 12px;
+    transition: background-color 0.2s ease;
+    flex-grow: 1;
+}
+
+.search-segment:hover {
+    background-color: rgba(197, 168, 128, 0.08);
+}
+
+.segment-keyword {
+    flex: 1.5;
+}
+
+.segment-date {
+    flex: 1.1;
+}
+
+.segment-guests {
+    flex: 1.1;
+}
+
+.segment-divider {
+    width: 1px;
+    background-color: var(--lux-border);
+    margin: 10px 0;
+    flex-shrink: 0;
+}
+
+.segment-label {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.9px;
+    color: var(--lux-gold-dark);
+    margin-bottom: 3px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.segment-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--lux-dark);
+    padding: 0;
+    box-shadow: none;
+}
+
+.segment-input::placeholder {
+    color: #9C958D;
+    font-weight: 500;
+    font-size: 13px;
+}
+
+.segment-select {
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23876944' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right center;
+    background-size: 11px 11px;
+    padding-right: 18px;
+}
+
+.search-btn-segment {
+    display: flex;
+    align-items: center;
+    padding: 3px;
+    flex-shrink: 0;
+}
+
+.capsule-search-btn {
+    background: linear-gradient(135deg, #C5A880 0%, #A68760 100%);
+    color: #FFFFFF;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    border: none;
+    border-radius: 14px;
+    padding: 12px 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    white-space: nowrap;
+    box-shadow: 0 4px 16px rgba(166, 135, 96, 0.35);
+    transition: var(--lux-transition);
+    height: 100%;
+    min-height: 46px;
+    cursor: pointer;
+}
+
+.capsule-search-btn:hover {
+    background: linear-gradient(135deg, #A68760 0%, #876944 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(166, 135, 96, 0.45);
+    color: #FFFFFF;
+}
+
+/* --- TIER 2: REFINEMENT TOOLBAR --- */
+.refinement-toolbar {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--lux-border-light);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.refine-price-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.refine-tag-label {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--lux-dark);
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+}
+
+.refine-price-inputs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.refine-input {
+    background: var(--lux-surface-muted);
+    border: 1px solid var(--lux-border);
+    border-radius: var(--lux-radius-pill);
+    padding: 6px 14px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--lux-dark);
+    width: 125px;
+    outline: none;
+    transition: var(--lux-transition);
+}
+
+.refine-input:focus {
+    background: #FFFFFF;
+    border-color: var(--lux-gold);
+    box-shadow: 0 0 0 3px var(--lux-gold-glow);
+}
+
+.refine-dash {
+    color: #9C958D;
+    font-weight: 700;
+}
+
+.refine-actions-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.refine-sort-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.refine-select {
+    background-color: var(--lux-surface-muted);
+    border: 1px solid var(--lux-border);
+    border-radius: var(--lux-radius-pill);
+    padding: 6px 28px 6px 14px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--lux-dark);
+    outline: none;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23876944' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 11px 11px;
+    transition: var(--lux-transition);
+    max-width: 210px;
+    text-overflow: ellipsis;
+}
+
+.refine-select:focus {
+    background-color: #FFFFFF;
+    border-color: var(--lux-gold);
+    box-shadow: 0 0 0 3px var(--lux-gold-glow);
+}
+
+.refine-reset-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: #78716C;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    padding: 6px 14px;
+    border-radius: var(--lux-radius-pill);
+    border: 1px solid var(--lux-border);
+    background: #FFFFFF;
+    transition: var(--lux-transition);
+    white-space: nowrap;
+}
+
+.refine-reset-btn:hover {
+    color: #DC2626;
+    border-color: rgba(220, 38, 38, 0.4);
+    background: #FEF2F2;
+}
+
+.refine-apply-btn {
+    background: #FFFFFF;
+    border: 1px solid var(--lux-gold);
+    color: var(--lux-gold-dark);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    border-radius: var(--lux-radius-pill);
+    padding: 6px 16px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: var(--lux-transition);
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.refine-apply-btn:hover {
+    background: var(--lux-gold-light);
+    color: var(--lux-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px var(--lux-gold-glow);
+}
+
+/* --- TIER 3: AMENITY STRIP FULL-WIDTH (AIRBNB LUXE STYLE) --- */
+.amenity-strip-lux {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--lux-border-light);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.amenity-strip-header {
+    flex-shrink: 0;
+}
+
+.amenity-strip-title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--lux-gold-dark);
+    white-space: nowrap;
+}
+
+.amenity-chips-container {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    flex-grow: 1;
+}
+
+.amenity-pill-item {
+    margin-bottom: 0;
+    cursor: pointer;
+}
+
+.amenity-pill-radio {
+    display: none;
+}
+
+.amenity-pill-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--lux-text-body);
+    background: var(--lux-surface-muted);
+    border: 1px solid var(--lux-border);
+    border-radius: var(--lux-radius-pill);
+    padding: 5px 14px;
+    transition: var(--lux-transition);
+    user-select: none;
+    white-space: nowrap;
+}
+
+.amenity-pill-tag i {
+    color: var(--lux-gold-dark);
+    font-size: 11.5px;
+    transition: var(--lux-transition);
+}
+
+.amenity-pill-tag:hover {
+    background: #FFFFFF;
+    border-color: var(--lux-gold);
+    color: var(--lux-gold-dark);
+    transform: translateY(-1px);
+}
+
+.amenity-pill-radio:checked + .amenity-pill-tag {
+    background: linear-gradient(135deg, #C5A880 0%, #A68760 100%);
+    color: #FFFFFF;
+    border-color: #9A7B56;
+    box-shadow: 0 4px 14px rgba(166, 135, 96, 0.32);
+    font-weight: 700;
+}
+
+.amenity-pill-radio:checked + .amenity-pill-tag i {
+    color: #FFFFFF;
+}
+
+/* --- RESPONSIVE STYLES --- */
+@media (max-width: 991.98px) {
+    .luxury-search-capsule {
+        flex-direction: column;
+        border-radius: 20px;
+        padding: 10px;
+    }
+
+    .segment-divider {
+        display: none !important;
+    }
+
+    .search-segment {
+        border-bottom: 1px solid var(--lux-border-light);
+        padding: 12px 14px;
+    }
+
+    .search-btn-segment {
+        padding-top: 10px;
+    }
+
+    .capsule-search-btn {
+        width: 100%;
+    }
+
+    .refinement-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .refine-price-group, .refine-actions-group {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .refine-price-inputs {
+        flex-grow: 1;
+    }
+
+    .refine-input {
+        flex: 1;
+        width: auto;
+    }
+}
+
+/* ============ ROOM CARDS (FULL WIDTH GRID) ============ */
+.room-card-modern {
+    background: #FFFFFF;
+    border: 1px solid var(--lux-border);
+    border-radius: 18px;
+    overflow: hidden;
+    transition: var(--lux-transition);
+    box-shadow: var(--lux-shadow-xs);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.room-card-modern:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--lux-shadow-md);
+    border-color: var(--lux-gold);
+}
+
+.room-card-img-wrap {
+    position: relative;
+    height: 240px;
+    width: 100%;
+    overflow: hidden;
+    background-color: var(--lux-dark);
+}
+
+.room-card-img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.room-card-modern:hover .room-card-img-wrap img {
+    transform: scale(1.06);
+}
+
+.room-card-name {
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--lux-dark);
+    letter-spacing: -0.01em;
+    margin-bottom: 8px;
+    transition: color 0.2s ease;
+}
+
+.room-card-modern:hover .room-card-name {
+    color: var(--lux-gold-dark);
+}
+
+.room-spec-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--lux-surface-muted);
+    border: 1px solid var(--lux-border);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--lux-text-body);
+    transition: var(--lux-transition);
+}
+
+.room-spec-chip i {
+    color: var(--lux-gold-dark);
+}
+
+.room-spec-chip:hover {
+    border-color: var(--lux-gold);
+    background: #FFFFFF;
+}
+
+.room-price-title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 23px;
+    font-weight: 800;
+    color: var(--lux-gold-dark);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+}
+
+.modal-room-main-img {
+    width: 100%;
+    height: 320px;
+    object-fit: cover;
+    border-radius: 14px;
+    border: 1px solid var(--lux-border);
+}
+
+/* Wide container for rooms page */
+.rooms-wide-container {
+    width: 100%;
+    max-width: 1540px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 24px;
+    padding-right: 24px;
+}
+
+@media (max-width: 767.98px) {
+    .rooms-wide-container {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+}
+
+/* Pagination styling */
+.rooms-pagination .page-item .page-link {
+    color: var(--lux-dark);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 600;
+    font-size: 13.5px;
+    padding: 8px 15px;
+    border: 1px solid var(--lux-border);
+    border-radius: 8px !important;
+    margin: 0 3px;
+    transition: var(--lux-transition);
+    background: #FFFFFF;
+}
+
+.rooms-pagination .page-item .page-link:hover {
+    color: var(--lux-gold-dark);
+    background-color: var(--lux-gold-light);
+    border-color: var(--lux-gold);
+}
+
+.rooms-pagination .page-item.active .page-link {
+    background: linear-gradient(135deg, #C5A880 0%, #A68760 100%);
+    color: #FFFFFF;
+    border-color: transparent;
+    box-shadow: 0 4px 14px rgba(166, 135, 96, 0.3);
+}
+
+.rooms-pagination .page-item.disabled .page-link {
+    color: var(--lux-text-light);
+    background-color: var(--lux-surface-muted);
+    border-color: var(--lux-border);
+}

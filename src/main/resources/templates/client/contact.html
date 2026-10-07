@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/client-layout}">
+<head>
+    <title layout:fragment="title">Liên hệ - Grand Hotel</title>
+    <link rel="stylesheet" th:href="@{/css/client-contact.css}">
+</head>
+<body>
+    <div layout:fragment="content">
+
+        <!-- 1. Page Header Banner -->
+        <div class="page-header-banner">
+            <div class="container">
+                <span class="badge rounded-pill px-3 py-1 text-uppercase fw-bold small mb-2"
+                      style="color: #fde68a !important; background: rgba(217, 119, 6, 0.3) !important; border: 1px solid rgba(253, 230, 138, 0.4);">
+                    <i class="fa-solid fa-headset me-1.5 text-warning"></i> KẾT NỐI VỚI GRAND HOTEL
+                </span>
+                <h1 class="fw-bold text-white display-5 mt-1" style="font-weight: 800 !important;">Liên Hệ &amp; Hỗ Trợ</h1>
+                <p class="text-light opacity-90 mb-0" style="font-size: 15px; max-width: 640px; margin: 0 auto;">
+                    Đội ngũ Chăm sóc Khách hàng 24/7 luôn sẵn sàng hỗ trợ Quý khách.
+                </p>
+            </div>
+        </div>
+
+        <!-- 2. Contact Info Cards -->
+        <section class="py-5">
+            <div class="container py-3">
+                <div class="row g-4 mb-5">
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="contact-info-card">
+                            <div class="contact-icon-wrap"><i class="fa-solid fa-location-dot"></i></div>
+                            <h6 class="fw-bold text-dark mb-1">Địa chỉ khách sạn</h6>
+                            <p class="text-muted small mb-0" style="line-height: 1.6;" th:text="${hotelAddress}">123 Trần Phú, Nha Trang</p>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="contact-info-card">
+                            <div class="contact-icon-wrap"><i class="fa-solid fa-phone-volume"></i></div>
+                            <h6 class="fw-bold text-dark mb-1">Hotline tư vấn &amp; Đặt phòng</h6>
+                            <p class="text-muted small mb-0">
+                                <strong class="text-dark" th:text="${hotelPhone}">1900 8888</strong><br>
+                                <span th:text="${hotelPhoneAlt} + ' (24/7)'">(0258) 3888 999 (24/7)</span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="contact-info-card">
+                            <div class="contact-icon-wrap"><i class="fa-solid fa-envelope-open-text"></i></div>
+                            <h6 class="fw-bold text-dark mb-1">Hòm thư điện tử</h6>
+                            <p class="text-muted small mb-0">
+                                <span th:text="${hotelEmail}">reservation@grandhotel.vn</span><br>
+                                <span th:text="${hotelEmailSupport}">support@grandhotel.vn</span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="contact-info-card">
+                            <div class="contact-icon-wrap"><i class="fa-solid fa-clock"></i></div>
+                            <h6 class="fw-bold text-dark mb-1">Giờ phục vụ</h6>
+                            <p class="text-muted small mb-0">Lễ tân &amp; hỗ trợ: 24/7<br>Nhận phòng từ 14:00</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-5">
+                    <!-- Left: Contact Form -->
+                    <div class="col-12 col-lg-6">
+                        <span class="section-tag">GỬI YÊU CẦU</span>
+                        <h2 class="serif-title fw-bold text-dark display-6 mb-3">Gửi Yêu Cầu Tư Vấn &amp; Hỗ Trợ</h2>
+                        <p class="text-muted small mb-4">Điền thông tin bên dưới, đội ngũ tư vấn sẽ phản hồi Quý khách trong vòng 30 phút.</p>
+
+                        <form id="contactForm" onsubmit="handleContactSubmit(event);" class="row g-3">
+                            <div class="col-12 col-md-6">
+                                <label class="form-label small fw-semibold text-dark">Họ và tên <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control form-control-sm bg-light" id="contactName" placeholder="Nguyễn Văn A" required>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label small fw-semibold text-dark">Số điện thoại <span class="text-danger">*</span></label>
+                                <input type="tel" class="form-control form-control-sm bg-light" id="contactPhone" placeholder="0912 345 678" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-semibold text-dark">Địa chỉ Email</label>
+                                <input type="email" class="form-control form-control-sm bg-light" id="contactEmail" placeholder="email@example.com">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-semibold text-dark">Chủ đề</label>
+                                <select class="form-select form-select-sm bg-light" id="contactTopic">
+                                    <option>Đặt phòng &amp; Ưu đãi</option>
+                                    <option>Tổ chức sự kiện / Hội nghị</option>
+                                    <option>Dịch vụ Spa &amp; Ẩm thực</option>
+                                    <option>Góp ý &amp; Phản hồi</option>
+                                    <option>Khác</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-semibold text-dark">Nội dung tin nhắn <span class="text-danger">*</span></label>
+                                <textarea class="form-control form-control-sm bg-light" id="contactMessage" rows="4" placeholder="Nhập chi tiết yêu cầu của Quý khách..." required></textarea>
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn gold-btn px-4 py-2 rounded-3 fw-semibold small shadow">
+                                    <i class="fa-solid fa-paper-plane me-2"></i> Gửi tin nhắn
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Right: Bản đồ & Thông tin thêm -->
+                    <div class="col-12 col-lg-6">
+                        <div class="card border-0 shadow-sm rounded-4 overflow-hidden" style="background: #ffffff;">
+                            <div class="p-4">
+                                <h5 class="serif-title fw-bold text-dark mb-1">
+                                    <i class="fa-solid fa-map-location-dot text-warning me-2" style="color: #d97706 !important;"></i> Vị Trí Của Chúng Tôi
+                                </h5>
+                                <p class="text-muted small mb-0" th:text="${hotelAddress}">123 Trần Phú, Nha Trang</p>
+                            </div>
+                            <div style="min-height: 360px;">
+                                <iframe th:src="${hotelMapEmbed}" width="100%" height="100%" style="border:0; min-height: 360px; width: 100%;" allowfullscreen="" loading="lazy"></iframe>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <th:block layout:fragment="script">
+        <script th:src="@{/js/client-contact.js}"></script>
+    </th:block>
+</body>
+</html>

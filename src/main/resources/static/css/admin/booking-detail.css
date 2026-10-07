@@ -1,0 +1,74 @@
+.gold-btn {
+    background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+    color: #ffffff !important;
+    border: none;
+    box-shadow: 0 4px 12px rgba(217, 119, 6, 0.25);
+    transition: all 0.25s ease;
+}
+.gold-btn:hover {
+    background: linear-gradient(135deg, #b45309 0%, #92400e 100%);
+    box-shadow: 0 6px 16px rgba(217, 119, 6, 0.35);
+    transform: translateY(-1px);
+}
+.detail-hero-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 24px 28px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+}
+.financial-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 18px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+    position: sticky;
+    top: 24px;
+}
+.price-highlight-gold {
+    font-family: 'JetBrains Mono', 'Segoe UI', monospace;
+    font-size: 24px;
+    font-weight: 800;
+    color: #b45309;
+}
+.remaining-highlight {
+    font-family: 'JetBrains Mono', 'Segoe UI', monospace;
+    font-size: 19px;
+    font-weight: 700;
+    color: #dc2626;
+}
+.section-header {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #1e293b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.qty-control-btn {
+    width: 34px;
+    height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #cbd5e1;
+    background: #f8fafc;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.15s ease;
+}
+.qty-control-btn:hover {
+    background: #e2e8f0;
+}
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    .card, .detail-hero-card, .financial-card {
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+    }
+}

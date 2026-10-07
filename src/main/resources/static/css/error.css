@@ -1,0 +1,50 @@
+* {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #0f172a;
+            color: #1e293b;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .error-card-lux {
+            background: #ffffff;
+            border-radius: 28px;
+            padding: 55px 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.45);
+            max-width: 650px;
+            width: 100%;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .gold-btn {
+            background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+            color: #ffffff !important;
+            font-weight: 700;
+            border: none;
+            box-shadow: 0 4px 14px rgba(217, 119, 6, 0.28);
+            transition: all 0.25s ease;
+        }
+        .gold-btn:hover {
+            background: linear-gradient(135deg, #b45309 0%, #92400e 100%);
+            box-shadow: 0 6px 18px rgba(217, 119, 6, 0.38);
+            transform: translateY(-2px);
+        }
+
+        .error-code-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 72px;
+            font-weight: 800;
+            line-height: 1;
+            background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 12px;
+        }

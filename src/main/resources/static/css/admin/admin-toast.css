@@ -1,0 +1,10 @@
+.toast-container {
+    z-index: 1090 !important;
+}
+.luxury-toast {
+    border-radius: 14px !important;
+    background: #ffffff !important;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}

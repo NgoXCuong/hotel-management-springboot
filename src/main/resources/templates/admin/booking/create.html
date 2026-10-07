@@ -1,0 +1,558 @@
+<!doctype html>
+<html
+  lang="vi"
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layout/admin-layout}"
+>
+  <head>
+    <title>Đặt phòng tại quầy - Grand Hotel</title>
+    <link rel="stylesheet" th:href="@{/css/admin/booking-create.css}" />
+  </head>
+  <body>
+    <div layout:fragment="content">
+      <!-- Top Header & Breadcrumb -->
+      <div
+        class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4"
+      >
+        <div>
+          <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1 small">
+              <li class="breadcrumb-item">
+                <a
+                  th:href="@{/admin/bookings}"
+                  class="text-decoration-none text-muted"
+                  >Đặt phòng</a
+                >
+              </li>
+              <li
+                class="breadcrumb-item active text-warning"
+                aria-current="page"
+                style="color: #d97706 !important"
+              >
+                Đặt phòng tại quầy
+              </li>
+            </ol>
+          </nav>
+          <h4 class="fw-bold text-dark mb-0 mt-2">
+            <i
+              class="fa-solid fa-hotel text-warning me-2"
+              style="color: #d97706 !important"
+            ></i>
+            Tiếp nhận Đặt phòng mới
+          </h4>
+        </div>
+        <div>
+          <a
+            th:href="@{/admin/bookings}"
+            class="btn btn-outline-secondary px-3 py-2 rounded-3"
+          >
+            <i class="fa-solid fa-arrow-left me-2"></i> Danh sách đặt phòng
+          </a>
+        </div>
+      </div>
+
+      <!-- Form Tạo Đặt phòng -->
+      <form
+        th:action="@{/admin/bookings/create}"
+        th:object="${booking}"
+        method="post"
+        id="bookingForm"
+      >
+        <div class="row g-4">
+          <!-- CỘT TRÁI (Tỉ lệ 7): Thông tin lưu trú & Chọn phòng -->
+          <div class="col-12 col-lg-7">
+            <!-- 1. Card Khách hàng -->
+            <div
+              class="card border-0 shadow-sm rounded-4 p-4 mb-4"
+              style="background: #ffffff"
+            >
+              <div class="section-title">
+                <i
+                  class="fa-solid fa-user text-warning"
+                  style="color: #d97706 !important"
+                ></i>
+                1. Thông tin Khách hàng đại diện
+              </div>
+
+              <!-- Lựa chọn Khách cũ hay Thêm mới -->
+              <ul class="nav nav-pills mb-3" id="customerTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                  <button
+                    class="nav-link active rounded-pill px-3 py-1.5 small fw-semibold"
+                    id="existing-tab"
+                    data-bs-toggle="pill"
+                    data-bs-target="#existing-pane"
+                    type="button"
+                    role="tab"
+                    onclick="setNewCustomerMode(false)"
+                  >
+                    <i class="fa-solid fa-address-book me-2"></i> Khách hàng đã
+                    có hồ sơ
+                  </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button
+                    class="nav-link rounded-pill px-3 py-1.5 small fw-semibold"
+                    id="new-tab"
+                    data-bs-toggle="pill"
+                    data-bs-target="#new-pane"
+                    type="button"
+                    role="tab"
+                    onclick="setNewCustomerMode(true)"
+                  >
+                    <i class="fa-solid fa-user-plus me-2"></i> Tạo hồ sơ khách
+                    mới
+                  </button>
+                </li>
+              </ul>
+
+              <input
+                type="hidden"
+                name="isNewCustomer"
+                id="isNewCustomer"
+                value="false"
+              />
+
+              <div class="tab-content" id="customerTabContent">
+                <!-- Tab 1: Khách hàng có sẵn -->
+                <div
+                  class="tab-pane fade show active"
+                  id="existing-pane"
+                  role="tabpanel"
+                >
+                  <div class="mb-3">
+                    <label class="form-label small fw-semibold text-dark"
+                      >Chọn khách hàng <span class="text-danger">*</span></label
+                    >
+                    <select
+                      class="form-select"
+                      th:field="*{customer.id}"
+                      id="customerSelect"
+                    >
+                      <option value="">
+                        -- Tìm kiếm & chọn khách hàng theo Tên hoặc SĐT --
+                      </option>
+                      <option
+                        th:each="c : ${customers}"
+                        th:value="${c.id}"
+                        th:text="${c.fullName} + ' - ' + ${c.phone} + (${c.identityNumber != null} ? ' (' + ${c.identityNumber} + ')' : '')"
+                      ></option>
+                    </select>
+                    <div class="form-text">
+                      Có thể tìm theo số điện thoại hoặc mã định danh của khách.
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Tab 2: Thêm khách mới tại quầy -->
+                <div class="tab-pane fade" id="new-pane" role="tabpanel">
+                  <div class="row g-3">
+                    <div class="col-12 col-md-6">
+                      <label class="form-label small fw-semibold text-dark"
+                        >Họ và tên <span class="text-danger">*</span></label
+                      >
+                      <input
+                        type="text"
+                        name="newCustomerName"
+                        id="newCustomerName"
+                        class="form-control"
+                        placeholder="Vd: Trần Thị Mai"
+                      />
+                    </div>
+                    <div class="col-12 col-md-6">
+                      <label class="form-label small fw-semibold text-dark"
+                        >Số điện thoại <span class="text-danger">*</span></label
+                      >
+                      <input
+                        type="tel"
+                        name="newCustomerPhone"
+                        id="newCustomerPhone"
+                        class="form-control"
+                        placeholder="Vd: 0987654321"
+                      />
+                    </div>
+                    <div class="col-12 col-md-6">
+                      <label class="form-label small fw-semibold text-dark"
+                        >Số CCCD / Hộ chiếu</label
+                      >
+                      <input
+                        type="text"
+                        name="newCustomerIdentityNumber"
+                        class="form-control"
+                        placeholder="Vd: 001201009988"
+                      />
+                    </div>
+                    <div class="col-12 col-md-6">
+                      <label class="form-label small fw-semibold text-dark"
+                        >Email</label
+                      >
+                      <input
+                        type="email"
+                        name="newCustomerEmail"
+                        class="form-control"
+                        placeholder="Vd: khachhang@gmail.com"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. Card Thời gian lưu trú & Số khách -->
+            <div
+              class="card border-0 shadow-sm rounded-4 p-4 mb-4"
+              style="background: #ffffff"
+            >
+              <div class="section-title">
+                <i
+                  class="fa-solid fa-calendar-days text-warning"
+                  style="color: #d97706 !important"
+                ></i>
+                2. Thời gian lưu trú & Số khách
+              </div>
+
+              <div class="row g-3">
+                <div class="col-12 col-md-5">
+                  <label class="form-label small fw-semibold text-dark"
+                    >Nhận phòng (Check-in)
+                    <span class="text-danger">*</span></label
+                  >
+                  <input
+                    type="datetime-local"
+                    th:field="*{checkIn}"
+                    id="checkInInput"
+                    class="form-control"
+                    required
+                    onchange="onDateChanged()"
+                  />
+                </div>
+                <div class="col-12 col-md-5">
+                  <label class="form-label small fw-semibold text-dark"
+                    >Trả phòng (Check-out)
+                    <span class="text-danger">*</span></label
+                  >
+                  <input
+                    type="datetime-local"
+                    th:field="*{checkOut}"
+                    id="checkOutInput"
+                    class="form-control"
+                    required
+                    onchange="onDateChanged()"
+                  />
+                </div>
+                <div class="col-12 col-md-2">
+                  <label class="form-label small fw-semibold text-dark"
+                    >Số khách <span class="text-danger">*</span></label
+                  >
+                  <input
+                    type="number"
+                    th:field="*{numberOfGuests}"
+                    class="form-control"
+                    min="1"
+                    max="20"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div
+                class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top"
+              >
+                <div class="text-muted small">
+                  Số đêm lưu trú:
+                  <span id="stayNightsText" class="fw-bold text-dark fs-6"
+                    >1</span
+                  >
+                  đêm
+                </div>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-primary rounded-pill px-3"
+                  onclick="refreshAvailableRooms()"
+                >
+                  <i class="fa-solid fa-rotate me-2"></i> Kiểm tra phòng trống
+                </button>
+              </div>
+            </div>
+
+            <!-- 3. Card Chọn phòng khả dụng -->
+            <div
+              class="card border-0 shadow-sm rounded-4 p-4 mb-4"
+              style="background: #ffffff"
+            >
+              <div
+                class="d-flex justify-content-between align-items-center mb-3"
+              >
+                <div class="section-title mb-0">
+                  <i
+                    class="fa-solid fa-door-open text-warning"
+                    style="color: #d97706 !important"
+                  ></i>
+                  3. Chọn phòng trống gán vào đơn
+                </div>
+                <span
+                  class="badge bg-light text-dark border px-2.5 py-1.5"
+                  id="availableCountBadge"
+                >
+                  Khả dụng:
+                  <strong th:text="${#lists.size(availableRooms)}">0</strong>
+                  phòng
+                </span>
+              </div>
+
+              <!-- Danh sách phòng khả dụng -->
+              <div
+                class="row g-2"
+                id="roomsContainer"
+                style="max-height: 380px; overflow-y: auto"
+              >
+                <div th:each="r : ${availableRooms}" class="col-12 col-sm-6">
+                  <div
+                    class="room-select-card d-flex align-items-center justify-content-between"
+                    onclick="toggleRoomCard(this)"
+                  >
+                    <div class="d-flex align-items-center gap-2.5">
+                      <input
+                        class="form-check-input room-checkbox"
+                        type="checkbox"
+                        name="roomIds"
+                        th:value="${r.id}"
+                        th:data-price="${r.roomType.pricePerNight}"
+                        th:data-number="${r.roomNumber}"
+                        onclick="
+                          event.stopPropagation();
+                          calculateFinancials();
+                        "
+                      />
+                      <div>
+                        <div class="fw-bold text-dark">
+                          <i class="fa-solid fa-bed text-muted me-2"></i>Phòng
+                          <span th:text="${r.roomNumber}">101</span>
+                        </div>
+                        <div
+                          class="text-muted small"
+                          style="font-size: 11.5px"
+                          th:text="${r.roomType.name}"
+                        >
+                          Deluxe King
+                        </div>
+                      </div>
+                    </div>
+                    <div class="text-end">
+                      <div
+                        class="fw-bold text-dark small"
+                        th:text="${#numbers.formatDecimal(r.roomType.pricePerNight, 0, 'COMMA', 0, 'POINT')} + ' đ'"
+                      >
+                        1,200,000 đ
+                      </div>
+                      <div class="text-muted" style="font-size: 11px">
+                        / đêm
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                id="noRoomsAlert"
+                class="alert alert-warning border-0 rounded-3 mt-3 mb-0 text-center"
+                style="display: none"
+              >
+                <i class="fa-solid fa-triangle-exclamation me-2"></i>Không có
+                phòng trống nào trong khoảng ngày đã chọn. Vui lòng đổi ngày
+                Check-in/Check-out.
+              </div>
+            </div>
+
+            <!-- 4. Ghi chú đơn đặt -->
+            <div
+              class="card border-0 shadow-sm rounded-4 p-4"
+              style="background: #ffffff"
+            >
+              <div class="section-title">
+                <i
+                  class="fa-solid fa-comment-dots text-warning"
+                  style="color: #d97706 !important"
+                ></i>
+                4. Ghi chú lưu trú
+              </div>
+              <textarea
+                th:field="*{note}"
+                class="form-control"
+                rows="3"
+                placeholder="Yêu cầu đặc biệt của khách (nhận phòng sớm, tầng cao, đồ uống chào mừng...)"
+              ></textarea>
+            </div>
+          </div>
+
+          <!-- CỘT PHẢI (Tỉ lệ 5): Tóm tắt chi phí & Thanh toán cọc -->
+          <div class="col-12 col-lg-5">
+            <div class="summary-card p-4">
+              <h5 class="fw-bold text-dark mb-3 pb-2 border-bottom">
+                <i
+                  class="fa-solid fa-calculator text-warning me-2"
+                  style="color: #d97706 !important"
+                ></i>
+                Tóm tắt chi phí & Thanh toán
+              </h5>
+
+              <!-- Bảng kê chi phí -->
+              <div
+                class="d-flex justify-content-between align-items-center mb-2 text-muted small"
+              >
+                <span>Số đêm lưu trú:</span>
+                <span class="fw-bold text-dark" id="summaryNights">1 đêm</span>
+              </div>
+              <div
+                class="d-flex justify-content-between align-items-center mb-2 text-muted small"
+              >
+                <span>Phòng đã chọn:</span>
+                <span class="fw-bold text-dark" id="summaryRoomCount"
+                  >0 phòng</span
+                >
+              </div>
+              <div
+                class="d-flex justify-content-between align-items-center mb-3 text-muted small"
+              >
+                <span>Tạm tính tiền phòng:</span>
+                <span class="fw-bold text-dark fs-6" id="summaryRoomSubtotal"
+                  >0 đ</span
+                >
+              </div>
+
+              <!-- Áp dụng mã Voucher / Promotion -->
+              <div class="bg-light p-3 rounded-3 mb-3 border">
+                <label class="form-label small fw-semibold text-dark mb-1">
+                  <i
+                    class="fa-solid fa-ticket text-warning me-2"
+                    style="color: #d97706 !important"
+                  ></i>
+                  Mã khuyến mãi / Voucher
+                </label>
+                <div class="input-group mb-1">
+                  <input
+                    type="text"
+                    name="voucherCode"
+                    id="voucherCodeInput"
+                    class="form-control text-uppercase"
+                    placeholder="Nhập mã code..."
+                  />
+                  <button
+                    type="button"
+                    class="btn btn-dark"
+                    onclick="applyVoucher()"
+                  >
+                    Áp dụng
+                  </button>
+                </div>
+                <div
+                  id="voucherMessage"
+                  class="small mt-1"
+                  style="display: none"
+                ></div>
+              </div>
+
+              <!-- Chiết khấu giảm giá -->
+              <div
+                class="d-flex justify-content-between align-items-center mb-3 text-muted small"
+              >
+                <span>Giảm giá Voucher:</span>
+                <span class="fw-bold text-success fs-6" id="summaryDiscount"
+                  >-0 đ</span
+                >
+              </div>
+
+              <hr class="my-3" />
+
+              <!-- TỔNG TIỀN PHẢI THANH TOÁN -->
+              <div
+                class="d-flex justify-content-between align-items-center mb-4"
+              >
+                <div>
+                  <div class="fw-bold text-dark fs-6">TỔNG CỘNG</div>
+                  <div class="text-muted small">Đã bao gồm thuế & phí</div>
+                </div>
+                <div class="price-highlight" id="summaryTotalAmount">0 đ</div>
+              </div>
+
+              <!-- Tiền đặt cọc -->
+              <div class="mb-3">
+                <label class="form-label small fw-semibold text-dark">
+                  Số tiền khách đặt cọc trước (VNĐ)
+                </label>
+                <div class="input-group">
+                  <span class="input-group-text bg-light"
+                    ><i class="fa-solid fa-money-bill-wave text-success"></i
+                  ></span>
+                  <input
+                    type="number"
+                    th:field="*{depositAmount}"
+                    id="depositInput"
+                    class="form-control fw-bold"
+                    min="0"
+                    step="any"
+                    placeholder="0"
+                  />
+                  <span class="input-group-text bg-light">đ</span>
+                </div>
+                <div class="form-text">Nhập 0 nếu khách chưa đặt cọc.</div>
+              </div>
+
+              <!-- Nguồn đặt & Trạng thái khởi tạo -->
+              <div class="row g-2 mb-4">
+                <div class="col-6">
+                  <label class="form-label small fw-semibold text-muted mb-1"
+                    >Nguồn đặt</label
+                  >
+                  <select
+                    th:field="*{source}"
+                    class="form-select bg-light small"
+                  >
+                    <option
+                      th:each="sc : ${sources}"
+                      th:value="${sc.name()}"
+                      th:text="${sc.displayName}"
+                    ></option>
+                  </select>
+                </div>
+                <div class="col-6">
+                  <label class="form-label small fw-semibold text-muted mb-1"
+                    >Trạng thái khởi tạo</label
+                  >
+                  <select
+                    th:field="*{status}"
+                    class="form-select bg-light small"
+                  >
+                    <option value="CONFIRMED">Đã duyệt (Chờ nhận)</option>
+                    <option value="CHECKED_IN">Nhận phòng ngay</option>
+                    <option value="PENDING">Chờ xác nhận</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Nút Hoàn tất đặt phòng -->
+              <button
+                type="submit"
+                class="btn gold-btn w-100 py-3 rounded-3 fw-bold fs-6 mb-2"
+              >
+                <i class="fa-solid fa-check-circle me-2"></i> XÁC NHẬN ĐẶT PHÒNG
+              </button>
+              <a
+                th:href="@{/admin/bookings}"
+                class="btn btn-light w-100 py-2 rounded-3 text-muted"
+              >
+                Hủy bỏ
+              </a>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Script tính toán động & AJAX -->
+    <th:block layout:fragment="script">
+      <script th:src="@{/js/admin/booking-create.js}"></script>
+    </th:block>
+  </body>
+</html>

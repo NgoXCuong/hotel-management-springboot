@@ -1,0 +1,21 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24" />
+      <stop offset="50%" stop-color="#d97706" />
+      <stop offset="100%" stop-color="#b45309" />
+    </linearGradient>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#bgGrad)" />
+  <rect x="2" y="2" width="60" height="60" rx="12" fill="none" stroke="url(#goldGrad)" stroke-width="1.5" stroke-opacity="0.7"/>
+  <!-- Crown stars -->
+  <polygon points="32,13 34,17 38,17 35,20 36,24 32,22 28,24 29,20 26,17 30,17" fill="url(#goldGrad)" />
+  <polygon points="21,17 22.5,20 25.5,20 23,22 24,25 21,23.5 18,25 19,22 16.5,20 19.5,20" fill="url(#goldGrad)" />
+  <polygon points="43,17 44.5,20 47.5,20 45,22 46,25 43,23.5 40,25 41,22 38.5,20 41.5,20" fill="url(#goldGrad)" />
+  <!-- Grand Hotel Pillar H Structure -->
+  <path d="M21 28 H27 V48 H21 Z M37 28 H43 V48 H37 Z M27 36 H37 V40 H27 Z" fill="url(#goldGrad)" />
+</svg>

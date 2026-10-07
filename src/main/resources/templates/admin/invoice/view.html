@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin-layout}">
+<head>
+    <title th:text="'Hóa đơn ' + ${invoice.invoiceCode} + ' - Grand Hotel'">Chi tiết Hóa đơn - Grand Hotel</title>
+    <link rel="stylesheet" th:href="@{/css/admin/invoice-view.css}">
+</head>
+<body>
+    <div layout:fragment="content">
+
+        <!-- Top Breadcrumb & Actions -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+            <div>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-1 small">
+                        <li class="breadcrumb-item"><a th:href="@{/admin/invoices}" class="text-decoration-none text-muted">Hóa đơn</a></li>
+                        <li class="breadcrumb-item active text-warning" aria-current="page" style="color: #d97706 !important;">Chi tiết chứng từ</li>
+                    </ol>
+                </nav>
+                <h4 class="fw-bold text-dark mb-0">
+                    <i class="fa-solid fa-receipt text-warning me-2" style="color: #d97706 !important;"></i> Chi tiết Hóa đơn & Thu ngân
+                </h4>
+            </div>
+            <div class="d-flex gap-2">
+                <a th:href="@{/admin/invoices/print/{id}(id=${invoice.id})}" target="_blank" class="btn btn-outline-dark rounded-3 px-3">
+                    <i class="fa-solid fa-print me-2"></i> In Hóa đơn A4
+                </a>
+                <a th:href="@{/admin/invoices}" class="btn btn-light border rounded-3 px-3">
+                    <i class="fa-solid fa-arrow-left me-2"></i> Quay lại
+                </a>
+            </div>
+        </div>
+
+        <!-- 1. Hero Header Card -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 mb-4" style="background: #ffffff;">
+            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+                <div>
+                    <div class="d-flex align-items-center flex-wrap gap-2.5 mb-2">
+                        <h3 class="fw-bold text-dark mb-0" style="font-family: 'JetBrains Mono', monospace;" th:text="${invoice.invoiceCode}">
+                            INV-20260823-1001
+                        </h3>
+                        
+                        <!-- Badge Trạng thái Hóa đơn -->
+                        <span class="badge rounded-pill px-3 py-1.5 border fs-6" th:classappend="${invoice.status.badgeClass}">
+                            <i class="fa-solid me-2" th:classappend="${invoice.status.icon}"></i>
+                            <span th:text="${invoice.status.displayName}">Đã phát hành</span>
+                        </span>
+                    </div>
+
+                    <div class="text-muted small d-flex flex-wrap gap-3">
+                        <span><i class="fa-solid fa-bookmark me-2"></i>Đơn đặt: 
+                            <a th:href="@{/admin/bookings/{id}(id=${invoice.booking.id})}" class="fw-bold text-dark text-decoration-none" th:text="${invoice.booking.bookingCode}">BK-20260823-1001</a>
+                        </span>
+                        <span><i class="fa-regular fa-clock me-2"></i>Thời gian: <strong th:text="${#temporals.format(invoice.issuedAt != null ? invoice.issuedAt : invoice.createdAt, 'dd/MM/yyyy HH:mm')}">23/08/2026 10:00</strong></span>
+                        <span><i class="fa-solid fa-user-tie me-2"></i>Thu ngân: <strong th:text="${invoice.issuedBy != null ? invoice.issuedBy.fullName : 'Chưa phân công'}">Admin</strong></span>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button th:if="${invoice.status.name() != 'CANCELLED'}" type="button" class="btn btn-outline-danger px-3 py-2 rounded-3" data-bs-toggle="modal" data-bs-target="#cancelInvoiceModal">
+                        <i class="fa-regular fa-circle-xmark me-2"></i> Hủy Hóa đơn
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Bố cục 2 Cột (8:4) -->
+        <div class="row g-4">
+
+            <!-- CỘT TRÁI (8): Chi tiết các khoản chi phí -->
+            <div class="col-12 col-lg-8">
+
+                <!-- CARD 1: Chi tiết Tiền phòng -->
+                <div class="card border-0 shadow-sm rounded-4 p-4 mb-4" style="background: #ffffff;">
+                    <div class="section-header">
+                        <div>
+                            <i class="fa-solid fa-bed text-warning me-2" style="color: #d97706 !important;"></i>1. Tiền phòng lưu trú
+                        </div>
+                        <span class="badge bg-light text-secondary border px-2.5 py-1">
+                            <span th:text="${invoice.booking.getNumberOfNights()} + ' đêm'">2 đêm</span>
+                        </span>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle mb-0" style="font-size: 13.5px;">
+                            <thead class="table-light small text-uppercase text-muted">
+                                <tr>
+                                    <th class="ps-3 py-2.5">Số phòng</th>
+                                    <th class="py-2.5">Hạng / Loại phòng</th>
+                                    <th class="py-2.5 text-end">Giá niêm yết / Đêm</th>
+                                    <th class="py-2.5 text-center">Số đêm</th>
+                                    <th class="py-2.5 text-end pe-3">Thành tiền</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="br : ${invoice.booking.bookingRooms}">
+                                    <td class="ps-3 fw-bold text-dark">
+                                        Phòng <span th:text="${br.room.roomNumber}">101</span>
+                                    </td>
+                                    <td th:text="${br.room.roomType.name}">Deluxe King Room</td>
+                                    <td class="text-end" th:text="${#numbers.formatDecimal(br.pricePerNight, 0, 'COMMA', 0, 'POINT')} + ' đ'">1,200,000 đ</td>
+                                    <td class="text-center" th:text="${br.numberOfNights} + ' đêm'">2 đêm</td>
+                                    <td class="text-end pe-3 fw-bold text-dark" th:text="${#numbers.formatDecimal(br.subtotal, 0, 'COMMA', 0, 'POINT')} + ' đ'">2,400,000 đ</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- CARD 2: Chi tiết Dịch vụ phát sinh -->
+                <div class="card border-0 shadow-sm rounded-4 p-4 mb-4" style="background: #ffffff;">
+                    <div class="section-header">
+                        <div>
+                            <i class="fa-solid fa-bell-concierge text-warning me-2" style="color: #d97706 !important;"></i>2. Dịch vụ phát sinh
+                        </div>
+                        <span class="badge bg-light text-secondary border px-2.5 py-1">
+                            <span th:text="${#lists.size(invoice.booking.bookingServices)} + ' dịch vụ'">2 dịch vụ</span>
+                        </span>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle mb-0" style="font-size: 13.5px;">
+                            <thead class="table-light small text-uppercase text-muted">
+                                <tr>
+                                    <th class="ps-3 py-2.5">Tên dịch vụ</th>
+                                    <th class="py-2.5">Thời gian sử dụng</th>
+                                    <th class="py-2.5 text-end">Đơn giá</th>
+                                    <th class="py-2.5 text-center">Số lượng</th>
+                                    <th class="py-2.5 text-end pe-3">Thành tiền</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="bs : ${invoice.booking.bookingServices}">
+                                    <td class="ps-3 fw-bold text-dark" th:text="${bs.service != null ? bs.service.name : 'Dịch vụ'}">Nước suối Lavie</td>
+                                    <td class="small text-muted" th:text="${#temporals.format(bs.usedAt, 'dd/MM/yyyy HH:mm')}">23/08/2026 15:30</td>
+                                    <td class="text-end" th:text="${#numbers.formatDecimal(bs.pricePerUnit, 0, 'COMMA', 0, 'POINT')} + ' đ'">20,000 đ</td>
+                                    <td class="text-center" th:text="${bs.quantity}">2</td>
+                                    <td class="text-end pe-3 fw-bold text-dark" th:text="${#numbers.formatDecimal(bs.subtotal, 0, 'COMMA', 0, 'POINT')} + ' đ'">40,000 đ</td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(invoice.booking.bookingServices)}">
+                                    <td colspan="5" class="text-center text-muted py-3">Không phát sinh dịch vụ phụ trội trong kỳ lưu trú.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- CARD 3: Lịch sử Giao dịch thanh toán -->
+                <div class="card border-0 shadow-sm rounded-4 p-4" style="background: #ffffff;">
+                    <div class="section-header">
+                        <div>
+                            <i class="fa-solid fa-credit-card text-warning me-2" style="color: #d97706 !important;"></i>3. Lịch sử Giao dịch & Đặt cọc
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle mb-0" style="font-size: 13.5px;">
+                            <thead class="table-light small text-uppercase text-muted">
+                                <tr>
+                                    <th class="ps-3 py-2.5">Mã giao dịch</th>
+                                    <th class="py-2.5">Phương thức</th>
+                                    <th class="py-2.5 text-end">Số tiền</th>
+                                    <th class="py-2.5">Thời gian</th>
+                                    <th class="py-2.5">Thu ngân</th>
+                                    <th class="py-2.5 pe-3 text-center">Trạng thái</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="pm : ${invoice.booking.payments}">
+                                     <td class="ps-3 fw-bold text-dark" style="font-family: monospace;" th:text="${pm.transactionCode}">TRX-10023</td>
+                                     <td>
+                                         <i class="fa-solid me-2" th:classappend="${pm.paymentMethod.icon} + ' ' + ${pm.paymentMethod.colorClass}"></i>
+                                         <span th:text="${pm.paymentMethod.displayName}">Tiền mặt</span>
+                                     </td>
+                                     <td class="text-end fw-bold text-success" th:text="${#numbers.formatDecimal(pm.amount, 0, 'COMMA', 0, 'POINT')} + ' đ'">1,000,000 đ</td>
+                                     <td class="small text-muted" th:text="${#temporals.format(pm.paidAt, 'dd/MM/yyyy HH:mm')}">23/08/2026 09:30</td>
+                                     <td class="small text-dark" th:text="${pm.processedBy != null ? pm.processedBy.fullName : 'Thu ngân'}">Admin</td>
+                                     <td class="pe-3 text-center">
+                                         <span class="badge rounded-pill px-2.5 py-1 border" th:classappend="${pm.paymentStatus.badgeClass}" style="font-size: 11px;" th:text="${pm.paymentStatus.displayName}">Đã thanh toán</span>
+                                     </td>
+                                 </tr>
+                                 <tr th:if="${#lists.isEmpty(invoice.booking.payments) and invoice.booking.depositAmount != null and invoice.booking.depositAmount > 0}">
+                                     <td class="ps-3 fw-bold text-dark" style="font-family: monospace;" th:text="'DEP-' + ${invoice.booking.bookingCode}">DEP-1001</td>
+                                     <td><i class="fa-solid fa-money-bill-wave text-success me-2"></i> Tiền đặt cọc</td>
+                                     <td class="text-end fw-bold text-success" th:text="${#numbers.formatDecimal(invoice.booking.depositAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">1,000,000 đ</td>
+                                     <td class="small text-muted" th:text="${#temporals.format(invoice.booking.createdAt, 'dd/MM/yyyy HH:mm')}">23/08/2026 09:00</td>
+                                     <td class="small text-dark" th:text="${invoice.booking.createdBy != null ? invoice.booking.createdBy.fullName : 'Lễ tân'}">Lễ tân</td>
+                                     <td class="pe-3 text-center"><span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-1" style="font-size: 11px;">Đã nhận cọc</span></td>
+                                 </tr>
+                                 <tr th:if="${#lists.isEmpty(invoice.booking.payments) and (invoice.booking.depositAmount == null or invoice.booking.depositAmount == 0)}">
+                                     <td colspan="6" class="text-center text-muted py-3">Chưa có giao dịch thanh toán nào trước đó.</td>
+                                 </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- CỘT PHẢI (4): Khách hàng, Tổng hợp tài chính & Thu tiền -->
+            <div class="col-12 col-lg-4">
+
+                <!-- CARD 1: Khách hàng -->
+                <div class="card border-0 shadow-sm rounded-4 p-4 mb-4" style="background: #ffffff;">
+                    <div class="section-header">
+                        <div>
+                            <i class="fa-solid fa-user-circle text-warning me-2" style="color: #d97706 !important;"></i>Khách hàng thanh toán
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="rounded-circle bg-light d-flex align-items-center justify-content-center text-secondary border fw-bold fs-4" style="width: 48px; height: 48px;">
+                            <span th:text="${#strings.substring(invoice.booking.customer.fullName, 0, 1)}">A</span>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold text-dark mb-0" th:text="${invoice.booking.customer.fullName}">Nguyễn Văn An</h6>
+                            <div class="text-muted small" th:text="${invoice.booking.customer.phone}">0912345678</div>
+                        </div>
+                    </div>
+                    <div class="small text-muted mb-1 d-flex justify-content-between">
+                        <span>CCCD / Hộ chiếu:</span>
+                        <strong class="text-dark" th:text="${invoice.booking.customer.identityNumber != null ? invoice.booking.customer.identityNumber : 'Chưa có'}">001201009988</strong>
+                    </div>
+                    <div class="small text-muted d-flex justify-content-between">
+                        <span>Địa chỉ:</span>
+                        <span class="text-dark text-truncate ms-2" style="max-width: 170px;" th:text="${invoice.booking.customer.address != null ? invoice.booking.customer.address : 'Hà Nội'}">Hà Nội</span>
+                    </div>
+                </div>
+
+                <!-- CARD 2: Bảng Tổng kết tài chính (Billing Summary) -->
+                <div class="card border-0 shadow-sm rounded-4 p-4 mb-4" style="background: #ffffff;">
+                    <h5 class="fw-bold text-dark mb-3 pb-2 border-bottom">
+                        <i class="fa-solid fa-calculator text-warning me-2" style="color: #d97706 !important;"></i>Quyết toán Chi phí
+                    </h5>
+
+                    <!-- Tiền phòng + Dịch vụ = Subtotal -->
+                    <div class="d-flex justify-content-between align-items-center mb-2 small">
+                        <span class="text-muted">Cộng tiền hàng (Subtotal):</span>
+                        <span class="fw-semibold text-dark fs-6" th:text="${#numbers.formatDecimal(invoice.subtotal, 0, 'COMMA', 0, 'POINT')} + ' đ'">2,440,000 đ</span>
+                    </div>
+
+                    <!-- Chiết khấu Voucher -->
+                    <div class="d-flex justify-content-between align-items-center mb-2 small">
+                        <span class="text-muted">Chiết khấu voucher:</span>
+                        <span class="fw-bold text-success fs-6" th:text="'-' + ${#numbers.formatDecimal(invoice.discount, 0, 'COMMA', 0, 'POINT')} + ' đ'">-0 đ</span>
+                    </div>
+
+                    <!-- Thuế VAT -->
+                    <div class="d-flex justify-content-between align-items-center mb-3 small">
+                        <span class="text-muted">Thuế GTGT (VAT 8% bóc tách):</span>
+                        <span class="fw-semibold text-secondary fs-6" th:text="${#numbers.formatDecimal(invoice.tax, 0, 'COMMA', 0, 'POINT')} + ' đ'">195,200 đ</span>
+                    </div>
+
+                    <hr class="my-3">
+
+                    <!-- TỔNG CỘNG HÓA ĐƠN -->
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <div class="fw-bold text-dark fs-6">TỔNG CỘNG HÓA ĐƠN</div>
+                            <div class="text-muted small" style="font-size: 11px;">(Đã bao gồm VAT)</div>
+                        </div>
+                        <div class="price-highlight-gold" th:text="${#numbers.formatDecimal(invoice.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                            2,635,200 đ
+                        </div>
+                    </div>
+
+                    <!-- Đã trả & Còn thiếu -->
+                    <div class="p-3 bg-light rounded-3 border">
+                        <div class="d-flex justify-content-between align-items-center mb-2 small">
+                            <span class="text-muted">Đã thanh toán / Đã cọc:</span>
+                            <span class="fw-bold text-success fs-6" th:text="${#numbers.formatDecimal(invoice.getPaidAmount(), 0, 'COMMA', 0, 'POINT')} + ' đ'">1,000,000 đ</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                            <span class="fw-bold text-dark small">CÒN PHẢI THU:</span>
+                            <div class="remaining-highlight" th:text="${#numbers.formatDecimal(invoice.getRemainingAmount(), 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                1,635,200 đ
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 3: Khung Xử lý Thu tiền & Phát hành Hóa đơn -->
+                <div class="card border-0 shadow-sm rounded-4 p-4" style="background: #ffffff;">
+                    <!-- Nếu còn thiếu tiền hoặc đang là DRAFT -> Hiện Form Thu tiền -->
+                    <div th:if="${invoice.status.name() == 'DRAFT' or invoice.getRemainingAmount() > 0}">
+                        <h6 class="fw-bold text-dark mb-3">
+                            <i class="fa-solid fa-cash-register text-warning me-2" style="color: #d97706 !important;"></i>Thu tiền & Phát hành
+                        </h6>
+
+                        <form th:action="@{/admin/invoices/{id}/pay(id=${invoice.id})}" method="post">
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold text-dark">Phương thức thanh toán <span class="text-danger">*</span></label>
+                                <select name="paymentMethod" class="form-select form-select-sm" required>
+                                    <option th:each="pm : ${paymentMethods}" th:value="${pm.name()}" th:text="${pm.displayName}">Tiền mặt</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold text-dark">Số tiền thu lần này (VNĐ) <span class="text-danger">*</span></label>
+                                <input type="number" name="paymentAmount" class="form-control form-control-sm fw-bold text-dark" 
+                                       th:value="${invoice.getRemainingAmount()}" min="0" step="any" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold text-dark">Mã chuẩn chi / Giao dịch</label>
+                                <input type="text" name="transactionCode" class="form-control form-control-sm" placeholder="Vd: FT2608234589 hoặc để trống tự sinh">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold text-dark">Ghi chú thu ngân</label>
+                                <input type="text" name="note" class="form-control form-control-sm" placeholder="Ghi chú thu tiền...">
+                            </div>
+
+                            <button type="submit" class="btn gold-btn w-100 py-2.5 rounded-3 fw-semibold" 
+                                    onclick="return confirm('Xác nhận thu tiền và phát hành Hóa đơn chính thức?');">
+                                <i class="fa-solid fa-circle-check me-2"></i> Xác nhận Thu tiền & Phát hành
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Nếu đã hoàn tất thanh toán và đã ISSUED -->
+                    <div th:if="${invoice.status.name() == 'ISSUED' and invoice.getRemainingAmount() == 0}" class="text-center py-3">
+                        <div class="rounded-circle bg-success-subtle text-success mx-auto d-flex align-items-center justify-content-center mb-3" style="width: 56px; height: 56px; font-size: 24px;">
+                            <i class="fa-solid fa-check"></i>
+                        </div>
+                        <h6 class="fw-bold text-success mb-1">ĐÃ HOÀN TẤT THANH TOÁN</h6>
+                        <p class="text-muted small mb-3">Hóa đơn đã được phát hành và quyết toán toàn bộ số tiền lưu trú.</p>
+                        <a th:href="@{/admin/invoices/print/{id}(id=${invoice.id})}" target="_blank" class="btn btn-outline-dark rounded-3 px-4 fw-semibold w-100">
+                            <i class="fa-solid fa-print me-2"></i> In Phiếu Hóa đơn A4
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- MODAL HỦY HÓA ĐƠN (#cancelInvoiceModal) -->
+        <div class="modal fade" id="cancelInvoiceModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content rounded-4 border-0 shadow">
+                    <form th:action="@{/admin/invoices/{id}/cancel(id=${invoice.id})}" method="post">
+                        <div class="modal-header border-0 pb-0">
+                            <h5 class="modal-title fw-bold text-dark">
+                                <i class="fa-solid fa-triangle-exclamation text-danger me-2"></i> Hủy Hóa đơn
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body py-4">
+                            <p class="text-muted mb-3">
+                                Bạn có chắc chắn muốn hủy Hóa đơn <span class="fw-bold text-dark" th:text="${invoice.invoiceCode}"></span>?
+                            </p>
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold text-dark">Lý do hủy <span class="text-danger">*</span></label>
+                                <textarea name="reason" class="form-control" rows="3" placeholder="Nhập lý do hủy hóa đơn..." required></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer border-0 pt-0">
+                            <button type="button" class="btn btn-light rounded-3 px-3" data-bs-dismiss="modal">Đóng</button>
+                            <button type="submit" class="btn btn-danger rounded-3 px-4 fw-semibold">Xác nhận Hủy hóa đơn</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

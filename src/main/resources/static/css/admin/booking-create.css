@@ -1,0 +1,53 @@
+.gold-btn {
+    background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+    color: #ffffff !important;
+    border: none;
+    box-shadow: 0 4px 14px rgba(217, 119, 6, 0.3);
+    transition: all 0.25s ease;
+}
+.gold-btn:hover {
+    background: linear-gradient(135deg, #b45309 0%, #92400e 100%);
+    box-shadow: 0 6px 18px rgba(217, 119, 6, 0.4);
+    transform: translateY(-1px);
+}
+.section-title {
+    font-size: 14.5px;
+    font-weight: 700;
+    color: #1e293b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.room-select-card {
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 12px 14px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    background: #ffffff;
+}
+.room-select-card:hover {
+    border-color: #d97706;
+    background: #fffdfa;
+}
+.room-select-card.selected {
+    border-color: #d97706;
+    background: #fffbeb;
+}
+.summary-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 18px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+    position: sticky;
+    top: 24px;
+}
+.price-highlight {
+    font-family: 'JetBrains Mono', 'Segoe UI', monospace;
+    font-size: 22px;
+    font-weight: 800;
+    color: #b45309;
+}

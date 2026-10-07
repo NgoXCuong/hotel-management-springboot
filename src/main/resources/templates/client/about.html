@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/client-layout}">
+<head>
+    <title layout:fragment="title">Về chúng tôi - Grand Hotel</title>
+    <link rel="stylesheet" th:href="@{/css/client-about.css}">
+</head>
+<body>
+    <div layout:fragment="content">
+
+        <!-- 1. Page Header Banner -->
+        <div class="page-header-banner">
+            <div class="container">
+                <span class="badge rounded-pill px-3 py-1 text-uppercase fw-bold small mb-2"
+                      style="color: #fde68a !important; background: rgba(217, 119, 6, 0.3) !important; border: 1px solid rgba(253, 230, 138, 0.4);">
+                    <i class="fa-solid fa-hotel me-1.5 text-warning"></i> CÂU CHUYỆN GRAND HOTEL
+                </span>
+                <h1 class="fw-bold text-white display-5 mt-1" style="font-weight: 800 !important;">Về Chúng Tôi</h1>
+                <p class="text-light opacity-90 mb-0" style="font-size: 15px; max-width: 640px; margin: 0 auto;">
+                    Kiệt tác nghỉ dưỡng 5 sao giữa lòng vịnh Nha Trang - nơi sự tinh tế trong từng chi tiết gặp gỡ lòng hiếu khách thượng lưu.
+                </p>
+            </div>
+        </div>
+
+        <!-- 2. Intro About -->
+        <section class="py-5">
+            <div class="container py-3">
+                <div class="row g-5 align-items-center">
+                    <div class="col-12 col-lg-6">
+                        <div class="position-relative">
+                            <img src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1000&q=80"
+                                 class="img-fluid rounded-4 shadow-lg w-100" alt="Grand Hotel"
+                                 style="height: 440px; object-fit: cover;">
+                            <div class="position-absolute bottom-0 start-0 m-4 p-3 bg-white rounded-4 shadow d-flex align-items-center gap-3">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center bg-warning-subtle"
+                                     style="width: 48px; height: 48px; color: #d97706 !important; font-size: 22px;">
+                                    <i class="fa-solid fa-award"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-dark mb-0">World Luxury Hotel Awards</div>
+                                    <small class="text-muted">Top 10 Khu nghỉ dưỡng hàng đầu Châu Á</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <span class="section-tag">VỀ CHÚNG TÔI</span>
+                        <h2 class="serif-title fw-bold text-dark display-6 mb-3">Câu Chuyện Tạo Nên Di Sản Nghỉ Dưỡng</h2>
+                        <p class="text-muted" style="line-height: 1.8;">
+                            Ra đời từ năm 2010 tại vị trí vàng trên con đường Trần Phú huyền thoại, Grand Hotel nhanh chóng trở thành
+                            biểu tượng của sự xa xỉ và thanh lịch tại thành phố biển Nha Trang. Với lối kiến trúc Tân Cổ Điển giao thoa
+                            cùng phong cách nhiệt đới hiện đại, mỗi không gian tại đây đều được thiết kế để kể một câu chuyện riêng.
+                        </p>
+                        <p class="text-muted" style="line-height: 1.8;">
+                            Từng chiếc giường, từng thực đơn trong nhà hàng cho đến từng liệu trình tại Spa đều được chăm chút tỉ mỉ
+                            bởi đội ngũ chuyên gia giàu kinh nghiệm, với một sứ mệnh duy nhất: biến kỳ nghỉ của Quý khách thành
+                            những ký ức không thể nào quên.
+                        </p>
+
+                        <div class="row g-3 pt-3">
+                            <div class="col-4">
+                                <div class="stat-counter-box">
+                                    <div class="fw-bold fs-3 text-warning" style="color: #b45309 !important; font-family: 'JetBrains Mono', monospace;">
+                                        <span th:text="${roomTypeCount}">150</span>+
+                                    </div>
+                                    <small class="text-muted fw-semibold">Hạng phòng & Villa</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="stat-counter-box">
+                                    <div class="fw-bold fs-3 text-warning" style="color: #b45309 !important; font-family: 'JetBrains Mono', monospace;">
+                                        <span th:text="${reviewStats.satisfactionRate}">98</span>%
+                                    </div>
+                                    <small class="text-muted fw-semibold">Khách hàng hài lòng</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="stat-counter-box">
+                                    <div class="fw-bold fs-3 text-warning" style="color: #b45309 !important; font-family: 'JetBrains Mono', monospace;">24/7</div>
+                                    <small class="text-muted fw-semibold">Concierge & Butler</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. Giá trị cốt lõi -->
+        <section class="py-5" style="background: #f8fafc; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;">
+            <div class="container py-3">
+                <div class="text-center mb-5">
+                    <span class="section-tag">GIÁ TRỊ CỐT LÕI</span>
+                    <h2 class="serif-title fw-bold text-dark display-6 mt-1 mb-0">Triết Lý Phục Vụ Của Chúng Tôi</h2>
+                </div>
+                <div class="row g-4">
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="value-card">
+                            <div class="value-icon-wrap"><i class="fa-solid fa-hand-holding-heart"></i></div>
+                            <h5 class="fw-bold text-dark mb-2">Tận Tâm</h5>
+                            <p class="text-muted small mb-0">Mỗi nhân viên là một đại sứ hiếu khách, luôn sẵn sàng phục vụ từ trái tim.</p>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="value-card">
+                            <div class="value-icon-wrap"><i class="fa-solid fa-gem"></i></div>
+                            <h5 class="fw-bold text-dark mb-2">Tinh Tế</h5>
+                            <p class="text-muted small mb-0">Chi tiết nhỏ nhất cũng được trau chuốt để mang đến trải nghiệm hoàn hảo.</p>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="value-card">
+                            <div class="value-icon-wrap"><i class="fa-solid fa-earth-asia"></i></div>
+                            <h5 class="fw-bold text-dark mb-2">Bền Vững</h5>
+                            <p class="text-muted small mb-0">Cam kết vận hành xanh, thân thiện môi trường và gắn kết cộng đồng địa phương.</p>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <div class="value-card">
+                            <div class="value-icon-wrap"><i class="fa-solid fa-shield-heart"></i></div>
+                            <h5 class="fw-bold text-dark mb-2">An Toàn</h5>
+                            <p class="text-muted small mb-0">Tiêu chuẩn vệ sinh & an ninh quốc tế được kiểm soát nghiêm ngặt mỗi ngày.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. Con số & Team -->
+        <section class="py-5">
+            <div class="container py-3">
+                <div class="row g-4 align-items-center">
+                    <div class="col-12 col-lg-5">
+                        <span class="section-tag">DỊCH VỤ ĐỘC QUYỀN</span>
+                        <h2 class="serif-title fw-bold text-dark display-6 mb-3">Hơn <span class="text-warning" style="color: #b45309 !important;" th:text="${serviceCount}">20</span> Dịch Vụ &amp; <span th:text="${amenityCount}">30</span> Tiện Ích Đẳng Cấp</h2>
+                        <p class="text-muted mb-4" style="line-height: 1.8;">
+                            Từ những bữa tiệc BBQ trên bãi biển riêng, lớp học nấu ăn cùng đầu bếp Michelin cho đến tour
+                            lặn ngắm san hô, Grand Hotel luôn mang đến những trải nghiệm độc bản cho kỳ nghỉ của Quý khách.
+                        </p>
+                        <a th:href="@{/services}" class="btn gold-btn rounded-pill px-4 py-2.5 fw-bold small shadow-sm">
+                            <i class="fa-solid fa-bell-concierge me-1.5"></i> Khám phá Dịch vụ & Tiện ích
+                        </a>
+                    </div>
+                    <div class="col-12 col-lg-7">
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <div class="mini-fact-card">
+                                    <i class="fa-solid fa-calendar-check text-warning mb-2" style="color: #d97706 !important; font-size: 26px;"></i>
+                                    <div class="fw-bold fs-4 text-dark" style="font-family: 'JetBrains Mono', monospace;" th:text="${reviewStats.totalReviews} + '+'">200+</div>
+                                    <small class="text-muted fw-semibold">Đánh giá 5 sao từ khách</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="mini-fact-card">
+                                    <i class="fa-solid fa-star text-warning mb-2" style="color: #d97706 !important; font-size: 26px;"></i>
+                                    <div class="fw-bold fs-4 text-dark" style="font-family: 'JetBrains Mono', monospace;">
+                                        <span th:text="${reviewStats.averageRating}">4.8</span>/5
+                                    </div>
+                                    <small class="text-muted fw-semibold">Điểm hài lòng trung bình</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="mini-fact-card">
+                                    <i class="fa-solid fa-users text-warning mb-2" style="color: #d97706 !important; font-size: 26px;"></i>
+                                    <div class="fw-bold fs-4 text-dark" style="font-family: 'JetBrains Mono', monospace;">350+</div>
+                                    <small class="text-muted fw-semibold">Nhân sự chuyên nghiệp</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="mini-fact-card">
+                                    <i class="fa-solid fa-door-open text-warning mb-2" style="color: #d97706 !important; font-size: 26px;"></i>
+                                    <div class="fw-bold fs-4 text-dark" style="font-family: 'JetBrains Mono', monospace;" th:text="${roomTypeCount} + '+'">150+</div>
+                                    <small class="text-muted fw-semibold">Phòng nghỉ & Suite</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+</body>
+</html>

@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin-layout}">
+<head>
+    <title layout:fragment="title">Quản lý Tài khoản & Phân quyền - Grand Hotel</title>
+    <link rel="stylesheet" th:href="@{/css/admin/user-list.css}">
+</head>
+<body>
+    <div layout:fragment="content">
+
+        <!-- 1. Header Toolbar -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+            <div>
+                <h4 class="fw-bold text-dark mb-1" style="letter-spacing: -0.5px;">
+                    <i class="fa-solid fa-users-gear text-warning me-2" style="color: #d97706 !important;"></i>Quản lý Tài khoản & Phân quyền
+                </h4>
+                <p class="text-muted small mb-0">Cấp quyền truy cập, theo dõi hoạt động và bảo mật tài khoản nhân viên</p>
+            </div>
+            <div class="d-flex gap-2">
+                <button type="button" class="btn gold-btn px-3.5 py-2 rounded-3 fw-semibold" onclick="openCreateUserModal()">
+                    <i class="fa-solid fa-user-plus me-2"></i> Cấp tài khoản mới
+                </button>
+            </div>
+        </div>
+
+
+
+        <!-- 2. KPI Stat Chips -->
+        <div class="row g-2 mb-4">
+            <div class="col-12 col-sm-4">
+                <div class="kpi-stat-chip">
+                    <div class="rounded-3 p-2 text-dark bg-light"><i class="fa-solid fa-users"></i></div>
+                    <div>
+                        <div class="text-muted" style="font-size: 11px;">TỔNG TÀI KHOẢN</div>
+                        <div class="fw-bold fs-5 text-dark" th:text="${totalUsers}">0</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-4">
+                <div class="kpi-stat-chip">
+                    <div class="rounded-3 p-2" style="background: #ecfdf5; color: #10b981;"><i class="fa-solid fa-user-check"></i></div>
+                    <div>
+                        <div class="text-muted" style="font-size: 11px;">ĐANG HOẠT ĐỘNG</div>
+                        <div class="fw-bold fs-5 text-success" th:text="${activeUsers}">0</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-4">
+                <div class="kpi-stat-chip">
+                    <div class="rounded-3 p-2" style="background: #fef2f2; color: #ef4444;"><i class="fa-solid fa-user-lock"></i></div>
+                    <div>
+                        <div class="text-muted" style="font-size: 11px;">ĐANG BỊ KHÓA / TẠM NGƯNG</div>
+                        <div class="fw-bold fs-5 text-danger" th:text="${lockedUsers}">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Thanh tìm kiếm & Bộ lọc -->
+        <div class="card border-0 shadow-sm rounded-4 p-3 mb-4" style="background: #ffffff;">
+            <form th:action="@{/admin/users}" method="get" class="row g-2 align-items-center">
+                <!-- Từ khóa -->
+                <div class="col-12 col-md-4">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-light border-end-0 text-muted"><i class="fa-solid fa-magnifying-glass"></i></span>
+                        <input type="text" name="keyword" class="form-control bg-light border-start-0 ps-0" 
+                               placeholder="Tìm theo username, họ tên hoặc email..." th:value="${keyword}">
+                    </div>
+                </div>
+
+                <!-- Lọc Vai trò -->
+                <div class="col-6 col-md-3">
+                    <select name="roleId" class="form-select form-select-sm bg-light">
+                        <option value="">-- Tất cả vai trò --</option>
+                        <option th:each="r : ${roles}" th:value="${r.id}" th:text="${r.displayName} + ' (' + ${r.description} + ')'" th:selected="${r.id == roleId}"></option>
+                    </select>
+                </div>
+
+                <!-- Lọc Khóa / Mở -->
+                <div class="col-6 col-md-3">
+                    <select name="accountNonLocked" class="form-select form-select-sm bg-light">
+                        <option value="">-- Trạng thái bảo mật --</option>
+                        <option value="true" th:selected="${accountNonLocked != null and accountNonLocked == true}">Bình thường (Không khóa)</option>
+                        <option value="false" th:selected="${accountNonLocked != null and accountNonLocked == false}">Bị khóa tài khoản (Locked)</option>
+                    </select>
+                </div>
+
+                <!-- Nút thao tác -->
+                <div class="col-12 col-md-2 d-flex gap-1">
+                    <button type="submit" class="btn btn-sm btn-dark rounded-2 w-100 fw-semibold">
+                        <i class="fa-solid fa-filter me-2"></i> Lọc
+                    </button>
+                    <a th:href="@{/admin/users}" class="btn btn-sm btn-outline-secondary rounded-2">
+                        <i class="fa-solid fa-rotate-left"></i>
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- 4. Bảng dữ liệu Tài khoản chuẩn UI/UX -->
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden" style="background: #ffffff;">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0" style="font-size: 13.5px;">
+                    <thead style="background-color: #f8fafc; border-bottom: 1px solid #e2e8f0; font-size: 12px; color: #475569; text-transform: uppercase; letter-spacing: 0.5px;">
+                        <tr>
+                            <th class="ps-4 py-3 text-center" style="width: 50px;">ID</th>
+                            <th class="py-3" style="width: 250px;">Tài khoản & Họ tên</th>
+                            <th class="py-3">Liên hệ</th>
+                            <th class="py-3">Vai trò (Roles)</th>
+                            <th class="py-3">Đăng nhập gần nhất</th>
+                            <th class="py-3 text-center" style="width: 140px;">Trạng thái</th>
+                            <th class="pe-4 py-3 text-center" style="width: 140px;">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="u : ${users}">
+                            <!-- ID -->
+                            <td class="ps-4 text-center text-muted small" th:text="'#' + ${u.id}">#1</td>
+
+                            <!-- Tài khoản & Avatar -->
+                            <td>
+                                <div class="d-flex align-items-center gap-2.5">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center text-dark border fw-bold overflow-hidden" 
+                                         style="width: 38px; height: 38px; flex-shrink: 0; background-color: #fef3c7;">
+                                        <img th:if="${u.avatarUrl != null and !u.avatarUrl.isEmpty()}" 
+                                             th:src="${u.avatarUrl}" alt="Avatar" class="w-100 h-100" style="object-fit: cover;">
+                                        <span th:unless="${u.avatarUrl != null and !u.avatarUrl.isEmpty()}"
+                                              th:text="${u.fullName != null and !u.fullName.isEmpty() ? #strings.substring(u.fullName, 0, 1) : #strings.substring(u.username, 0, 1)}">A</span>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-dark" th:text="${u.fullName != null and !u.fullName.isEmpty() ? u.fullName : u.username}">
+                                            Quản trị viên
+                                        </div>
+                                        <div class="text-muted small" style="font-family: 'JetBrains Mono', monospace; font-size: 12px;">
+                                            @<span th:text="${u.username}">admin</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- Liên hệ -->
+                            <td>
+                                <div class="small text-dark" th:if="${u.email != null}">
+                                    <i class="fa-regular fa-envelope me-2 text-muted"></i>
+                                    <span th:text="${u.email}">admin@grandhotel.vn</span>
+                                </div>
+                                <div class="small text-muted" th:if="${u.phone != null and !u.phone.isEmpty()}">
+                                    <i class="fa-solid fa-phone me-2 text-muted"></i>
+                                    <span th:text="${u.phone}">0912345678</span>
+                                </div>
+                                <div class="small text-muted fst-italic" th:if="${u.email == null and (u.phone == null or u.phone.isEmpty())}">
+                                    Chưa cập nhật
+                                </div>
+                            </td>
+
+                            <!-- Vai trò (Roles) -->
+                            <td>
+                                <div class="d-flex flex-wrap gap-1">
+                                    <span th:each="r : ${u.roles}" class="badge rounded-pill px-2.5 py-1"
+                                          th:classappend="${r.name == 'ROLE_ADMIN' ? 'role-badge-admin' : (r.name == 'ROLE_MANAGER' ? 'role-badge-manager' : (r.name == 'ROLE_RECEPTIONIST' ? 'role-badge-receptionist' : 'role-badge-customer'))}"
+                                          style="font-size: 11px;" th:text="${r.displayName}">
+                                        Quản trị viên
+                                    </span>
+                                </div>
+                            </td>
+
+                            <!-- Đăng nhập gần nhất & Failed Attempts -->
+                            <td>
+                                <div class="small text-dark">
+                                    <span th:if="${u.lastLoginAt != null}" th:text="${#temporals.format(u.lastLoginAt, 'dd/MM/yyyy HH:mm')}">15/04/2026 10:30</span>
+                                    <span th:unless="${u.lastLoginAt != null}" class="text-muted fst-italic">Chưa đăng nhập</span>
+                                </div>
+                                <div th:if="${u.failedLoginAttempts != null and u.failedLoginAttempts > 0}" class="text-danger small" style="font-size: 11px;">
+                                    <i class="fa-solid fa-triangle-exclamation me-2"></i>Đăng nhập sai: <strong th:text="${u.failedLoginAttempts}">0</strong> lần
+                                </div>
+                            </td>
+
+                            <!-- Trạng thái -->
+                            <td class="text-center">
+                                <span th:if="${!u.accountNonLocked}" class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-2.5 py-1.5" style="font-size: 11.5px;">
+                                    <i class="fa-solid fa-lock me-2"></i> Bị khóa
+                                </span>
+                                <span th:if="${u.accountNonLocked and !u.enabled}" class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill px-2.5 py-1.5" style="font-size: 11.5px;">
+                                    <i class="fa-solid fa-pause me-2"></i> Tạm ngưng
+                                </span>
+                                <span th:if="${u.accountNonLocked and u.enabled}" class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2.5 py-1.5" style="font-size: 11.5px;">
+                                    <i class="fa-solid fa-circle-check me-2"></i> Hoạt động
+                                </span>
+                            </td>
+
+                            <!-- Thao tác -->
+                            <td class="pe-4 text-center">
+                                <div class="d-inline-flex gap-1">
+                                    <!-- Sửa tài khoản -->
+                                    <button type="button" 
+                                            class="btn btn-sm btn-light border text-primary" title="Chỉnh sửa thông tin"
+                                            th:data-id="${u.id}"
+                                            th:data-username="${u.username}"
+                                            th:data-fullname="${u.fullName}"
+                                            th:data-email="${u.email}"
+                                            th:data-phone="${u.phone}"
+                                            th:data-enabled="${u.enabled}"
+                                            th:data-locked="${!u.accountNonLocked}"
+                                            th:data-avatar-url="${u.avatarUrl}"
+                                            th:data-role-ids="${u.roles != null ? #strings.listJoin(u.roles.![id], ',') : ''}"
+                                            onclick="openEditUserModal(this)">
+                                        <i class="fa-regular fa-pen-to-square"></i>
+                                    </button>
+
+                                    <!-- Khóa / Mở khóa -->
+                                    <form th:action="@{/admin/users/toggle-lock/{id}(id=${u.id})}" method="post" style="display:inline;">
+                                        <button type="submit" class="btn btn-sm btn-light border" 
+                                                th:classappend="${u.accountNonLocked ? 'text-secondary' : 'text-danger'}"
+                                                th:title="${u.accountNonLocked ? 'Khóa tài khoản này' : 'Mở khóa tài khoản'}">
+                                            <i class="fa-solid" th:classappend="${u.accountNonLocked ? 'fa-unlock' : 'fa-lock'}"></i>
+                                        </button>
+                                    </form>
+
+                                    <!-- Cấp lại mật khẩu -->
+                                    <button type="button" class="btn btn-sm btn-light border text-warning" title="Cấp lại mật khẩu mới"
+                                            th:data-id="${u.id}" th:data-username="${u.username}"
+                                            onclick="openResetPasswordModal(this)">
+                                        <i class="fa-solid fa-key" style="color: #d97706 !important;"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Empty State -->
+                        <tr th:if="${#lists.isEmpty(users)}">
+                            <td colspan="7" class="text-center py-5 text-muted">
+                                <i class="fa-solid fa-user-slash text-muted mb-2" style="font-size: 40px; opacity: 0.3;"></i>
+                                <div>Chưa có tài khoản nào trong hệ thống hoặc không khớp bộ lọc.</div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Table Footer / Pagination -->
+            <div class="px-4 py-3 bg-light border-top d-flex flex-column flex-md-row justify-content-between align-items-center gap-3" style="font-size: 13px; color: #64748b;">
+                <div>
+                    <span th:if="${usersPage != null and usersPage.totalElements > 0}">
+                        Hiển thị <strong class="text-dark" th:text="${usersPage.number * usersPage.size + 1}">1</strong>
+                        - <strong class="text-dark" th:text="${usersPage.number * usersPage.size + #lists.size(users)}">10</strong>
+                        trong tổng số <strong class="text-dark" th:text="${usersPage.totalElements}">25</strong> tài khoản
+                    </span>
+                    <span th:if="${usersPage == null or usersPage.totalElements == 0}">
+                        Hiển thị <strong class="text-dark">0</strong> tài khoản
+                    </span>
+                </div>
+
+                <!-- Navigation Pagination Controls -->
+                <nav th:if="${usersPage != null and usersPage.totalPages > 1}" aria-label="Phân trang tài khoản">
+                    <ul class="pagination pagination-sm mb-0">
+                        <!-- Trang đầu -->
+                        <li class="page-item" th:classappend="${usersPage.first ? 'disabled' : ''}">
+                            <a class="page-link" th:href="@{/admin/users(keyword=${keyword}, roleId=${roleId}, enabled=${enabled}, accountNonLocked=${accountNonLocked}, page=1)}" title="Trang đầu">
+                                <i class="fa-solid fa-angles-left"></i>
+                            </a>
+                        </li>
+                        <!-- Trang trước -->
+                        <li class="page-item" th:classappend="${usersPage.first ? 'disabled' : ''}">
+                            <a class="page-link" th:href="@{/admin/users(keyword=${keyword}, roleId=${roleId}, enabled=${enabled}, accountNonLocked=${accountNonLocked}, page=${usersPage.number})}" title="Trang trước">
+                                <i class="fa-solid fa-chevron-left"></i>
+                            </a>
+                        </li>
+
+                        <!-- Các số trang -->
+                        <li th:each="p : ${#numbers.sequence(T(java.lang.Math).max(1, usersPage.number + 1 - 2), T(java.lang.Math).min(usersPage.totalPages, usersPage.number + 1 + 2))}"
+                            class="page-item" th:classappend="${p == usersPage.number + 1 ? 'active' : ''}">
+                            <a class="page-link" th:text="${p}" th:href="@{/admin/users(keyword=${keyword}, roleId=${roleId}, enabled=${enabled}, accountNonLocked=${accountNonLocked}, page=${p})}">1</a>
+                        </li>
+
+                        <!-- Trang sau -->
+                        <li class="page-item" th:classappend="${usersPage.last ? 'disabled' : ''}">
+                            <a class="page-link" th:href="@{/admin/users(keyword=${keyword}, roleId=${roleId}, enabled=${enabled}, accountNonLocked=${accountNonLocked}, page=${usersPage.number + 2})}" title="Trang sau">
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </a>
+                        </li>
+                        <!-- Trang cuối -->
+                        <li class="page-item" th:classappend="${usersPage.last ? 'disabled' : ''}">
+                            <a class="page-link" th:href="@{/admin/users(keyword=${keyword}, roleId=${roleId}, enabled=${enabled}, accountNonLocked=${accountNonLocked}, page=${usersPage.totalPages})}" title="Trang cuối">
+                                <i class="fa-solid fa-angles-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+
+        <!-- ============ MODAL 1: CẤP MỚI / CHỈNH SỬA TÀI KHOẢN ============ -->
+        <div class="modal fade" id="userModal" tabindex="-1" aria-labelledby="userModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content border-0 shadow rounded-4 overflow-hidden">
+                    
+                    <div class="modal-header border-bottom px-4 py-3 bg-light">
+                        <h5 class="modal-title fw-bold text-dark fs-6" id="userModalLabel">
+                            <i class="fa-solid fa-user-shield text-warning me-2" style="color: #d97706 !important;"></i>
+                            <span id="userModalTitle">Cấp mới Tài khoản Nhân viên</span>
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <form id="userForm" method="post" enctype="multipart/form-data">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <div class="modal-body p-4">
+                            <input type="hidden" id="userId" name="id" />
+
+                            <div class="row g-4">
+                                <!-- CỘT TRÁI: ĐĂNG NHẬP & PHÂN QUYỀN -->
+                                <div class="col-12 col-md-6 border-end-md pe-md-3">
+                                    <div class="fw-bold text-warning small text-uppercase mb-3 pb-1 border-bottom" style="color: #d97706 !important;">
+                                        <i class="fa-solid fa-key me-2"></i> 1. Đăng nhập & Vai trò
+                                    </div>
+
+                                    <!-- Username -->
+                                    <div class="mb-3">
+                                        <label for="modalUsernameInput" class="form-label small fw-semibold text-dark">Tên đăng nhập (Username) <span class="text-danger">*</span></label>
+                                        <div class="input-group input-group-sm">
+                                            <span class="input-group-text bg-light text-muted">@</span>
+                                            <input type="text" class="form-control bg-light" id="modalUsernameInput" name="username" 
+                                                   placeholder="vd: le_tan_an, ketoan_mai" required minlength="3" maxlength="50"
+                                                   pattern="^[a-zA-Z0-9_.]+$">
+                                        </div>
+                                        <div class="form-text small" style="font-size: 11px;">Chỉ gồm chữ cái, số, gạch dưới và dấu chấm.</div>
+                                    </div>
+
+                                    <!-- Password -->
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-semibold text-dark">
+                                            Mật khẩu <span id="modalPasswordRequiredStar" class="text-danger">*</span>
+                                            <span id="modalPasswordNote" class="text-muted fw-normal d-none">(để trống nếu không đổi)</span>
+                                        </label>
+                                        <div class="input-group input-group-sm">
+                                            <input type="password" name="rawPassword" id="modalInputPassword" class="form-control bg-light" 
+                                                   placeholder="••••••••" minlength="6">
+                                            <button type="button" class="btn btn-outline-secondary" onclick="togglePasswordVisibility('modalInputPassword', this)">
+                                                <i class="fa-regular fa-eye"></i>
+                                            </button>
+                                        </div>
+                                        <div class="form-text small" style="font-size: 11px;">Mật khẩu tối thiểu 6 ký tự bảo mật.</div>
+                                    </div>
+
+                                    <!-- Roles Checkboxes -->
+                                    <div class="mb-3">
+                                        <label class="form-label small fw-semibold text-dark d-block mb-1">Vai trò / Quyền hạn <span class="text-danger">*</span></label>
+                                        <div class="d-flex flex-column gap-2 p-2.5 bg-light rounded-3 border">
+                                            <div th:each="r : ${roles}" class="form-check">
+                                                <input class="form-check-input user-role-checkbox" type="checkbox" name="roleIds" th:value="${r.id}" 
+                                                       th:id="'modalRole_' + ${r.id}">
+                                                <label class="form-check-label small fw-semibold" th:for="'modalRole_' + ${r.id}">
+                                                    <span th:text="${r.displayName}">Quản trị viên</span>
+                                                    <span class="text-muted fw-normal" style="font-size: 11px;" th:text="' - ' + ${r.description}">Quản trị hệ thống</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- CỘT PHẢI: THÔNG TIN CÁ NHÂN & AVATAR -->
+                                <div class="col-12 col-md-6 ps-md-3">
+                                    <div class="fw-bold text-warning small text-uppercase mb-3 pb-1 border-bottom" style="color: #d97706 !important;">
+                                        <i class="fa-solid fa-id-card me-2"></i> 2. Cá nhân & Ảnh đại diện
+                                    </div>
+
+                                    <!-- Avatar Cloudinary -->
+                                    <div class="text-center mb-3">
+                                        <div class="avatar-upload-wrapper" onclick="document.getElementById('modalAvatarInput').click()" title="Nhấn để tải ảnh lên Cloudinary">
+                                            <img id="modalAvatarPreview" src="" alt="Avatar" class="avatar-preview-img d-none" />
+                                            <div id="modalAvatarPlaceholder" class="avatar-placeholder">
+                                                <i class="fa-solid fa-user" style="font-size: 28px;"></i>
+                                            </div>
+                                            <div class="avatar-edit-badge">
+                                                <i class="fa-solid fa-camera"></i>
+                                            </div>
+                                        </div>
+                                        <div class="text-muted" style="font-size: 11px;">Tải ảnh đại diện lên Cloudinary (Tối đa 5MB)</div>
+                                        <input type="file" id="modalAvatarInput" name="avatarFile" accept="image/jpeg,image/png,image/webp"
+                                               class="d-none"
+                                               data-single-preview="#modalAvatarPreview"
+                                               data-placeholder="#modalAvatarPlaceholder">
+                                    </div>
+
+                                    <!-- Họ tên -->
+                                    <div class="mb-2">
+                                        <label for="modalFullName" class="form-label small fw-semibold text-dark">Họ và tên đầy đủ <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control form-control-sm bg-light" id="modalFullName" name="fullName" 
+                                               placeholder="vd: Nguyễn Văn An" required maxlength="100">
+                                    </div>
+
+                                    <!-- Email -->
+                                    <div class="mb-2">
+                                        <label for="modalEmail" class="form-label small fw-semibold text-dark">Email liên hệ <span class="text-danger">*</span></label>
+                                        <input type="email" class="form-control form-control-sm bg-light" id="modalEmail" name="email" 
+                                               placeholder="vd: an.nguyen@grandhotel.vn" required maxlength="100">
+                                    </div>
+
+                                    <!-- Phone -->
+                                    <div class="mb-3">
+                                        <label for="modalPhone" class="form-label small fw-semibold text-dark">Số điện thoại</label>
+                                        <input type="tel" class="form-control form-control-sm bg-light" id="modalPhone" name="phone" 
+                                               placeholder="0912345678" maxlength="20">
+                                    </div>
+
+                                    <!-- Trạng thái -->
+                                    <div class="p-2.5 bg-light rounded-3 border">
+                                        <div class="form-check form-switch mb-1">
+                                            <input class="form-check-input" type="checkbox" role="switch" id="modalEnabled" name="enabled" checked>
+                                            <label class="form-check-label small fw-semibold text-dark" for="modalEnabled">Kích hoạt hoạt động</label>
+                                        </div>
+                                        <div class="form-check form-switch mb-0">
+                                            <input class="form-check-input" type="checkbox" role="switch" id="modalAccountNonLocked" name="accountNonLocked" checked>
+                                            <label class="form-check-label small fw-semibold text-dark" for="modalAccountNonLocked">Tài khoản không bị khóa</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer border-top px-4 py-3 bg-light">
+                            <button type="button" class="btn btn-light border px-3" data-bs-dismiss="modal">Hủy bỏ</button>
+                            <button type="submit" class="btn gold-btn px-4 fw-semibold">
+                                <i class="fa-solid fa-floppy-disk me-2"></i> Lưu tài khoản
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ MODAL 2: CẤP LẠI MẬT KHẨU ============ -->
+        <div class="modal fade" id="resetPasswordModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content rounded-4 border-0 shadow overflow-hidden">
+                    <form id="resetPasswordForm" method="post">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <div class="modal-header border-0 pb-0 bg-light p-4">
+                            <div>
+                                <h5 class="modal-title fw-bold text-dark fs-6">
+                                    <i class="fa-solid fa-key text-warning me-2" style="color: #d97706 !important;"></i> Cấp lại Mật khẩu
+                                </h5>
+                                <div class="text-muted small mt-0.5">
+                                    Tài khoản: <strong class="text-dark" id="modalUsername">@admin</strong>
+                                </div>
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+
+                        <div class="modal-body p-4">
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold text-dark">Mật khẩu mới <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <input type="password" name="newPassword" id="modalNewPassword" class="form-control form-control-sm" placeholder="Nhập mật khẩu mới..." required minlength="6">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="togglePasswordVisibility('modalNewPassword', this)">
+                                        <i class="fa-regular fa-eye"></i>
+                                    </button>
+                                </div>
+                                <div class="form-text small" style="font-size: 11px;">Mật khẩu tối thiểu 6 ký tự. Tài khoản sẽ được tự động mở khóa.</div>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer border-0 pt-0 bg-light px-4 py-3">
+                            <button type="button" class="btn btn-light rounded-3 px-3" data-bs-dismiss="modal">Đóng</button>
+                            <button type="submit" class="btn gold-btn rounded-3 px-4 fw-semibold">
+                                <i class="fa-solid fa-shield-halved me-2"></i> Xác nhận Cấp lại mật khẩu
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Script Modal & Toggle Password & Avatar Preview -->
+    <th:block layout:fragment="script">
+        <script th:src="@{/js/image-upload.js}"></script>
+        <script th:src="@{/js/admin/user-list.js}"></script>
+    </th:block>
+</body>
+</html>

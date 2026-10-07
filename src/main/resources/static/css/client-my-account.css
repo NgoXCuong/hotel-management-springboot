@@ -1,0 +1,77 @@
+/* ==========================================================================
+   GRAND HOTEL - MY ACCOUNT STYLES
+   Quiet Luxury & Warm Editorial Theme (Aman & Six Senses Style)
+   ========================================================================== */
+
+.account-card-lux {
+    background: #FFFFFF;
+    border: 1px solid var(--lux-border);
+    border-radius: 18px;
+    padding: 32px;
+    box-shadow: var(--lux-shadow-xs);
+    margin-bottom: 24px;
+}
+
+.account-nav-pills .nav-link {
+    color: var(--lux-dark);
+    font-weight: 600;
+    font-size: 13.5px;
+    padding: 12px 18px;
+    border-radius: 10px;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: var(--lux-transition);
+    border: 1px solid transparent;
+}
+
+.account-nav-pills .nav-link:hover {
+    background-color: var(--lux-surface-muted);
+    color: var(--lux-gold-dark);
+}
+
+.account-nav-pills .nav-link.active {
+    background-color: var(--lux-gold-light);
+    color: var(--lux-gold-dark);
+    border-color: var(--lux-gold);
+}
+
+.booking-item-card {
+    background: #FFFFFF;
+    border: 1px solid var(--lux-border);
+    border-radius: 14px;
+    padding: 22px;
+    box-shadow: var(--lux-shadow-xs);
+    transition: var(--lux-transition);
+    margin-bottom: 18px;
+}
+
+.booking-item-card:hover {
+    border-color: var(--lux-gold);
+    box-shadow: var(--lux-shadow-sm);
+}
+
+.star-rating-select {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: center;
+    gap: 10px;
+}
+
+.star-rating-select input {
+    display: none;
+}
+
+.star-rating-select label {
+    font-size: 26px;
+    color: #E2E8F0;
+    cursor: pointer;
+    transition: color 0.15s ease;
+}
+
+.star-rating-select label:hover,
+.star-rating-select label:hover ~ label,
+.star-rating-select input:checked ~ label {
+    color: #F59E0B;
+}

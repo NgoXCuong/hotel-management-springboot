@@ -1,0 +1,135 @@
+.gold-btn {
+        background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+        color: #ffffff !important;
+        border: none;
+        box-shadow: 0 4px 12px rgba(217, 119, 6, 0.25);
+        transition: all 0.25s ease;
+      }
+      .gold-btn:hover {
+        background: linear-gradient(135deg, #b45309 0%, #92400e 100%);
+        box-shadow: 0 6px 16px rgba(217, 119, 6, 0.35);
+        transform: translateY(-1px);
+      }
+
+      /* Tab Switcher */
+      .view-tab-btn {
+        padding: 8px 18px;
+        font-weight: 600;
+        font-size: 13.5px;
+        border-radius: 10px;
+        color: #64748b;
+        border: 1px solid transparent;
+        transition: all 0.2s ease;
+        background: transparent;
+      }
+      .view-tab-btn.active {
+        background: #ffffff;
+        color: #0f172a;
+        border-color: #e2e8f0;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      }
+
+      /* Status Legend Pills */
+      .legend-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        border-radius: 30px;
+        font-size: 13px;
+        font-weight: 600;
+        border: 1px solid;
+        transition: all 0.2s ease;
+      }
+      .legend-available {
+        background: #ecfdf5;
+        border-color: #a7f3d0 !important;
+        color: #059669;
+      }
+      .legend-occupied {
+        background: #eff6ff;
+        border-color: #bfdbfe !important;
+        color: #2563eb;
+      }
+      .legend-cleaning {
+        background: #fffbeb;
+        border-color: #fde68a !important;
+        color: #d97706;
+      }
+      .legend-maintenance {
+        background: #fef2f2;
+        border-color: #fecaca !important;
+        color: #dc2626;
+      }
+
+      /* Room Matrix Tile Cards */
+      .room-matrix-tile {
+        background: #ffffff;
+        border-radius: 16px;
+        border: 1.5px solid #e2e8f0;
+        padding: 16px;
+        transition: all 0.25s ease;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 195px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+      }
+      .room-matrix-tile:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+      }
+
+      .tile-available {
+        border-color: #a7f3d0;
+        background: linear-gradient(180deg, #ffffff 60%, #f0fdf4 100%);
+      }
+      .tile-available:hover {
+        border-color: #10b981;
+      }
+
+      .tile-occupied {
+        border-color: #bfdbfe;
+        background: linear-gradient(180deg, #ffffff 60%, #eff6ff 100%);
+      }
+      .tile-occupied:hover {
+        border-color: #3b82f6;
+      }
+
+      .tile-cleaning {
+        border-color: #fde68a;
+        background: linear-gradient(180deg, #ffffff 60%, #fffbeb 100%);
+      }
+      .tile-cleaning:hover {
+        border-color: #d97706;
+      }
+
+      .tile-maintenance {
+        border-color: #fecaca;
+        background: linear-gradient(180deg, #ffffff 60%, #fef2f2 100%);
+      }
+      .tile-maintenance:hover {
+        border-color: #ef4444;
+      }
+
+      .floor-section-header {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 12px 18px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+      }
+
+      .guest-info-badge {
+        background: #ffffff;
+        border: 1px solid #dbeafe;
+        border-radius: 8px;
+        padding: 6px 10px;
+        font-size: 11.5px;
+        color: #1e40af;
+        margin-top: 6px;
+      }

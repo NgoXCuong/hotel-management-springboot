@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin-layout}">
+<head>
+    <title layout:fragment="title">Dashboard Tổng quan - Grand Hotel</title>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" th:href="@{/css/admin/dashboard.css}">
+    <style>
+        .period-btn {
+            border: none;
+            font-size: 11.5px;
+            font-weight: 600;
+            color: #64748b;
+            background: transparent;
+            transition: all 0.2s ease;
+        }
+        .period-btn:hover {
+            color: #0f172a;
+            background: #e2e8f0;
+        }
+        .period-btn.active {
+            background: #d97706 !important;
+            color: #ffffff !important;
+            box-shadow: 0 1px 4px rgba(217, 119, 6, 0.35);
+        }
+    </style>
+</head>
+<body>
+    <div layout:fragment="content">
+
+        <!-- 1. Header Toolbar -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
+            <div>
+                <h4 class="fw-bold text-dark mb-1" style="letter-spacing: -0.5px;">
+                    <i class="fa-solid fa-chart-pie text-warning me-2" style="color: #d97706 !important;"></i> Dashboard Tổng quan
+                </h4>
+                <p class="text-muted small mb-0">Theo dõi vận hành, hiệu suất phòng và chỉ số doanh thu thời gian thực</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a th:href="@{/admin/revenue}" class="btn btn-outline-secondary rounded-3 px-3 fw-semibold small">
+                    <i class="fa-solid fa-chart-line me-2"></i> Báo cáo Doanh thu chi tiết
+                </a>
+                <a th:href="@{/admin/rooms/matrix}" class="btn btn-dark rounded-3 px-3 fw-semibold small">
+                    <i class="fa-solid fa-table-cells me-2"></i> Sơ đồ phòng
+                </a>
+            </div>
+        </div>
+
+        <!-- 2. HÀNG 1: 4 THẺ KPI CHỈ SỐ NHANH -->
+        <div class="row g-3 mb-3">
+            
+            <!-- KPI 1: Doanh thu hôm nay -->
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="kpi-card-lux">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="kpi-icon-box" style="background: #fffbeb; color: #d97706;">
+                            <i class="fa-solid fa-sack-dollar"></i>
+                        </div>
+                        <span class="badge rounded-pill px-2.5 py-1 small border"
+                              th:classappend="${summary.growthPositive ? 'bg-success-subtle text-success border-success-subtle' : 'bg-danger-subtle text-danger border-danger-subtle'}">
+                            <i class="fa-solid me-1" th:classappend="${summary.growthPositive ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down'}"></i>
+                            <span th:text="${summary.revenueGrowthPercent} + '%'">0%</span>
+                        </span>
+                    </div>
+                    <div class="text-muted small fw-semibold text-uppercase mb-1" style="font-size: 11px;">DOANH THU HÔM NAY</div>
+                    <div class="gold-amount mb-1" th:text="${#numbers.formatDecimal(summary.todayRevenue, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                        0 đ
+                    </div>
+                    <div class="text-muted small" style="font-size: 11.5px;">
+                        So với hôm qua: <strong class="text-dark" th:text="${summary.growthPositive ? 'Tăng trưởng' : 'Giảm'}">Tăng trưởng</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KPI 2: Công suất phòng -->
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="kpi-card-lux">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="kpi-icon-box" style="background: #eff6ff; color: #2563eb;">
+                            <i class="fa-solid fa-bed"></i>
+                        </div>
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-2.5 py-1 small">
+                            Lấp đầy
+                        </span>
+                    </div>
+                    <div class="text-muted small fw-semibold text-uppercase mb-1" style="font-size: 11px;">CÔNG SUẤT PHÒNG</div>
+                    <div class="fw-bold fs-3 text-dark mb-1">
+                        <span th:text="${summary.occupancyRate}">0</span><span class="text-primary fs-5">%</span>
+                    </div>
+                    <div class="text-muted small" style="font-size: 11.5px;">
+                        Đang ở: <strong class="text-dark" th:text="${summary.occupiedRooms}">0</strong> / <span th:text="${summary.totalRooms}">0</span> phòng
+                    </div>
+                </div>
+            </div>
+
+            <!-- KPI 3: Khách nhận phòng hôm nay -->
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="kpi-card-lux">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="kpi-icon-box" style="background: #ecfdf5; color: #059669;">
+                            <i class="fa-solid fa-key"></i>
+                        </div>
+                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2.5 py-1 small">
+                            Check-in
+                        </span>
+                    </div>
+                    <div class="text-muted small fw-semibold text-uppercase mb-1" style="font-size: 11px;">KHÁCH ĐẾN HÔM NAY</div>
+                    <div class="fw-bold fs-3 text-success mb-1">
+                        <span th:text="${summary.todayCheckIns}">0</span> <span class="fs-6 text-muted fw-normal">lượt</span>
+                    </div>
+                    <div class="text-muted small" style="font-size: 11.5px;">
+                        Tiếp nhận trong ngày hôm nay
+                    </div>
+                </div>
+            </div>
+
+            <!-- KPI 4: Đơn chờ xác nhận -->
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="kpi-card-lux">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="kpi-icon-box" style="background: #fff7ed; color: #ea580c;">
+                            <i class="fa-solid fa-bell"></i>
+                        </div>
+                        <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill px-2.5 py-1 small" style="color: #ea580c !important;">
+                            Chờ xử lý
+                        </span>
+                    </div>
+                    <div class="text-muted small fw-semibold text-uppercase mb-1" style="font-size: 11px;">ĐƠN CHỜ XÁC NHẬN</div>
+                    <div class="fw-bold fs-3 text-dark mb-1" style="color: #ea580c !important;">
+                        <span th:text="${summary.pendingBookings}">0</span> <span class="fs-6 text-muted fw-normal">đơn</span>
+                    </div>
+                    <div class="text-muted small" style="font-size: 11.5px;">
+                        <a th:href="@{/admin/bookings(status='PENDING')}" class="text-decoration-none text-warning fw-semibold" style="color: #ea580c !important;">
+                            Xem & duyệt ngay &rarr;
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 3. HÀNG 2: BIỂU ĐỒ 7 NGÀY & HIỆN TRẠNG PHÒNG (Tỷ lệ 8:4) -->
+        <div class="row g-3 mb-3">
+            
+            <!-- Cột trái: Biểu đồ doanh thu với mốc thời gian tùy chọn (Area / Line Chart) -->
+            <div class="col-12 col-lg-8">
+                <div class="chart-card">
+                    <div class="card-header-clean flex-wrap gap-2">
+                        <div>
+                            <h6 class="fw-bold text-dark mb-0" id="revenueChartTitle">Biến động Doanh thu (7 ngày qua)</h6>
+                            <div class="text-muted small" style="font-size: 12px;">
+                                Đơn vị: VNĐ &bull; Tổng trong kỳ: <strong id="revenueChartTotal" class="text-warning" style="color: #b45309 !important;">-</strong>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-1.5 flex-wrap">
+                            <div class="btn-group btn-group-sm rounded-pill p-1 bg-light border shadow-none" role="group" id="periodButtonGroup">
+                                <button type="button" class="btn btn-sm rounded-pill px-2.5 py-1 period-btn active" data-period="7">7 ngày</button>
+                                <button type="button" class="btn btn-sm rounded-pill px-2.5 py-1 period-btn" data-period="14">14 ngày</button>
+                                <button type="button" class="btn btn-sm rounded-pill px-2.5 py-1 period-btn" data-period="30">30 ngày</button>
+                                <button type="button" class="btn btn-sm rounded-pill px-2.5 py-1 period-btn" data-period="this_month">Tháng này</button>
+                                <button type="button" class="btn btn-sm rounded-pill px-2.5 py-1 period-btn" data-period="last_month">Tháng trước</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="height: 320px; position: relative;">
+                        <canvas id="revenue7DaysChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cột phải: Biểu đồ Hiện trạng phòng (Doughnut Chart) -->
+            <div class="col-12 col-lg-4">
+                <div class="chart-card">
+                    <div class="card-header-clean">
+                        <div>
+                            <h6 class="fw-bold text-dark mb-0">Hiện trạng Phòng tức thời</h6>
+                            <div class="text-muted small" style="font-size: 12px;">Tổng: <strong th:text="${summary.totalRooms}">0</strong> phòng</div>
+                        </div>
+                        <a th:href="@{/admin/rooms/matrix}" class="text-decoration-none small text-warning fw-semibold" style="color: #d97706 !important;">
+                            Sơ đồ &rarr;
+                        </a>
+                    </div>
+                    <div style="height: 230px; position: relative;" class="d-flex align-items-center justify-content-center">
+                        <canvas id="roomStatusChart"></canvas>
+                    </div>
+                    <div class="row g-2 mt-2 pt-2 border-top text-center" style="font-size: 11.5px;">
+                        <div class="col-3">
+                            <div class="text-success fw-bold" th:text="${summary.availableRooms}">0</div>
+                            <div class="text-muted">Trống</div>
+                        </div>
+                        <div class="col-3">
+                            <div class="text-primary fw-bold" th:text="${summary.occupiedRooms}">0</div>
+                            <div class="text-muted">Đang ở</div>
+                        </div>
+                        <div class="col-3">
+                            <div class="text-warning fw-bold" th:text="${summary.cleaningRooms}">0</div>
+                            <div class="text-muted">Đang dọn</div>
+                        </div>
+                        <div class="col-3">
+                            <div class="text-danger fw-bold" th:text="${summary.maintenanceRooms}">0</div>
+                            <div class="text-muted">Bảo trì</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 4. HÀNG 3: 5 ĐƠN ĐẶT MỚI NHẤT & TOP HẠNG PHÒNG (Tỷ lệ 8:4) -->
+        <div class="row g-3">
+            
+            <!-- Cột trái: 5 Đơn đặt phòng mới nhất -->
+            <div class="col-12 col-lg-8">
+                <div class="chart-card p-0 overflow-hidden">
+                    <div class="p-3.5 px-4 border-bottom d-flex justify-content-between align-items-center bg-light">
+                        <h6 class="fw-bold text-dark mb-0">
+                            <i class="fa-solid fa-clock-rotate-left text-warning me-2" style="color: #d97706 !important;"></i> 5 Đơn đặt phòng mới nhất
+                        </h6>
+                        <a th:href="@{/admin/bookings}" class="text-decoration-none small text-warning fw-semibold" style="color: #d97706 !important;">
+                            Xem tất cả &rarr;
+                        </a>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0" style="font-size: 13px;">
+                            <thead class="table-light small text-uppercase text-muted" style="font-size: 11px;">
+                                <tr>
+                                    <th class="ps-4 py-2.5">Mã Đơn</th>
+                                    <th class="py-2.5">Khách hàng</th>
+                                    <th class="py-2.5">Ngày nhận & trả</th>
+                                    <th class="py-2.5 text-end">Tổng tiền</th>
+                                    <th class="py-2.5 text-center">Trạng thái</th>
+                                    <th class="pe-4 py-2.5 text-center">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="b : ${summary.recentBookings}">
+                                    <td class="ps-4 fw-bold text-dark" style="font-family: monospace;" th:text="${b.bookingCode}">BK-1001</td>
+                                    <td>
+                                        <div class="fw-semibold text-dark" th:text="${b.customer != null ? b.customer.fullName : 'Khách vãng lai'}">Nguyễn Văn An</div>
+                                        <div class="text-muted small" style="font-size: 11px;" th:text="${b.customer != null ? b.customer.phone : ''}">0912345678</div>
+                                    </td>
+                                    <td class="small text-muted">
+                                        <span th:text="${#temporals.format(b.checkIn, 'dd/MM')}">23/08</span> &rarr; <span th:text="${#temporals.format(b.checkOut, 'dd/MM')}">25/08</span>
+                                    </td>
+                                    <td class="text-end fw-bold" style="color: #b45309;" th:text="${#numbers.formatDecimal(b.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                        2,400,000 đ
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge rounded-pill px-2.5 py-1 border" th:classappend="${b.status.badgeClass}" style="font-size: 11px;" th:text="${b.status.displayName}">Đang ở</span>
+                                    </td>
+                                    <td class="pe-4 text-center">
+                                        <a th:href="@{/admin/bookings/{id}(id=${b.id})}" class="btn btn-sm btn-light border text-primary" title="Xem chi tiết">
+                                            <i class="fa-solid fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(summary.recentBookings)}">
+                                    <td colspan="6" class="text-center text-muted py-4">Chưa có đơn đặt phòng nào.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cột phải: Top 5 Loại phòng doanh thu cao nhất -->
+            <div class="col-12 col-lg-4">
+                <div class="chart-card">
+                    <div class="card-header-clean">
+                        <h6 class="fw-bold text-dark mb-0">
+                            <i class="fa-solid fa-ranking-star text-warning me-2" style="color: #d97706 !important;"></i> Top Hạng phòng Doanh thu
+                        </h6>
+                    </div>
+                    <div class="d-flex flex-column gap-3">
+                        <div th:each="rt : ${summary.topRoomTypes}">
+                            <div class="d-flex justify-content-between align-items-center mb-1 small">
+                                <span class="fw-semibold text-dark text-truncate" style="max-width: 170px;" th:text="${rt.roomTypeName}">Deluxe King</span>
+                                <strong style="color: #b45309;" th:text="${#numbers.formatDecimal(rt.totalRevenue, 0, 'COMMA', 0, 'POINT')} + ' đ'">2,400,000 đ</strong>
+                            </div>
+                            <div class="progress" style="height: 6px; border-radius: 4px; background-color: #f1f5f9;">
+                                <div class="progress-bar" role="progressbar" 
+                                     style="background: linear-gradient(90deg, #f59e0b, #d97706);" 
+                                     th:style="'width: ' + ${rt.percentage} + '%; background: linear-gradient(90deg, #f59e0b, #d97706);'"
+                                     th:aria-valuenow="${rt.percentage}" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <div class="d-flex justify-content-between text-muted mt-1" style="font-size: 10.5px;">
+                                <span><span th:text="${rt.totalBookings}">0</span> lượt đặt</span>
+                                <span><span th:text="${rt.percentage}">0</span>% doanh thu</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Scripts vẽ biểu đồ Chart.js -->
+    <th:block layout:fragment="script">
+        <script th:inline="javascript">
+            document.addEventListener("DOMContentLoaded", function () {
+                // 1. Biểu đồ biến động doanh thu 7 ngày (Area Line Chart)
+                const revenueLabels = /*[[${summary.revenueChartLabels}]]*/ [];
+                const revenueData = /*[[${summary.revenueChartData}]]*/ [];
+
+                const ctxRevenue = document.getElementById('revenue7DaysChart').getContext('2d');
+                
+                // Gradient Fill Gold
+                const gradientGold = ctxRevenue.createLinearGradient(0, 0, 0, 300);
+                gradientGold.addColorStop(0, 'rgba(217, 119, 6, 0.25)');
+                gradientGold.addColorStop(1, 'rgba(217, 119, 6, 0.00)');
+
+                const revenueChart = new Chart(ctxRevenue, {
+                    type: 'line',
+                    data: {
+                        labels: revenueLabels,
+                        datasets: [{
+                            label: 'Doanh thu (VNĐ)',
+                            data: revenueData,
+                            borderColor: '#d97706',
+                            borderWidth: 2.5,
+                            backgroundColor: gradientGold,
+                            fill: true,
+                            tension: 0.35,
+                            pointBackgroundColor: '#ffffff',
+                            pointBorderColor: '#d97706',
+                            pointBorderWidth: 2,
+                            pointRadius: 4,
+                            pointHoverRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        let value = context.parsed.y || 0;
+                                        return ' ' + value.toLocaleString('vi-VN') + ' VNĐ';
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: { display: false }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: '#f1f5f9' },
+                                ticks: {
+                                    callback: function (value) {
+                                        if (value >= 1000000) return (value / 1000000) + 'M';
+                                        if (value >= 1000) return (value / 1000) + 'k';
+                                        return value;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // Khởi tạo tổng doanh thu ban đầu
+                function updateRevenueTotal(dataArr) {
+                    const total = (dataArr || []).reduce((sum, val) => sum + Number(val || 0), 0);
+                    const totalElem = document.getElementById('revenueChartTotal');
+                    if (totalElem) {
+                        totalElem.innerText = total.toLocaleString('vi-VN') + ' đ';
+                    }
+                }
+                updateRevenueTotal(revenueData);
+
+                // Lắng nghe sự kiện chuyển đổi mốc thời gian (7 ngày, 14 ngày, 30 ngày, tháng này, tháng trước)
+                const periodBtns = document.querySelectorAll('.period-btn');
+                periodBtns.forEach(btn => {
+                    btn.addEventListener('click', function () {
+                        const period = this.getAttribute('data-period');
+                        periodBtns.forEach(b => b.classList.remove('active'));
+                        this.classList.add('active');
+
+                        const titleElem = document.getElementById('revenueChartTitle');
+                        const totalElem = document.getElementById('revenueChartTotal');
+                        if (totalElem) totalElem.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+
+                        fetch('/admin/api/dashboard/revenue-chart?period=' + encodeURIComponent(period))
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data && data.labels && data.data) {
+                                    revenueChart.data.labels = data.labels;
+                                    revenueChart.data.datasets[0].data = data.data;
+                                    revenueChart.update();
+
+                                    if (titleElem && data.periodLabel) {
+                                        titleElem.innerText = 'Biến động Doanh thu (' + data.periodLabel + ')';
+                                    }
+                                    if (totalElem && data.totalRevenue !== undefined) {
+                                        totalElem.innerText = Number(data.totalRevenue).toLocaleString('vi-VN') + ' đ';
+                                    }
+                                }
+                            })
+                            .catch(err => {
+                                console.error('Lỗi khi tải dữ liệu doanh thu:', err);
+                                updateRevenueTotal(revenueChart.data.datasets[0].data);
+                            });
+                    });
+                });
+
+                // 2. Biểu đồ Hiện trạng phòng (Doughnut Chart)
+                const available = /*[[${summary.availableRooms}]]*/ 0;
+                const occupied = /*[[${summary.occupiedRooms}]]*/ 0;
+                const cleaning = /*[[${summary.cleaningRooms}]]*/ 0;
+                const maintenance = /*[[${summary.maintenanceRooms}]]*/ 0;
+
+                const ctxRoom = document.getElementById('roomStatusChart').getContext('2d');
+                new Chart(ctxRoom, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Trống', 'Đang ở', 'Đang dọn', 'Bảo trì'],
+                        datasets: [{
+                            data: [available, occupied, cleaning, maintenance],
+                            backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#ef4444'],
+                            borderWidth: 2,
+                            borderColor: '#ffffff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '72%',
+                        plugins: {
+                            legend: { display: false }
+                        }
+                    }
+                });
+            });
+        </script>
+    </th:block>
+</body>
+</html>

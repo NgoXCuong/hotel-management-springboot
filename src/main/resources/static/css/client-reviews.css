@@ -1,0 +1,80 @@
+/* ==========================================================================
+   GRAND HOTEL - REVIEWS STYLES
+   Quiet Luxury & Warm Editorial Theme (Aman & Six Senses Style)
+   ========================================================================== */
+
+.page-header-banner {
+    position: relative;
+    background: linear-gradient(180deg, rgba(23, 21, 19, 0.6) 0%, rgba(23, 21, 19, 0.85) 100%),
+                url('https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=2000&q=85') center center / cover no-repeat;
+    padding: 70px 0 90px;
+    color: #FAF8F5;
+    text-align: center;
+}
+
+.rating-overview-card {
+    background: #FFFFFF;
+    border: 1px solid var(--lux-border);
+    border-radius: 18px;
+    padding: 28px;
+    position: sticky;
+    top: 90px;
+    box-shadow: var(--lux-shadow-xs);
+}
+
+.rating-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+}
+
+.rating-bar-row span:first-child {
+    width: 40px;
+    flex-shrink: 0;
+}
+
+.rating-bar-row span:last-child {
+    width: 38px;
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.review-item {
+    background: #FFFFFF;
+    border: 1px solid var(--lux-border);
+    border-radius: 16px;
+    padding: 24px;
+    transition: var(--lux-transition);
+    box-shadow: var(--lux-shadow-xs);
+}
+
+.review-item:hover {
+    border-color: var(--lux-gold);
+    box-shadow: var(--lux-shadow-sm);
+}
+
+.reviews-pagination .page-item .page-link {
+    color: var(--lux-dark);
+    font-weight: 600;
+    font-size: 13.5px;
+    padding: 8px 14px;
+    border: 1px solid var(--lux-border);
+    border-radius: 8px !important;
+    margin: 0 3px;
+    transition: var(--lux-transition);
+    background: #FFFFFF;
+}
+
+.reviews-pagination .page-item .page-link:hover {
+    color: var(--lux-gold-dark);
+    background-color: var(--lux-gold-light);
+    border-color: var(--lux-gold);
+}
+
+.reviews-pagination .page-item.active .page-link {
+    background: linear-gradient(135deg, #C5A880 0%, #A68760 100%);
+    color: #FFFFFF;
+    border-color: transparent;
+    box-shadow: 0 4px 14px rgba(166, 135, 96, 0.3);
+}

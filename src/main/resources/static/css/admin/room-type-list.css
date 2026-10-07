@@ -1,0 +1,85 @@
+.gold-btn {
+            background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+            color: #ffffff !important;
+            border: none;
+            box-shadow: 0 4px 12px rgba(217, 119, 6, 0.25);
+            transition: all 0.25s ease;
+        }
+        .gold-btn:hover {
+            background: linear-gradient(135deg, #b45309 0%, #92400e 100%);
+            box-shadow: 0 6px 16px rgba(217, 119, 6, 0.35);
+            transform: translateY(-1px);
+        }
+        .view-tab-btn {
+            padding: 9px 20px;
+            font-weight: 600;
+            font-size: 13.5px;
+            border-radius: 10px;
+            color: #64748b;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+            background: transparent;
+        }
+        .view-tab-btn.active {
+            background: #ffffff;
+            color: #0f172a;
+            border-color: #e2e8f0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .amenity-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 2.5px 7px;
+            border-radius: 6px;
+            font-size: 11px;
+            color: #475569;
+            white-space: nowrap;
+            margin: 1.5px;
+        }
+        .amenity-more-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            background: #fffbeb;
+            color: #b45309;
+            border: 1px solid #fde68a;
+            padding: 2.5px 7.5px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+            margin: 1.5px;
+            transition: all 0.2s ease;
+        }
+        .amenity-more-chip:hover {
+            background: #fef3c7;
+            border-color: #d97706;
+            color: #92400e;
+            transform: translateY(-1px);
+        }
+        .gallery-upload-box {
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+            background: #f8fafc;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .gallery-upload-box:hover {
+            border-color: #d97706;
+            background: #fffbeb;
+        }
+        .existing-image-item {
+            width: 100px;
+            height: 75px;
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }

@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin-layout}">
+<head>
+    <title layout:fragment="title">Báo cáo Doanh thu & Đối soát - Grand Hotel</title>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" th:href="@{/css/admin/revenue-index.css}">
+</head>
+<body>
+    <div layout:fragment="content">
+
+        <!-- 1. Header Toolbar & Xuất báo cáo -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+            <div>
+                <h4 class="fw-bold text-dark mb-1" style="letter-spacing: -0.5px;">
+                    <i class="fa-solid fa-chart-line text-warning me-2" style="color: #d97706 !important;"></i> Báo cáo Doanh thu & Đối soát
+                </h4>
+                <p class="text-muted small mb-0">Phân tích cơ cấu nguồn thu, biến động theo thời gian và xuất báo cáo kế toán</p>
+            </div>
+            <div class="d-flex gap-2">
+                <!-- Nút Xuất Excel / CSV -->
+                <a th:href="@{/admin/revenue/export-excel(period=${period}, fromDate=${fromDate}, toDate=${toDate}, roomTypeId=${roomTypeId}, source=${source})}" 
+                   class="btn btn-success px-3.5 py-2 rounded-3 fw-semibold shadow-sm" style="background-color: #10b981; border-color: #10b981;">
+                    <i class="fa-solid fa-file-excel me-2"></i> Xuất file Excel / CSV
+                </a>
+            </div>
+        </div>
+
+        <!-- 2. Thanh Bộ lọc thời gian & Điều kiện nâng cao -->
+        <div class="card border-0 shadow-sm rounded-4 p-3 mb-4" style="background: #ffffff;">
+            <form th:action="@{/admin/revenue}" method="get" class="row g-2 align-items-center">
+                
+                <!-- Chu kỳ thời gian -->
+                <div class="col-6 col-md-2">
+                    <select name="period" class="form-select form-select-sm bg-light" id="periodSelect" onchange="toggleCustomDates()">
+                        <option value="today" th:selected="${period == 'today'}">Hôm nay</option>
+                        <option value="week" th:selected="${period == 'week'}">Tuần này</option>
+                        <option value="month" th:selected="${period == 'month'}">Tháng này</option>
+                        <option value="year" th:selected="${period == 'year'}">Năm nay</option>
+                        <option value="custom" th:selected="${period == 'custom'}">Tùy chọn ngày</option>
+                    </select>
+                </div>
+
+                <!-- Từ ngày -->
+                <div class="col-6 col-md-2" id="fromDateCol" th:style="${period == 'custom' ? '' : 'display:none;'}">
+                    <input type="date" name="fromDate" class="form-control form-control-sm bg-light" th:value="${fromDate}" placeholder="Từ ngày">
+                </div>
+
+                <!-- Đến ngày -->
+                <div class="col-6 col-md-2" id="toDateCol" th:style="${period == 'custom' ? '' : 'display:none;'}">
+                    <input type="date" name="toDate" class="form-control form-control-sm bg-light" th:value="${toDate}" placeholder="Đến ngày">
+                </div>
+
+                <!-- Hạng phòng -->
+                <div class="col-6 col-md-3">
+                    <select name="roomTypeId" class="form-select form-select-sm bg-light">
+                        <option value="">-- Tất cả hạng phòng --</option>
+                        <option th:each="rt : ${roomTypes}" th:value="${rt.id}" th:text="${rt.name}" th:selected="${rt.id == roomTypeId}"></option>
+                    </select>
+                </div>
+
+                <!-- Nguồn đặt -->
+                <div class="col-6 col-md-2">
+                    <select name="source" class="form-select form-select-sm bg-light">
+                        <option value="">-- Tất cả nguồn --</option>
+                        <option th:each="s : ${sources}" th:value="${s.name()}" th:text="${s.displayName}" th:selected="${s == source}"></option>
+                    </select>
+                </div>
+
+                <!-- Nút thao tác -->
+                <div class="col-12 col-md-1 d-flex gap-1">
+                    <button type="submit" class="btn btn-sm btn-dark rounded-2 w-100 fw-semibold">
+                        <i class="fa-solid fa-filter me-2"></i> Lọc
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- 3. Khối Thống kê Tổng hợp (4 Revenue Metric Cards) -->
+        <div class="row g-3 mb-4">
+            
+            <!-- Metric 1: Tổng doanh thu thực nhận -->
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="metric-card-lux">
+                    <div class="text-muted small fw-semibold text-uppercase mb-2" style="font-size: 11px;">TỔNG DOANH THU THỰC NHẬN</div>
+                    <div class="metric-amount mb-2" style="color: #b45309;" 
+                         th:text="${#numbers.formatDecimal(report.totalRevenue, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                        0 đ
+                    </div>
+                    <div class="text-muted small" style="font-size: 11.5px;">
+                        Khoảng thời gian: <strong class="text-dark" th:text="${#temporals.format(report.fromDate, 'dd/MM')} + ' - ' + ${#temporals.format(report.toDate, 'dd/MM/yyyy')}">23/08/2026</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Metric 2: Doanh thu tiền phòng -->
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="metric-card-lux">
+                    <div class="text-muted small fw-semibold text-uppercase mb-2" style="font-size: 11px;">DOANH THU TIỀN PHÒNG</div>
+                    <div class="metric-amount text-primary mb-2" 
+                         th:text="${#numbers.formatDecimal(report.totalRoomRevenue, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                        0 đ
+                    </div>
+                    <div class="text-muted small" style="font-size: 11.5px;">
+                        Thuần tiền lưu trú các đêm phòng
+                    </div>
+                </div>
+            </div>
+
+            <!-- Metric 3: Doanh thu dịch vụ -->
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="metric-card-lux">
+                    <div class="text-muted small fw-semibold text-uppercase mb-2" style="font-size: 11px;">DOANH THU DỊCH VỤ PHÁT SINH</div>
+                    <div class="metric-amount text-success mb-2" 
+                         th:text="${#numbers.formatDecimal(report.totalServiceRevenue, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                        0 đ
+                    </div>
+                    <div class="text-muted small" style="font-size: 11.5px;">
+                        Ăn uống, giặt ủi, minibar, tour...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Metric 4: Chiết khấu voucher -->
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="metric-card-lux">
+                    <div class="text-muted small fw-semibold text-uppercase mb-2" style="font-size: 11px;">CHIẾT KHẤU VOUCHER / GIẢM GIÁ</div>
+                    <div class="metric-amount text-danger mb-2" 
+                         th:text="'-' + ${#numbers.formatDecimal(report.totalDiscount, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                        -0 đ
+                    </div>
+                    <div class="text-muted small" style="font-size: 11.5px;">
+                        Thuế VAT: <strong class="text-dark" th:text="${#numbers.formatDecimal(report.totalTax, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</strong>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 4. Biểu đồ chuyên sâu (Tỷ lệ 8:4) -->
+        <div class="row g-3 mb-4">
+            
+            <!-- Cột trái: Biểu đồ cột kép so sánh 12 tháng (Tiền phòng vs Tiền dịch vụ) -->
+            <div class="col-12 col-lg-8">
+                <div class="chart-box-lux">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <h6 class="fw-bold text-dark mb-0">Cơ cấu Doanh thu theo 12 Tháng</h6>
+                            <div class="text-muted small" style="font-size: 12px;">So sánh Tiền phòng vs Tiền dịch vụ phát sinh (VNĐ)</div>
+                        </div>
+                        <span class="badge bg-light text-dark border px-3 py-1.5 rounded-pill small">Năm <span th:text="${#temporals.format(report.toDate, 'yyyy')}">2026</span></span>
+                    </div>
+                    <div style="height: 300px; position: relative;">
+                        <canvas id="monthlyDoubleBarChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cột phải: Biểu đồ tròn cơ cấu doanh thu theo Loại phòng -->
+            <div class="col-12 col-lg-4">
+                <div class="chart-box-lux">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <h6 class="fw-bold text-dark mb-0">Tỷ trọng theo Loại phòng</h6>
+                            <div class="text-muted small" style="font-size: 12px;">Đóng góp doanh thu từng hạng</div>
+                        </div>
+                    </div>
+                    <div style="height: 250px; position: relative;" class="d-flex align-items-center justify-content-center">
+                        <canvas id="roomTypeDoughnutChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 5. Bảng đối soát chi tiết từng Hóa đơn trong kỳ -->
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden" style="background: #ffffff;">
+            <div class="p-3.5 px-4 border-bottom bg-light d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="fw-bold text-dark mb-0">
+                        <i class="fa-solid fa-receipt text-warning me-2" style="color: #d97706 !important;"></i> Bảng đối soát chi tiết Chứng từ Hóa đơn
+                    </h6>
+                    <div class="text-muted small" style="font-size: 11.5px;">Tổng cộng <strong th:text="${#lists.size(report.invoices)}">0</strong> hóa đơn trong kỳ lọc</div>
+                </div>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0" style="font-size: 13.5px;">
+                    <thead style="background-color: #f8fafc; border-bottom: 1px solid #e2e8f0; font-size: 12px; color: #475569; text-transform: uppercase; letter-spacing: 0.5px;">
+                        <tr>
+                            <th class="ps-4 py-3">Mã Hóa đơn</th>
+                            <th class="py-3">Mã Booking & Khách hàng</th>
+                            <th class="py-3">Ngày phát hành</th>
+                            <th class="py-3 text-end">Tiền phòng</th>
+                            <th class="py-3 text-end">Dịch vụ</th>
+                            <th class="py-3 text-end">Chiết khấu</th>
+                            <th class="py-3 text-end">Tổng thực thu</th>
+                            <th class="py-3 text-center">Trạng thái</th>
+                            <th class="pe-4 py-3 text-center">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="inv : ${report.invoices}">
+                            <!-- Mã HĐ -->
+                            <td class="ps-4">
+                                <span class="invoice-code-badge" th:text="${inv.invoiceCode}">INV-1001</span>
+                            </td>
+
+                            <!-- Booking & Khách -->
+                            <td>
+                                <div class="fw-semibold text-dark">
+                                    <a th:href="@{/admin/bookings/{id}(id=${inv.booking.id})}" class="text-decoration-none text-dark" style="font-family: monospace;" th:text="${inv.booking.bookingCode}">BK-1001</a>
+                                </div>
+                                <div class="text-muted small" th:text="${inv.booking.customer != null ? inv.booking.customer.fullName : 'Khách vãng lai'}">Nguyễn Văn An</div>
+                            </td>
+
+                            <!-- Ngày phát hành -->
+                            <td class="small text-muted" th:text="${#temporals.format(inv.issuedAt != null ? inv.issuedAt : inv.createdAt, 'dd/MM/yyyy HH:mm')}">
+                                23/08/2026 10:00
+                            </td>
+
+                            <!-- Tiền phòng -->
+                            <td class="text-end text-dark" th:text="${#numbers.formatDecimal(inv.booking.roomTotalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                2,400,000 đ
+                            </td>
+
+                            <!-- Tiền dịch vụ -->
+                            <td class="text-end text-dark" th:text="${#numbers.formatDecimal(inv.booking.serviceTotalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                40,000 đ
+                            </td>
+
+                            <!-- Chiết khấu -->
+                            <td class="text-end text-danger" th:text="'-' + ${#numbers.formatDecimal(inv.discount, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                -0 đ
+                            </td>
+
+                            <!-- Tổng thực thu -->
+                            <td class="text-end fw-bold" style="color: #b45309;" th:text="${#numbers.formatDecimal(inv.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                2,635,200 đ
+                            </td>
+
+                            <!-- Trạng thái -->
+                            <td class="text-center">
+                                <span class="badge rounded-pill px-2.5 py-1 border" th:classappend="${inv.status.badgeClass}" style="font-size: 11px;" th:text="${inv.status.displayName}">Đã phát hành</span>
+                            </td>
+
+                            <!-- Thao tác -->
+                            <td class="pe-4 text-center">
+                                <a th:href="@{/admin/invoices/view/{id}(id=${inv.id})}" class="btn btn-sm btn-light border text-primary" title="Xem chi tiết">
+                                    <i class="fa-solid fa-eye"></i>
+                                </a>
+                                <a th:href="@{/admin/invoices/print/{id}(id=${inv.id})}" target="_blank" class="btn btn-sm btn-light border text-dark" title="In phiếu">
+                                    <i class="fa-solid fa-print"></i>
+                                </a>
+                            </td>
+                        </tr>
+
+                        <!-- Empty State -->
+                        <tr th:if="${#lists.isEmpty(report.invoices)}">
+                            <td colspan="9" class="text-center text-muted py-5">
+                                <i class="fa-solid fa-receipt text-muted mb-2" style="font-size: 38px; opacity: 0.3;"></i>
+                                <div>Không có hóa đơn phát sinh nào trong khoảng thời gian đã chọn.</div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Footer -->
+            <div class="px-4 py-3 bg-light border-top d-flex justify-content-between align-items-center" style="font-size: 13px; color: #64748b;">
+                <div>
+                    Tổng doanh thu đối soát: <strong class="text-dark" th:text="${#numbers.formatDecimal(report.totalRevenue, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">0 VNĐ</strong>
+                </div>
+                <div class="text-muted">
+                    Báo cáo Đối soát Doanh thu Grand Hotel
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Scripts vẽ biểu đồ Chart.js -->
+    <th:block layout:fragment="script">
+        <script th:inline="javascript">
+            function toggleCustomDates() {
+                const val = document.getElementById('periodSelect').value;
+                const fromCol = document.getElementById('fromDateCol');
+                const toCol = document.getElementById('toDateCol');
+                if (val === 'custom') {
+                    fromCol.style.display = 'block';
+                    toCol.style.display = 'block';
+                } else {
+                    fromCol.style.display = 'none';
+                    toCol.style.display = 'none';
+                }
+            }
+
+            document.addEventListener("DOMContentLoaded", function () {
+                // 1. Biểu đồ cột kép so sánh 12 tháng (Tiền phòng vs Tiền dịch vụ)
+                const monthlyLabels = /*[[${report.monthlyLabels}]]*/ [];
+                const monthlyRoomRev = /*[[${report.monthlyRoomRevenue}]]*/ [];
+                const monthlyServiceRev = /*[[${report.monthlyServiceRevenue}]]*/ [];
+
+                const ctxMonthly = document.getElementById('monthlyDoubleBarChart').getContext('2d');
+                new Chart(ctxMonthly, {
+                    type: 'bar',
+                    data: {
+                        labels: monthlyLabels,
+                        datasets: [
+                            {
+                                label: 'Tiền phòng (VNĐ)',
+                                data: monthlyRoomRev,
+                                backgroundColor: '#d97706',
+                                borderRadius: 6
+                            },
+                            {
+                                label: 'Tiền dịch vụ (VNĐ)',
+                                data: monthlyServiceRev,
+                                backgroundColor: '#10b981',
+                                borderRadius: 6
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: { boxWidth: 12, font: { size: 12 } }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        let value = context.parsed.y || 0;
+                                        return ' ' + context.dataset.label + ': ' + value.toLocaleString('vi-VN') + ' đ';
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: { grid: { display: false } },
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: '#f1f5f9' },
+                                ticks: {
+                                    callback: function (value) {
+                                        if (value >= 1000000) return (value / 1000000) + 'M';
+                                        if (value >= 1000) return (value / 1000) + 'k';
+                                        return value;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // 2. Biểu đồ tròn cơ cấu Loại phòng
+                const roomTypeLabels = /*[[${report.roomTypeLabels}]]*/ [];
+                const roomTypeValues = /*[[${report.roomTypeValues}]]*/ [];
+
+                const ctxRoomType = document.getElementById('roomTypeDoughnutChart').getContext('2d');
+                new Chart(ctxRoomType, {
+                    type: 'doughnut',
+                    data: {
+                        labels: roomTypeLabels,
+                        datasets: [{
+                            data: roomTypeValues,
+                            backgroundColor: ['#d97706', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'],
+                            borderWidth: 2,
+                            borderColor: '#ffffff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '65%',
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { boxWidth: 10, font: { size: 11 } }
+                            }
+                        }
+                    }
+                });
+            });
+        </script>
+    </th:block>
+</body>
+</html>

@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html ang="vi" xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layout/admin-layout}">
+  <head>
+    <title layout:fragment="title">Quản lý & Sơ đồ phòng - Grand Hotel</title>
+    <link rel="stylesheet" th:href="@{/css/admin/room-list.css}">
+  </head>
+  <body>
+    <div layout:fragment="content">
+      <!-- 1. Header Toolbar -->
+      <div
+        class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4"
+      >
+        <div>
+          <h4 class="fw-bold text-dark mb-1" style="letter-spacing: -0.5px">
+            <i
+              class="fa-solid fa-door-open text-warning me-2"
+              style="color: #d97706 !important"
+            ></i>
+            Quản lý Phòng
+          </h4>
+          <p class="text-muted small mb-0">
+            Theo dõi sơ đồ trạng thái phòng theo tầng và quản trị danh mục phòng
+          </p>
+        </div>
+        <div class="d-flex gap-2">
+          <button
+            type="button"
+            class="btn gold-btn px-3.5 py-2 rounded-3 fw-semibold"
+            onclick="openCreateRoomModal()"
+          >
+            <i class="fa-solid fa-plus me-2"></i> Thêm phòng mới
+          </button>
+        </div>
+      </div>
+
+      <!-- 2. Thống kê nhanh trạng thái phòng -->
+      <div
+        class="card border-0 shadow-sm rounded-4 p-3 mb-4"
+        style="background: #ffffff"
+      >
+        <div
+          class="d-flex flex-wrap align-items-center justify-content-between gap-3"
+        >
+          <div class="d-flex flex-wrap gap-2">
+            <div class="legend-pill legend-available">
+              <i class="fa-solid fa-door-open"></i>
+              <span
+                >Sẵn sàng (<strong th:text="${stats.availableRooms}">0</strong
+                >)</span
+              >
+            </div>
+            <div class="legend-pill legend-occupied">
+              <i class="fa-solid fa-user-check"></i>
+              <span
+                >Có khách (<strong th:text="${stats.occupiedRooms}">0</strong
+                >)</span
+              >
+            </div>
+            <div class="legend-pill legend-cleaning">
+              <i class="fa-solid fa-broom"></i>
+              <span
+                >Dọn phòng (<strong th:text="${stats.cleaningRooms}">0</strong
+                >)</span
+              >
+            </div>
+            <div class="legend-pill legend-maintenance">
+              <i class="fa-solid fa-screwdriver-wrench"></i>
+              <span
+                >Bảo trì (<strong th:text="${stats.maintenanceRooms}">0</strong
+                >)</span
+              >
+            </div>
+          </div>
+
+          <div class="d-flex align-items-center gap-2">
+            <div class="text-end">
+              <div class="text-muted small" style="font-size: 11px">
+                CÔNG SUẤT PHÒNG
+              </div>
+              <div
+                class="fw-bold fs-6 text-dark"
+                th:text="${stats.occupancyRate} + '%'"
+              >
+                0%
+              </div>
+            </div>
+            <div
+              class="progress"
+              style="width: 80px; height: 8px; border-radius: 10px"
+            >
+              <div
+                class="progress-bar bg-primary"
+                role="progressbar"
+                th:style="'width: ' + ${stats.occupancyRate} + '%;'"
+                th:aria-valuenow="${stats.occupancyRate}"
+                aria-valuemin="0"
+                aria-valuemax="100"
+              ></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Thanh điều hướng Tab -->
+      <div
+        class="card border-0 shadow-sm rounded-4 p-3 mb-4"
+        style="background: #ffffff"
+      >
+        <div
+          class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3"
+        >
+          <div
+            class="bg-light p-1 rounded-3 d-inline-flex border"
+            id="viewTabs"
+            role="tablist"
+          >
+            <button
+              class="view-tab-btn"
+              th:classappend="${currentView == 'grid' ? 'active' : ''}"
+              id="grid-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#grid-pane"
+              type="button"
+              role="tab"
+              onclick="switchView('grid')"
+            >
+              <i
+                class="fa-solid fa-table-cells me-2 text-warning"
+                style="color: #d97706 !important"
+              ></i>
+              Sơ đồ trực quan (Floor Plan)
+            </button>
+            <button
+              class="view-tab-btn"
+              th:classappend="${currentView == 'list' ? 'active' : ''}"
+              id="list-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#list-pane"
+              type="button"
+              role="tab"
+              onclick="switchView('list')"
+            >
+              <i class="fa-solid fa-list-check me-2 text-primary"></i> Bảng danh
+              sách quản trị (List CRUD)
+            </button>
+          </div>
+
+          <form
+            th:action="@{/admin/rooms}"
+            method="get"
+            class="d-flex flex-wrap gap-2 align-items-center"
+          >
+            <input
+              type="hidden"
+              name="view"
+              th:value="${currentView}"
+              id="hiddenViewInput"
+            />
+
+            <div class="input-group" style="max-width: 190px">
+              <span class="input-group-text bg-light border-end-0 text-muted"
+                ><i class="fa-solid fa-magnifying-glass"></i
+              ></span>
+              <input
+                type="text"
+                name="roomNumber"
+                class="form-control bg-light border-start-0 ps-0 form-control-sm"
+                placeholder="Số phòng..."
+                th:value="${paramRoomNumber}"
+              />
+            </div>
+
+            <select
+              name="floor"
+              class="form-select form-select-sm bg-light"
+              style="width: auto"
+            >
+              <option value="">Tất cả các tầng</option>
+              <option
+                th:each="f : ${floors}"
+                th:value="${f}"
+                th:text="'Tầng ' + ${f}"
+                th:selected="${f == paramFloor}"
+              ></option>
+            </select>
+
+            <select
+              name="roomTypeId"
+              class="form-select form-select-sm bg-light"
+              style="width: auto"
+            >
+              <option value="">Tất cả loại phòng</option>
+              <option
+                th:each="rt : ${roomTypes}"
+                th:value="${rt.id}"
+                th:text="${rt.name}"
+                th:selected="${rt.id == paramRoomTypeId}"
+              ></option>
+            </select>
+
+            <select
+              name="status"
+              class="form-select form-select-sm bg-light"
+              style="width: auto"
+            >
+              <option value="">Tất cả trạng thái</option>
+              <option
+                th:each="st : ${statuses}"
+                th:value="${st.name()}"
+                th:text="${st.displayName}"
+                th:selected="${st.name() == paramStatus}"
+              ></option>
+            </select>
+
+            <button
+              type="submit"
+              class="btn btn-sm btn-dark rounded-2 px-3 fw-semibold"
+            >
+              <i class="fa-solid fa-filter me-2"></i> Lọc
+            </button>
+            <a
+              th:href="@{/admin/rooms(view=${currentView})}"
+              class="btn btn-sm btn-outline-secondary rounded-2"
+              title="Xóa bộ lọc"
+            >
+              <i class="fa-solid fa-rotate-left"></i>
+            </a>
+          </form>
+        </div>
+      </div>
+
+      <!-- 4. Nội dung các Tab -->
+      <div class="tab-content" id="roomTabContent">
+        <!-- =================== TAB 1: SƠ ĐỒ TRỰC QUAN FLOOR PLAN =================== -->
+        <div
+          class="tab-pane fade"
+          th:classappend="${currentView == 'grid' ? 'show active' : ''}"
+          id="grid-pane"
+          role="tabpanel"
+        >
+          <div th:each="entry : ${matrixByFloor}" class="mb-5">
+            <!-- Floor Header -->
+            <div class="floor-section-header">
+              <div class="d-flex align-items-center gap-2">
+                <div
+                  class="bg-warning text-white rounded-3 d-flex align-items-center justify-content-center fw-bold shadow-sm"
+                  style="
+                    width: 36px;
+                    height: 36px;
+                    font-size: 15px;
+                    background: #d97706 !important;
+                  "
+                >
+                  <span th:text="${entry.key}">1</span>
+                </div>
+                <div>
+                  <h6
+                    class="fw-bold text-dark mb-0"
+                    th:text="'KHU VỰC TẦNG ' + ${entry.key}"
+                  >
+                    KHU VỰC TẦNG 1
+                  </h6>
+                  <span
+                    class="text-muted small"
+                    th:text="${#lists.size(entry.value)} + ' phòng tiêu chuẩn'"
+                    >4 phòng</span
+                  >
+                </div>
+              </div>
+              <span
+                class="badge bg-light text-secondary border px-3 py-1.5 rounded-pill"
+                style="font-size: 12px"
+              >
+                Tầng <span th:text="${entry.key}">1</span>
+              </span>
+            </div>
+
+            <!-- Floor Rooms Grid -->
+            <div class="row g-3">
+              <div
+                th:each="r : ${entry.value}"
+                class="col-12 col-sm-6 col-lg-4 col-xl-3"
+              >
+                <div
+                  class="room-matrix-tile"
+                  th:classappend="'tile-' + ${#strings.toLowerCase(r.status.name())}"
+                >
+                  <!-- Top Info -->
+                  <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                      <span
+                        class="fw-bold text-dark fs-3"
+                        style="
+                          font-family: &quot;JetBrains Mono&quot;, monospace;
+                        "
+                        th:text="'P.' + ${r.roomNumber}"
+                      >
+                        P.101
+                      </span>
+                      <div
+                        class="text-muted small fw-medium"
+                        th:text="${r.roomTypeName}"
+                      >
+                        Deluxe King
+                      </div>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-1">
+                      <!-- Dropdown Chuyển đổi trạng thái nhanh & Sửa phòng -->
+                      <div class="dropdown">
+                        <button
+                          class="btn btn-sm btn-light border rounded-circle p-1"
+                          style="width: 28px; height: 28px"
+                          type="button"
+                          data-bs-toggle="dropdown"
+                          aria-expanded="false"
+                        >
+                          <i
+                            class="fa-solid fa-ellipsis-vertical text-muted"
+                          ></i>
+                        </button>
+                        <ul
+                          class="dropdown-menu dropdown-menu-end shadow-sm border-0 small"
+                        >
+                          <li>
+                            <button
+                              type="button"
+                              class="dropdown-item"
+                              th:data-id="${r.id}"
+                              th:data-room-number="${r.roomNumber}"
+                              th:data-floor="${entry.key}"
+                              th:data-room-type-id="${r.roomTypeId}"
+                              th:data-status="${r.status.name()}"
+                              th:data-description="${r.description}"
+                              th:data-active="${r.active}"
+                              onclick="openEditRoomModal(this)"
+                            >
+                              <i class="fa-solid fa-pen me-2 text-primary"></i>
+                              Chỉnh sửa phòng
+                            </button>
+                          </li>
+                          <li><hr class="dropdown-divider" /></li>
+                          <li
+                            class="dropdown-header text-muted"
+                            style="font-size: 11px"
+                          >
+                            ĐỔI TRẠNG THÁI PHÒNG
+                          </li>
+                          <li>
+                            <form
+                              th:action="@{/admin/rooms/quick-update-status}"
+                              method="post"
+                            >
+                              <input
+                                type="hidden"
+                                name="roomId"
+                                th:value="${r.id}"
+                              />
+                              <input
+                                type="hidden"
+                                name="newStatus"
+                                value="AVAILABLE"
+                              />
+                              <input
+                                type="hidden"
+                                name="returnUrl"
+                                value="/admin/rooms?view=grid"
+                              />
+                              <button
+                                type="submit"
+                                class="dropdown-item text-success"
+                              >
+                                <i class="fa-solid fa-door-open me-2"></i> Sẵn
+                                sàng
+                              </button>
+                            </form>
+                          </li>
+                          <li>
+                            <form
+                              th:action="@{/admin/rooms/quick-update-status}"
+                              method="post"
+                            >
+                              <input
+                                type="hidden"
+                                name="roomId"
+                                th:value="${r.id}"
+                              />
+                              <input
+                                type="hidden"
+                                name="newStatus"
+                                value="CLEANING"
+                              />
+                              <input
+                                type="hidden"
+                                name="returnUrl"
+                                value="/admin/rooms?view=grid"
+                              />
+                              <button
+                                type="submit"
+                                class="dropdown-item text-warning"
+                              >
+                                <i class="fa-solid fa-broom me-2"></i> Đang dọn
+                                dẹp
+                              </button>
+                            </form>
+                          </li>
+                          <li>
+                            <form
+                              th:action="@{/admin/rooms/quick-update-status}"
+                              method="post"
+                            >
+                              <input
+                                type="hidden"
+                                name="roomId"
+                                th:value="${r.id}"
+                              />
+                              <input
+                                type="hidden"
+                                name="newStatus"
+                                value="MAINTENANCE"
+                              />
+                              <input
+                                type="hidden"
+                                name="returnUrl"
+                                value="/admin/rooms?view=grid"
+                              />
+                              <button
+                                type="submit"
+                                class="dropdown-item text-danger"
+                              >
+                                <i
+                                  class="fa-solid fa-screwdriver-wrench me-2"
+                                ></i>
+                                Đang bảo trì
+                              </button>
+                            </form>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Middle Area: Guest Details if OCCUPIED, or Price info -->
+                  <div class="my-2">
+                    <!-- 1. Nếu OCCUPIED: Hiển thị tên khách và ngày out dự kiến -->
+                    <div th:if="${r.isOccupied()}" class="guest-info-badge">
+                      <div class="fw-bold text-dark text-truncate">
+                        <i class="fa-solid fa-user me-2 text-primary"></i>
+                        <span
+                          th:text="${r.guestName != null ? r.guestName : 'Khách lưu trú'}"
+                          >Nguyễn Hoàng Nam</span
+                        >
+                      </div>
+                      <div
+                        class="text-muted small mt-0.5"
+                        style="font-size: 10.5px"
+                      >
+                        <i class="fa-regular fa-calendar-check me-2"></i>
+                        Out:
+                        <span
+                          th:text="${r.expectedCheckOut != null ? #temporals.format(r.expectedCheckOut, 'dd/MM HH:mm') : '--'}"
+                          >26/08 12:00</span
+                        >
+                      </div>
+                    </div>
+
+                    <!-- 2. Nếu AVAILABLE: Hiển thị giá niêm yết -->
+                    <div th:if="${r.isAvailable()}" class="text-muted small">
+                      <span style="font-size: 12px">Đơn giá:</span>
+                      <strong
+                        style="color: #b45309"
+                        th:text="${#numbers.formatDecimal(r.pricePerNight, 0, 'COMMA', 0, 'POINT')} + ' đ/đêm'"
+                        >1,200,000 đ</strong
+                      >
+                    </div>
+
+                    <!-- 3. Nếu CLEANING: Cảnh báo đang dọn -->
+                    <div
+                      th:if="${r.isCleaning()}"
+                      class="text-warning small fst-italic"
+                      style="color: #d97706 !important"
+                    >
+                      <i class="fa-solid fa-clock me-2"></i> Đang chờ buồng
+                      phòng dọn dẹp
+                    </div>
+
+                    <!-- 4. Nếu MAINTENANCE: Cảnh báo bảo trì -->
+                    <div
+                      th:if="${r.isMaintenance()}"
+                      class="text-danger small fst-italic"
+                    >
+                      <i class="fa-solid fa-triangle-exclamation me-2"></i> Tạm
+                      khóa phòng để bảo trì
+                    </div>
+                  </div>
+
+                  <!-- Bottom Action Button -->
+                  <div>
+                    <!-- Trạng thái AVAILABLE: Nút Đặt phòng nhanh -->
+                    <button
+                      th:if="${r.isAvailable()}"
+                      type="button"
+                      class="btn btn-sm btn-outline-success w-100 rounded-3 fw-semibold py-1.5"
+                      th:data-id="${r.id}"
+                      th:data-number="${r.roomNumber}"
+                      th:data-type="${r.roomTypeName}"
+                      onclick="openQuickBookModal(this)"
+                    >
+                      <i class="fa-solid fa-bolt me-2"></i> Đặt phòng nhanh
+                    </button>
+
+                    <!-- Trạng thái OCCUPIED: Nút Xem chi tiết Đơn đặt -->
+                    <a
+                      th:if="${r.isOccupied() and r.activeBookingId != null}"
+                      th:href="@{/admin/bookings/{id}(id=${r.activeBookingId})}"
+                      class="btn btn-sm btn-outline-primary w-100 rounded-3 fw-semibold py-1.5"
+                    >
+                      <i class="fa-solid fa-eye me-2"></i> Xem đơn phòng
+                    </a>
+                    <a
+                      th:if="${r.isOccupied() and r.activeBookingId == null}"
+                      th:href="@{/admin/bookings}"
+                      class="btn btn-sm btn-outline-primary w-100 rounded-3 fw-semibold py-1.5"
+                    >
+                      <i class="fa-solid fa-eye me-2"></i> Xem đơn phòng
+                    </a>
+
+                    <!-- Trạng thái CLEANING: Nút Hoàn tất dọn phòng -->
+                    <form
+                      th:if="${r.isCleaning()}"
+                      th:action="@{/admin/rooms/quick-update-status}"
+                      method="post"
+                    >
+                      <input type="hidden" name="roomId" th:value="${r.id}" />
+                      <input type="hidden" name="newStatus" value="AVAILABLE" />
+                      <input
+                        type="hidden"
+                        name="returnUrl"
+                        value="/admin/rooms?view=grid"
+                      />
+                      <button
+                        type="submit"
+                        class="btn btn-sm btn-outline-warning text-dark w-100 rounded-3 fw-semibold py-1.5"
+                      >
+                        <i class="fa-solid fa-circle-check me-2"></i> Hoàn tất
+                        dọn dẹp
+                      </button>
+                    </form>
+
+                    <!-- Trạng thái MAINTENANCE: Nút Mở phòng lại -->
+                    <form
+                      th:if="${r.isMaintenance()}"
+                      th:action="@{/admin/rooms/quick-update-status}"
+                      method="post"
+                    >
+                      <input type="hidden" name="roomId" th:value="${r.id}" />
+                      <input type="hidden" name="newStatus" value="AVAILABLE" />
+                      <input
+                        type="hidden"
+                        name="returnUrl"
+                        value="/admin/rooms?view=grid"
+                      />
+                      <button
+                        type="submit"
+                        class="btn btn-sm btn-outline-danger w-100 rounded-3 fw-semibold py-1.5"
+                      >
+                        <i class="fa-solid fa-wrench me-2"></i> Kết thúc bảo trì
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Empty state nếu không có phòng nào -->
+          <div
+            th:if="${#maps.isEmpty(matrixByFloor)}"
+            class="card border-0 shadow-sm rounded-4 text-center py-5"
+            style="background: #ffffff"
+          >
+            <div class="py-4">
+              <i
+                class="fa-solid fa-door-closed text-muted mb-3"
+                style="font-size: 48px; opacity: 0.3"
+              ></i>
+              <h6 class="text-dark fw-bold mb-1">
+                Không tìm thấy phòng nào phù hợp
+              </h6>
+              <p class="text-muted small">
+                Thử thay đổi điều kiện lọc ở thanh tìm kiếm phía trên.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- =================== TAB 2: BẢNG DANH SÁCH QUẢN TRỊ (LIST CRUD) =================== -->
+        <div
+          class="tab-pane fade"
+          th:classappend="${currentView == 'list' ? 'show active' : ''}"
+          id="list-pane"
+          role="tabpanel"
+        >
+          <div
+            class="card border-0 shadow-sm rounded-4 overflow-hidden"
+            style="background: #ffffff"
+          >
+            <div class="table-responsive">
+              <table
+                class="table table-hover align-middle mb-0"
+                style="font-size: 14px"
+              >
+                <thead
+                  style="
+                    background-color: #f8fafc;
+                    border-bottom: 1px solid #e2e8f0;
+                    font-size: 12.5px;
+                    color: #475569;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                  "
+                >
+                  <tr>
+                    <th class="ps-4 py-3">Số phòng</th>
+                    <th class="py-3 text-center">Tầng</th>
+                    <th class="py-3">Hạng / Loại phòng</th>
+                    <th class="py-3 text-center">Trạng thái vận hành</th>
+                    <th class="py-3">Mô tả / Ghi chú</th>
+                    <th class="pe-4 py-3 text-center">Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr th:each="r : ${rooms}">
+                    <td class="ps-4">
+                      <span
+                        class="fw-bold text-dark fs-5"
+                        th:text="${r.roomNumber}"
+                        >101</span
+                      >
+                      <div
+                        th:unless="${r.active}"
+                        class="text-danger"
+                        style="font-size: 11.5px"
+                      >
+                        <i class="fa-solid fa-lock me-2"></i> Tạm khóa
+                      </div>
+                    </td>
+                    <td class="text-center">
+                      <span
+                        class="badge bg-light text-secondary border px-3 py-1.5 rounded-pill"
+                        th:text="'Tầng ' + ${r.floor}"
+                        >Tầng 1</span
+                      >
+                    </td>
+                    <td>
+                      <div
+                        class="fw-bold text-dark"
+                        th:text="${r.roomType.name}"
+                      >
+                        Standard Room
+                      </div>
+                      <div
+                        class="fw-bold"
+                        style="color: #b45309; font-size: 13px"
+                        th:text="${#numbers.formatDecimal(r.roomType.pricePerNight, 0, 'COMMA', 0, 'POINT')} + ' đ/đêm'"
+                      >
+                        1,200,000 đ/đêm
+                      </div>
+                    </td>
+                    <td class="text-center">
+                      <span
+                        th:if="${r.status.name() == 'AVAILABLE'}"
+                        class="badge rounded-pill px-3 py-1.5 border"
+                        style="
+                          background-color: #ecfdf5;
+                          color: #059669;
+                          border-color: #a7f3d0 !important;
+                        "
+                      >
+                        <i class="fa-solid fa-circle-check me-2"></i> Sẵn sàng
+                      </span>
+                      <span
+                        th:if="${r.status.name() == 'OCCUPIED'}"
+                        class="badge rounded-pill px-3 py-1.5 border"
+                        style="
+                          background-color: #eff6ff;
+                          color: #2563eb;
+                          border-color: #bfdbfe !important;
+                        "
+                      >
+                        <i class="fa-solid fa-user-check me-2"></i> Đang có
+                        khách
+                      </span>
+                      <span
+                        th:if="${r.status.name() == 'CLEANING'}"
+                        class="badge rounded-pill px-3 py-1.5 border"
+                        style="
+                          background-color: #fffbeb;
+                          color: #d97706;
+                          border-color: #fde68a !important;
+                        "
+                      >
+                        <i class="fa-solid fa-broom me-2"></i> Đang dọn dẹp
+                      </span>
+                      <span
+                        th:if="${r.status.name() == 'MAINTENANCE'}"
+                        class="badge rounded-pill px-3 py-1.5 border"
+                        style="
+                          background-color: #fef2f2;
+                          color: #dc2626;
+                          border-color: #fecaca !important;
+                        "
+                      >
+                        <i class="fa-solid fa-screwdriver-wrench me-2"></i> Đang
+                        bảo trì
+                      </span>
+                    </td>
+                    <td>
+                      <div
+                        class="text-muted text-truncate"
+                        style="max-width: 220px; font-size: 13px"
+                        th:text="${r.description != null and !r.description.isEmpty() ? r.description : '--'}"
+                      >
+                        --
+                      </div>
+                    </td>
+                    <td class="pe-4 text-center">
+                      <div class="d-inline-flex gap-1">
+                        <button
+                          type="button"
+                          class="btn btn-sm btn-light text-primary border"
+                          title="Chỉnh sửa phòng"
+                          th:data-id="${r.id}"
+                          th:data-room-number="${r.roomNumber}"
+                          th:data-floor="${r.floor}"
+                          th:data-room-type-id="${r.roomType.id}"
+                          th:data-status="${r.status.name()}"
+                          th:data-description="${r.description}"
+                          th:data-active="${r.active}"
+                          onclick="openEditRoomModal(this)"
+                        >
+                          <i class="fa-solid fa-pen"></i>
+                        </button>
+                        <form
+                          th:action="@{/admin/rooms/toggle-status/{id}(id=${r.id}, returnUrl='/admin/rooms?view=list')}"
+                          method="post"
+                          style="display: inline"
+                        >
+                          <button
+                            type="submit"
+                            class="btn btn-sm btn-light border"
+                            th:classappend="${r.active ? 'text-danger' : 'text-success'}"
+                            th:title="${r.active ? 'Khóa phòng' : 'Mở khóa phòng'}"
+                            onclick="
+                              return confirm(
+                                'Bạn có chắc chắn muốn thay đổi trạng thái phòng này?',
+                              );
+                            "
+                          >
+                            <i
+                              class="fa-solid"
+                              th:classappend="${r.active ? 'fa-lock' : 'fa-lock-open'}"
+                            ></i>
+                          </button>
+                        </form>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr th:if="${#lists.isEmpty(rooms)}">
+                    <td colspan="6" class="text-center py-5 text-muted">
+                      Không tìm thấy phòng nào trong danh sách.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Footer / Pagination -->
+            <div class="px-4 py-3 bg-light border-top d-flex flex-column flex-md-row justify-content-between align-items-center gap-3" style="font-size: 13px; color: #64748b;">
+                <div>
+                    <span th:if="${roomsPage != null and roomsPage.totalElements > 0}">
+                        Hiển thị <strong class="text-dark" th:text="${roomsPage.number * roomsPage.size + 1}">1</strong>
+                        - <strong class="text-dark" th:text="${roomsPage.number * roomsPage.size + #lists.size(rooms)}">10</strong>
+                        trong tổng số <strong class="text-dark" th:text="${roomsPage.totalElements}">25</strong> phòng
+                    </span>
+                    <span th:if="${roomsPage == null or roomsPage.totalElements == 0}">
+                        Hiển thị <strong class="text-dark">0</strong> phòng
+                    </span>
+                </div>
+
+                <!-- Navigation Pagination Controls -->
+                <nav th:if="${roomsPage != null and roomsPage.totalPages > 1}" aria-label="Phân trang danh sách phòng">
+                    <ul class="pagination pagination-sm mb-0">
+                        <!-- Trang đầu -->
+                        <li class="page-item" th:classappend="${roomsPage.first ? 'disabled' : ''}">
+                            <a class="page-link" th:href="@{/admin/rooms(view='list', roomNumber=${paramRoomNumber}, floor=${paramFloor}, roomTypeId=${paramRoomTypeId}, status=${paramStatus}, page=1)}" title="Trang đầu">
+                                <i class="fa-solid fa-angles-left"></i>
+                            </a>
+                        </li>
+                        <!-- Trang trước -->
+                        <li class="page-item" th:classappend="${roomsPage.first ? 'disabled' : ''}">
+                            <a class="page-link" th:href="@{/admin/rooms(view='list', roomNumber=${paramRoomNumber}, floor=${paramFloor}, roomTypeId=${paramRoomTypeId}, status=${paramStatus}, page=${roomsPage.number})}" title="Trang trước">
+                                <i class="fa-solid fa-chevron-left"></i>
+                            </a>
+                        </li>
+
+                        <!-- Các số trang -->
+                        <li th:each="p : ${#numbers.sequence(T(java.lang.Math).max(1, roomsPage.number + 1 - 2), T(java.lang.Math).min(roomsPage.totalPages, roomsPage.number + 1 + 2))}"
+                            class="page-item" th:classappend="${p == roomsPage.number + 1 ? 'active' : ''}">
+                            <a class="page-link" th:text="${p}" th:href="@{/admin/rooms(view='list', roomNumber=${paramRoomNumber}, floor=${paramFloor}, roomTypeId=${paramRoomTypeId}, status=${paramStatus}, page=${p})}">1</a>
+                        </li>
+
+                        <!-- Trang sau -->
+                        <li class="page-item" th:classappend="${roomsPage.last ? 'disabled' : ''}">
+                            <a class="page-link" th:href="@{/admin/rooms(view='list', roomNumber=${paramRoomNumber}, floor=${paramFloor}, roomTypeId=${paramRoomTypeId}, status=${paramStatus}, page=${roomsPage.number + 2})}" title="Trang sau">
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </a>
+                        </li>
+                        <!-- Trang cuối -->
+                        <li class="page-item" th:classappend="${roomsPage.last ? 'disabled' : ''}">
+                            <a class="page-link" th:href="@{/admin/rooms(view='list', roomNumber=${paramRoomNumber}, floor=${paramFloor}, roomTypeId=${paramRoomTypeId}, status=${paramStatus}, page=${roomsPage.totalPages})}" title="Trang cuối">
+                                <i class="fa-solid fa-angles-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ MODAL 1: THÊM MỚI / CHỈNH SỬA PHÒNG ============ -->
+      <div
+        class="modal fade"
+        id="roomModal"
+        tabindex="-1"
+        aria-labelledby="roomModalLabel"
+        aria-hidden="true"
+      >
+        <div
+          class="modal-dialog modal-dialog-centered"
+          style="max-width: 540px"
+        >
+          <div class="modal-content border-0 shadow rounded-4 overflow-hidden">
+            <div class="modal-header border-bottom px-4 py-3 bg-light">
+              <h5
+                class="modal-title fw-bold text-dark fs-6"
+                id="roomModalLabel"
+              >
+                <i
+                  class="fa-solid fa-door-open text-warning me-2"
+                  style="color: #d97706 !important"
+                ></i>
+                <span id="roomModalTitle">Thêm mới Phòng</span>
+              </h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+
+            <form id="roomForm" method="post">
+              <input
+                type="hidden"
+                th:name="${_csrf.parameterName}"
+                th:value="${_csrf.token}"
+              />
+              <div class="modal-body p-4">
+                <input type="hidden" id="roomId" name="id" />
+                <input
+                  type="hidden"
+                  id="roomReturnUrl"
+                  name="returnUrl"
+                  value="/admin/rooms"
+                />
+
+                <div class="row g-3">
+                  <div class="col-12 col-md-6">
+                    <label
+                      for="roomNumberInput"
+                      class="form-label small fw-semibold text-dark"
+                      >Số phòng <span class="text-danger">*</span></label
+                    >
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="roomNumberInput"
+                      name="roomNumber"
+                      placeholder="VD: 101, 202, VIP1"
+                      required
+                      maxlength="20"
+                    />
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <label
+                      for="roomFloorInput"
+                      class="form-label small fw-semibold text-dark"
+                      >Tầng <span class="text-danger">*</span></label
+                    >
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="roomFloorInput"
+                      name="floor"
+                      placeholder="1"
+                      min="1"
+                      max="100"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div class="mt-3">
+                  <label
+                    for="roomTypeSelect"
+                    class="form-label small fw-semibold text-dark"
+                    >Hạng / Loại phòng <span class="text-danger">*</span></label
+                  >
+                  <select
+                    class="form-select"
+                    id="roomTypeSelect"
+                    name="roomType.id"
+                    required
+                  >
+                    <option value="">-- Chọn loại phòng --</option>
+                    <option
+                      th:each="rt : ${roomTypes}"
+                      th:value="${rt.id}"
+                      th:text="${rt.name} + ' (' + ${#numbers.formatDecimal(rt.pricePerNight, 0, 'COMMA', 0, 'POINT')} + ' đ/đêm)'"
+                    >
+                      Standard Room (1,200,000 đ/đêm)
+                    </option>
+                  </select>
+                </div>
+
+                <div class="mt-3">
+                  <label
+                    for="roomStatusSelect"
+                    class="form-label small fw-semibold text-dark"
+                    >Trạng thái vận hành
+                    <span class="text-danger">*</span></label
+                  >
+                  <select
+                    class="form-select"
+                    id="roomStatusSelect"
+                    name="status"
+                    required
+                  >
+                    <option
+                      th:each="st : ${statuses}"
+                      th:value="${st.name()}"
+                      th:text="${st.displayName}"
+                    >
+                      Sẵn sàng
+                    </option>
+                  </select>
+                </div>
+
+                <div class="mt-3">
+                  <label
+                    for="roomDescriptionInput"
+                    class="form-label small fw-semibold text-dark"
+                    >Mô tả / Ghi chú</label
+                  >
+                  <textarea
+                    class="form-control"
+                    id="roomDescriptionInput"
+                    name="description"
+                    rows="2"
+                    placeholder="Ghi chú về vị trí hoặc trang thiết bị đặc biệt..."
+                  ></textarea>
+                </div>
+
+                <div class="mt-3 p-2.5 bg-light rounded-3 border">
+                  <div class="form-check form-switch mb-0">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      role="switch"
+                      id="roomActiveInput"
+                      name="active"
+                      checked
+                    />
+                    <label
+                      class="form-check-label small fw-semibold text-dark"
+                      for="roomActiveInput"
+                      style="cursor: pointer"
+                      >Hoạt động kinh doanh</label
+                    >
+                  </div>
+                </div>
+              </div>
+
+              <div class="modal-footer border-top px-4 py-3 bg-light">
+                <button
+                  type="button"
+                  class="btn btn-light border px-3"
+                  data-bs-dismiss="modal"
+                >
+                  Hủy bỏ
+                </button>
+                <button type="submit" class="btn gold-btn px-4 fw-semibold">
+                  <i class="fa-solid fa-floppy-disk me-2"></i> Lưu thông tin
+                  phòng
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ MODAL 2: TIẾP NHẬN ĐẶT PHÒNG NHANH ============ -->
+      <div
+        class="modal fade"
+        id="quickBookModal"
+        tabindex="-1"
+        aria-labelledby="quickBookModalLabel"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content border-0 shadow rounded-4 overflow-hidden">
+            <div class="modal-header border-bottom px-4 py-3 bg-light">
+              <div>
+                <h6
+                  class="modal-title fw-bold text-dark mb-0"
+                  id="quickBookModalLabel"
+                >
+                  <i
+                    class="fa-solid fa-bolt text-warning me-2"
+                    style="color: #d97706 !important"
+                  ></i>
+                  Nhận phòng nhanh tại quầy
+                </h6>
+                <span class="small text-muted">
+                  Phòng
+                  <strong id="modalRoomNumber" class="text-dark">P.101</strong>
+                  -
+                  <span id="modalRoomType" class="text-secondary"
+                    >Deluxe King</span
+                  >
+                </span>
+              </div>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+
+            <form th:action="@{/admin/rooms/quick-book}" method="post">
+              <input
+                type="hidden"
+                th:name="${_csrf.parameterName}"
+                th:value="${_csrf.token}"
+              />
+              <div class="modal-body p-4">
+                <input type="hidden" name="roomId" id="modalRoomId" />
+                <input type="hidden" name="view" value="grid" />
+
+                <!-- Thông tin khách hàng -->
+                <div class="row g-2 mb-3">
+                  <div class="col-7">
+                    <label class="form-label small fw-semibold text-dark"
+                      >Họ và tên khách <span class="text-danger">*</span></label
+                    >
+                    <input
+                      type="text"
+                      name="guestName"
+                      class="form-control form-control-sm"
+                      placeholder="Nguyễn Văn A"
+                      required
+                    />
+                  </div>
+                  <div class="col-5">
+                    <label class="form-label small fw-semibold text-dark"
+                      >Số điện thoại <span class="text-danger">*</span></label
+                    >
+                    <input
+                      type="tel"
+                      name="guestPhone"
+                      class="form-control form-control-sm"
+                      placeholder="0988776655"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div class="row g-2 mb-3">
+                  <div class="col-7">
+                    <label class="form-label small fw-semibold text-dark"
+                      >Email (nếu có)</label
+                    >
+                    <input
+                      type="email"
+                      name="guestEmail"
+                      class="form-control form-control-sm"
+                      placeholder="khachhang@gmail.com"
+                    />
+                  </div>
+                  <div class="col-5">
+                    <label class="form-label small fw-semibold text-dark"
+                      >Số CCCD / Hộ chiếu</label
+                    >
+                    <input
+                      type="text"
+                      name="guestIdentity"
+                      class="form-control form-control-sm"
+                      placeholder="001201009988"
+                    />
+                  </div>
+                </div>
+
+                <!-- Thời gian lưu trú -->
+                <div class="row g-2 mb-3">
+                  <div class="col-6">
+                    <label class="form-label small fw-semibold text-dark"
+                      >Nhận phòng (Check-in)</label
+                    >
+                    <input
+                      type="datetime-local"
+                      name="checkIn"
+                      id="modalCheckIn"
+                      class="form-control form-control-sm"
+                      required
+                    />
+                  </div>
+                  <div class="col-6">
+                    <label class="form-label small fw-semibold text-dark"
+                      >Trả phòng (Check-out)</label
+                    >
+                    <input
+                      type="datetime-local"
+                      name="checkOut"
+                      id="modalCheckOut"
+                      class="form-control form-control-sm"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <!-- Số lượng khách & Tiền cọc -->
+                <div class="row g-2 mb-2">
+                  <div class="col-6">
+                    <label class="form-label small fw-semibold text-dark"
+                      >Số lượng khách</label
+                    >
+                    <input
+                      type="number"
+                      name="guests"
+                      class="form-control form-control-sm"
+                      value="1"
+                      min="1"
+                      max="10"
+                    />
+                  </div>
+                  <div class="col-6">
+                    <label class="form-label small fw-semibold text-dark"
+                      >Tiền cọc trước (VNĐ)</label
+                    >
+                    <input
+                      type="number"
+                      name="deposit"
+                      class="form-control form-control-sm"
+                      value="0"
+                      min="0"
+                      step="any"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div class="modal-footer border-0 pt-0">
+                <button
+                  type="button"
+                  class="btn btn-light rounded-3 px-3"
+                  data-bs-dismiss="modal"
+                >
+                  Đóng
+                </button>
+                <button
+                  type="submit"
+                  class="btn gold-btn rounded-3 px-4 fw-semibold"
+                >
+                  <i class="fa-solid fa-key me-2"></i> Tiếp nhận Nhận phòng ngay
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Script tương tác -->
+    <th:block layout:fragment="script">
+      <script th:src="@{/js/admin/room-list.js}"></script>
+    </th:block>
+  </body>
+</html>

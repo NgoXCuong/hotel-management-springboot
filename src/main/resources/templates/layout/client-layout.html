@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title layout:title-pattern="$CONTENT_TITLE - $LAYOUT_TITLE">Grand Hotel - Resort & Luxury Spa</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" th:href="@{/images/favicon.svg}">
+    <link rel="alternate icon" type="image/png" th:href="@{/images/favicon.svg}">
+
+    <!-- Force CSRF token early generation -->
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome 6 Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Google Fonts: Plus Jakarta Sans (ĐỒNG NHẤT 1 FONT DUY NHẤT TOÀN HỆ THỐNG) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" th:href="@{/css/client-layout.css}">
+    <th:block layout:fragment="css"></th:block>
+</head>
+<body>
+
+    <!-- ============ TOAST CONTAINER ============ -->
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1100;">
+        <!-- Toast Thành công -->
+        <div id="liveSuccessToast" class="toast luxury-toast align-items-center border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true"
+             th:if="${successMessage != null}"
+             style="border-left: 5px solid #10b981 !important;">
+            <div class="d-flex p-3">
+                <div class="d-flex align-items-center me-3">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background: #ecfdf5;">
+                        <i class="fa-solid fa-circle-check text-success" style="font-size: 20px;"></i>
+                    </div>
+                </div>
+                <div class="toast-body p-0 flex-grow-1 align-self-center">
+                    <div class="fw-bold text-dark mb-0.5" style="font-size: 13.5px;">Thành công</div>
+                    <div class="text-secondary small" th:text="${successMessage}">Thao tác hoàn tất thành công.</div>
+                </div>
+                <button type="button" class="btn-close ms-2 my-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+
+        <!-- Toast Lỗi / Thất bại -->
+        <div id="liveErrorToast" class="toast luxury-toast align-items-center border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true"
+             th:if="${errorMessage != null}"
+             style="border-left: 5px solid #ef4444 !important;">
+            <div class="d-flex p-3">
+                <div class="d-flex align-items-center me-3">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background: #fef2f2;">
+                        <i class="fa-solid fa-triangle-exclamation text-danger" style="font-size: 20px;"></i>
+                    </div>
+                </div>
+                <div class="toast-body p-0 flex-grow-1 align-self-center">
+                    <div class="fw-bold text-dark mb-0.5" style="font-size: 13.5px;">Thông báo lỗi</div>
+                    <div class="text-secondary small" th:text="${errorMessage}">Đã xảy ra sự cố trong quá trình xử lý.</div>
+                </div>
+                <button type="button" class="btn-close ms-2 my-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 1. Top Announcement Bar -->
+    <div class="top-announce-bar">
+        <div class="container d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-3">
+                <span><i class="fa-solid fa-location-dot me-2" style="color: #C5A880;"></i> 123 Trần Phú, TP. Nha Trang</span>
+                <span class="d-none d-md-inline"><i class="fa-solid fa-phone me-2" style="color: #C5A880;"></i> Hotline: 1900 8888</span>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <span class="d-none d-sm-inline"><i class="fa-solid fa-shield-halved me-2" style="color: #C5A880;"></i> Đặt phòng trực tiếp đảm bảo giá tốt nhất</span>
+                <span sec:authorize="hasAnyRole('ADMIN', 'MANAGER', 'RECEPTIONIST')">
+                    <a th:href="@{/admin/dashboard}" class="text-decoration-none fw-semibold" style="color: #E7D7C1;">
+                        <i class="fa-solid fa-gauge-high me-2"></i> Trang Quản trị Admin
+                    </a>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Main Luxury Navbar -->
+    <nav class="navbar navbar-expand-lg luxury-navbar sticky-top">
+        <div class="container">
+            <!-- Brand Logo -->
+            <a class="navbar-brand d-flex align-items-center gap-3 me-4" th:href="@{/}">
+                <img th:src="@{/images/favicon.svg}" alt="Grand Hotel Logo" style="width: 40px; height: 40px; border-radius: 8px; box-shadow: 0 4px 14px rgba(166, 135, 96, 0.25);">
+                <div>
+                    <div class="navbar-brand-title">GRAND HOTEL</div>
+                    <div class="navbar-brand-subtitle">Resort & Luxury Spa</div>
+                </div>
+            </a>
+
+            <!-- Mobile Toggle Button -->
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
+                <i class="fa-solid fa-bars fs-4 text-dark"></i>
+            </button>
+
+            <!-- Menu items -->
+            <div class="collapse navbar-collapse" id="navbarMain">
+                <ul class="navbar-nav ms-auto me-auto mb-2 mb-lg-0 gap-1">
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-lux" th:classappend="${currentUri != null and currentUri == '/' ? 'active' : ''}" th:href="@{/}">Trang chủ</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-lux" th:classappend="${currentUri != null and currentUri.startsWith('/rooms') ? 'active' : ''}" th:href="@{/rooms}">Hạng phòng</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-lux" th:classappend="${currentUri != null and currentUri.startsWith('/services') ? 'active' : ''}" th:href="@{/services}">Dịch vụ & Tiện ích</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-lux" th:classappend="${currentUri != null and currentUri.startsWith('/about') ? 'active' : ''}" th:href="@{/about}">Về chúng tôi</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-lux" th:classappend="${currentUri != null and currentUri.startsWith('/reviews') ? 'active' : ''}" th:href="@{/reviews}">Đánh giá</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-lux" th:classappend="${currentUri != null and currentUri.startsWith('/contact') ? 'active' : ''}" th:href="@{/contact}">Liên hệ</a>
+                    </li>
+                </ul>
+
+                <!-- User Account Actions -->
+                <div class="d-flex align-items-center gap-2">
+                    <!-- Notification Bell - chỉ hiển thị khi đã đăng nhập -->
+                    <div sec:authorize="isAuthenticated()" class="notification-dropdown" id="notifDropdown">
+                        <button class="notification-bell" id="notificationBellBtn" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Thông báo">
+                            <i class="fa-regular fa-bell"></i>
+                            <span class="notification-badge d-none" id="notificationBadge">0</span>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end luxury-dropdown notification-panel" id="notifPanel">
+                            <div class="notification-panel-header">
+                                <span class="fw-bold text-dark">Thông báo</span>
+                                <button class="btn btn-sm btn-link p-0 text-decoration-none fw-semibold" id="markAllReadBtn" onclick="markAllRead()" style="color: #d97706; font-size: 12px;">
+                                    Đánh dấu đã đọc
+                                </button>
+                            </div>
+                            <div class="notification-list" id="notifList">
+                                <div class="text-center py-4 text-muted small">
+                                    <i class="fa-solid fa-spinner fa-spin mb-2" style="font-size: 24px;"></i>
+                                    <div>Đang tải thông báo...</div>
+                                </div>
+                            </div>
+                            <div class="notification-panel-footer">
+                                <a th:href="@{/my-account?tab=notifications}" class="text-decoration-none fw-semibold" style="color: #d97706; font-size: 12.5px;">
+                                    <i class="fa-regular fa-eye me-1"></i> Xem tất cả thông báo
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- If Authenticated -->
+                    <div sec:authorize="isAuthenticated()" class="dropdown">
+                        <button class="btn btn-light border rounded-pill px-3 py-1.5 d-flex align-items-center gap-2 dropdown-toggle shadow-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <div class="rounded-circle bg-warning-subtle text-dark d-flex align-items-center justify-content-center fw-bold" style="width: 28px; height: 28px; font-size: 12px; color: #b45309 !important;">
+                                <i class="fa-solid fa-user"></i>
+                            </div>
+                            <span class="small fw-bold text-dark" sec:authentication="name">User</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end luxury-dropdown mt-2 small">
+                            <li>
+                                <a class="dropdown-item" th:href="@{/my-account?tab=profile}">
+                                    <i class="fa-solid fa-id-card-clip me-2" style="color: #d97706 !important;"></i> Hồ sơ cá nhân
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" th:href="@{/my-account?tab=bookings}">
+                                    <i class="fa-solid fa-suitcase-rolling me-2" style="color: #d97706 !important;"></i> Chuyến đi của tôi
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" th:href="@{/my-account?tab=reviews}">
+                                    <i class="fa-solid fa-star me-2" style="color: #d97706 !important;"></i> Đánh giá của tôi
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" th:href="@{/my-account?tab=password}">
+                                    <i class="fa-solid fa-key me-2" style="color: #d97706 !important;"></i> Đổi mật khẩu
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" th:href="@{/my-account?tab=notifications}">
+                                    <i class="fa-solid fa-bell me-2" style="color: #d97706 !important;"></i> Thông báo hệ thống
+                                </a>
+                            </li>
+                            <li sec:authorize="hasAnyRole('ADMIN', 'MANAGER', 'RECEPTIONIST')">
+                                <hr class="dropdown-divider my-1">
+                                <a class="dropdown-item py-2 text-primary fw-bold" th:href="@{/admin/dashboard}">
+                                    <i class="fa-solid fa-gauge-high me-2"></i> Trang Quản trị Admin
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider my-1"></li>
+                            <li>
+                                <form th:action="@{/auth/logout}" method="post">
+                                    <button type="submit" class="dropdown-item py-1.5 text-danger fw-bold">
+                                        <i class="fa-solid fa-arrow-right-from-bracket me-2"></i> Đăng xuất
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- If Anonymous -->
+                    <div sec:authorize="!isAuthenticated()" class="d-flex align-items-center gap-2">
+                        <a th:href="@{/auth/login}" class="nav-auth-btn-login">
+                            <i class="fa-solid fa-user me-1.5"></i> Đăng nhập
+                        </a>
+                        <a th:href="@{/rooms}" class="nav-auth-btn-book">
+                            <i class="fa-solid fa-calendar-check me-1.5"></i> Đặt phòng ngay
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 3. Main Content Container -->
+    <main layout:fragment="content" class="flex-grow-1">
+        <!-- Page Content injected here -->
+    </main>
+
+    <!-- 4. Luxury Footer -->
+    <footer class="luxury-footer">
+        <div class="container">
+            <div class="row g-4 pb-5 border-bottom border-secondary border-opacity-25">
+                
+                <!-- Col 1: About Hotel -->
+                <div class="col-12 col-md-4">
+                    <div class="d-flex align-items-center gap-2.5 mb-3">
+                        <img th:src="@{/images/favicon.svg}" alt="Grand Hotel Logo" style="width: 38px; height: 38px; border-radius: 8px; box-shadow: 0 4px 14px rgba(0,0,0,0.35);">
+                        <div>
+                            <div class="footer-brand-title">GRAND HOTEL</div>
+                            <div class="footer-brand-sub">Resort & Luxury Spa</div>
+                        </div>
+                    </div>
+                    <p class="small" style="line-height: 1.8; color: #A8A29E;">
+                        Khu nghỉ dưỡng 5 sao tiêu chuẩn quốc tế tọa lạc bên vịnh biển Nha Trang tuyệt mỹ, mang đến không gian an yên, tinh tế và những trải nghiệm nghỉ dưỡng thượng lưu đích thực.
+                    </p>
+                    <div class="d-flex gap-2 mt-3">
+                        <a href="#" class="footer-social-btn"><i class="fa-brands fa-facebook-f"></i></a>
+                        <a href="#" class="footer-social-btn"><i class="fa-brands fa-instagram"></i></a>
+                        <a href="#" class="footer-social-btn"><i class="fa-brands fa-youtube"></i></a>
+                        <a href="#" class="footer-social-btn"><i class="fa-brands fa-tiktok"></i></a>
+                    </div>
+                </div>
+
+                <!-- Col 2: Quick Links -->
+                <div class="col-6 col-md-2">
+                    <div class="footer-heading">Khám phá</div>
+                    <div><a th:href="@{/rooms}" class="footer-link">Tất cả hạng phòng</a></div>
+                    <div><a th:href="@{/about}" class="footer-link">Về chúng tôi</a></div>
+                    <div><a th:href="@{/services}" class="footer-link">Dịch vụ & Tiện ích</a></div>
+                    <div><a th:href="@{/reviews}" class="footer-link">Đánh giá khách hàng</a></div>
+                    <div><a th:href="@{/my-account?tab=bookings}" class="footer-link">Tra cứu đơn đặt</a></div>
+                </div>
+
+                <!-- Col 3: Policies -->
+                <div class="col-6 col-md-2">
+                    <div class="footer-heading">Chính sách</div>
+                    <div><a href="#" class="footer-link">Quy định nhận phòng</a></div>
+                    <div><a href="#" class="footer-link">Chính sách hủy phòng</a></div>
+                    <div><a href="#" class="footer-link">Bảo mật thông tin</a></div>
+                    <div><a href="#" class="footer-link">Điều khoản dịch vụ</a></div>
+                    <div><a href="#" class="footer-link">Chương trình VIP</a></div>
+                </div>
+
+                <!-- Col 4: Contact & Newsletter -->
+                <div class="col-12 col-md-4">
+                    <div class="footer-heading">Liên hệ & Hỗ trợ</div>
+                    <div class="small mb-2" style="color: #D6D3D1;"><i class="fa-solid fa-location-dot me-2" style="color: #C5A880;"></i>123 Trần Phú, Lộc Thọ, TP. Nha Trang</div>
+                    <div class="small mb-2" style="color: #D6D3D1;"><i class="fa-solid fa-phone me-2" style="color: #C5A880;"></i>Hotline 24/7: 1900 8888 &bull; (0258) 3888 999</div>
+                    <div class="small mb-3" style="color: #D6D3D1;"><i class="fa-solid fa-envelope me-2" style="color: #C5A880;"></i>Email: reservation@grandhotel.vn</div>
+                    <div class="footer-info-badge">
+                        <i class="fa-solid fa-clock me-2" style="color: #C5A880;"></i> Lễ tân phục vụ 24/7 &bull; Nhận phòng từ 14:00
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Bottom Copyright -->
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center pt-4 small" style="color: #94a3b8;">
+                <div>&copy; 2026 Grand Hotel Resort & Spa. All rights reserved.</div>
+                <div class="mt-2 mt-sm-0 d-flex gap-3 align-items-center">
+                    <span>Trải nghiệm nghỉ dưỡng 5 sao</span>
+                    <span>&bull;</span>
+                    <span>Hệ thống Quản trị & Đặt phòng trực tuyến</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Toast Notification Trigger -->
+    <script th:src="@{/js/client-layout.js}"></script>
+    <!-- Notification Bell Trigger -->
+    <script th:src="@{/js/client-notifications.js}"></script>
+    <th:block layout:fragment="script"></th:block>
+</body>
+</html>

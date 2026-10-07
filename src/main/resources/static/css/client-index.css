@@ -1,0 +1,424 @@
+/* ==========================================================================
+   GRAND HOTEL - CLIENT HOMEPAGE (INDEX) STYLES
+   Quiet Luxury & Warm Editorial Theme (Đồng nhất 1 font Plus Jakarta Sans)
+   ========================================================================== */
+
+/* ============ 1. HERO BANNER ============ */
+.hero-banner {
+    position: relative;
+    min-height: 640px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #FFFFFF;
+    text-align: center;
+    padding: 120px 20px 140px;
+    background: linear-gradient(180deg, rgba(23, 21, 19, 0.5) 0%, rgba(23, 21, 19, 0.75) 100%),
+                url('https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=2000&q=85') center center / cover no-repeat;
+    background-attachment: scroll;
+}
+
+.hero-editorial-badge {
+    background: rgba(250, 248, 245, 0.15);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(247, 243, 236, 0.35);
+    color: #F7F3EC;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    padding: 7px 20px;
+    border-radius: var(--lux-radius-pill);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 24px;
+}
+
+.hero-title {
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
+    font-size: clamp(2.2rem, 4.5vw, 3.6rem);
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.03em;
+    color: #FAF8F5;
+    margin-bottom: 20px;
+    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.hero-subtitle {
+    font-size: clamp(14.5px, 1.8vw, 16.5px);
+    font-weight: 400;
+    line-height: 1.7;
+    color: #E7E5E4;
+    max-width: 720px;
+    margin: 0 auto 36px;
+    letter-spacing: 0.1px;
+}
+
+/* ============ 2. FLOATING SEARCH CAPSULE ============ */
+.search-widget-card {
+    background: #FFFFFF;
+    border-radius: 20px;
+    padding: 28px 34px;
+    box-shadow: 0 20px 45px -10px rgba(28, 25, 23, 0.12);
+    margin-top: -65px;
+    position: relative;
+    z-index: 20;
+    border: 1px solid var(--lux-border);
+}
+
+.search-label {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--lux-gold-dark);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.search-widget-card .form-control,
+.search-widget-card .form-select {
+    background-color: var(--lux-surface-muted);
+    border: 1px solid var(--lux-border);
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--lux-dark);
+    padding: 12px 14px;
+    transition: var(--lux-transition);
+}
+
+.search-widget-card .form-control:focus,
+.search-widget-card .form-select:focus {
+    background-color: #FFFFFF;
+    border-color: var(--lux-gold);
+    box-shadow: 0 0 0 3px var(--lux-gold-glow);
+}
+
+.search-submit-btn {
+    width: 100%;
+    padding: 13px;
+    font-size: 14.5px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    border-radius: 10px;
+}
+
+/* ============ 3. ABOUT STORY SECTION ============ */
+.about-image-wrapper {
+    position: relative;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: var(--lux-shadow-md);
+}
+
+.about-img {
+    height: 460px;
+    width: 100%;
+    object-fit: cover;
+    transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.about-image-wrapper:hover .about-img {
+    transform: scale(1.03);
+}
+
+.about-award-badge {
+    position: absolute;
+    bottom: 24px;
+    left: 24px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-radius: 14px;
+    padding: 14px 18px;
+    border: 1px solid var(--lux-border);
+    box-shadow: var(--lux-shadow-md);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.award-icon-box {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--lux-gold-light);
+    color: var(--lux-gold-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+}
+
+.stat-counter-box {
+    background: #FFFFFF;
+    border: 1px solid var(--lux-border);
+    border-radius: 14px;
+    padding: 22px 16px;
+    text-align: center;
+    box-shadow: var(--lux-shadow-xs);
+    transition: var(--lux-transition);
+}
+
+.stat-counter-box:hover {
+    border-color: var(--lux-gold);
+    transform: translateY(-3px);
+    box-shadow: var(--lux-shadow-sm);
+}
+
+.stat-number {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 30px;
+    font-weight: 800;
+    color: var(--lux-gold-dark);
+    line-height: 1;
+    margin-bottom: 6px;
+    letter-spacing: -0.02em;
+}
+
+/* ============ 4. SIGNATURE SUITES & ROOM CARDS ============ */
+.rooms-showcase-section {
+    background: var(--lux-surface-warm);
+    border-top: 1px solid var(--lux-border);
+    border-bottom: 1px solid var(--lux-border);
+    padding: 90px 0;
+}
+
+.room-card-lux {
+    background: #FFFFFF;
+    border: 1px solid var(--lux-border);
+    border-radius: 18px;
+    overflow: hidden;
+    transition: var(--lux-transition);
+    box-shadow: var(--lux-shadow-xs);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.room-card-lux:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--lux-shadow-md);
+    border-color: var(--lux-gold);
+}
+
+.room-card-img-wrap {
+    position: relative;
+    height: 250px;
+    overflow: hidden;
+}
+
+.room-card-img {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.room-card-lux:hover .room-card-img {
+    transform: scale(1.06);
+}
+
+.room-guest-badge {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: rgba(28, 25, 23, 0.75);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: #FAF8F5;
+    font-size: 11.5px;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: var(--lux-radius-pill);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.room-card-body {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    justify-content: space-between;
+}
+
+.room-card-title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--lux-dark);
+    margin-bottom: 8px;
+    transition: color 0.2s ease;
+    letter-spacing: -0.01em;
+}
+
+.room-card-lux:hover .room-card-title {
+    color: var(--lux-gold-dark);
+}
+
+.room-card-desc {
+    color: var(--lux-text-muted);
+    font-size: 13px;
+    line-height: 1.6;
+    margin-bottom: 16px;
+}
+
+.amenity-pill-sm {
+    background: var(--lux-surface-muted);
+    border: 1px solid var(--lux-border);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 11.5px;
+    font-weight: 500;
+    color: var(--lux-text-body);
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.room-card-price-row {
+    display: flex;
+    flex-direction: column;
+    padding-top: 16px;
+    border-top: 1px solid rgba(229, 224, 216, 0.6);
+}
+
+.room-price-amount {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 21px;
+    font-weight: 800;
+    color: var(--lux-gold-dark);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+}
+
+/* ============ 5. CURATED EXPERIENCES / SERVICES ============ */
+.service-feature-card {
+    background: #FFFFFF;
+    border: 1px solid var(--lux-border);
+    border-radius: 18px;
+    padding: 36px 24px;
+    text-align: center;
+    height: 100%;
+    transition: var(--lux-transition);
+    box-shadow: var(--lux-shadow-xs);
+}
+
+.service-feature-card:hover {
+    border-color: var(--lux-gold);
+    transform: translateY(-5px);
+    box-shadow: var(--lux-shadow-md);
+}
+
+.service-icon-wrap {
+    width: 64px;
+    height: 64px;
+    background: var(--lux-gold-light);
+    color: var(--lux-gold-dark);
+    border: 1px solid rgba(197, 168, 128, 0.3);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    margin: 0 auto 22px;
+    transition: var(--lux-transition);
+}
+
+.service-feature-card:hover .service-icon-wrap {
+    background: var(--lux-gold-dark);
+    color: #FFFFFF;
+    transform: scale(1.08);
+}
+
+.service-card-title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--lux-dark);
+    margin-bottom: 10px;
+}
+
+/* ============ 6. GUEST TESTIMONIALS ============ */
+.reviews-section {
+    background: var(--lux-surface-warm);
+    border-top: 1px solid var(--lux-border);
+    border-bottom: 1px solid var(--lux-border);
+    padding: 85px 0;
+}
+
+.review-card-client {
+    background: #FFFFFF;
+    border: 1px solid var(--lux-border);
+    border-radius: 18px;
+    padding: 30px 28px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: var(--lux-shadow-xs);
+    transition: var(--lux-transition);
+    position: relative;
+}
+
+.review-card-client:hover {
+    border-color: var(--lux-gold);
+    box-shadow: var(--lux-shadow-md);
+    transform: translateY(-4px);
+}
+
+.review-avatar-char {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--lux-gold-light);
+    color: var(--lux-gold-dark);
+    border: 1px solid rgba(197, 168, 128, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 15px;
+}
+
+.review-stars {
+    color: #D4AF37;
+    font-size: 12px;
+    display: flex;
+    gap: 2px;
+}
+
+.review-comment-text {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 14.5px;
+    font-weight: 400;
+    font-style: normal;
+    color: var(--lux-text-body);
+    line-height: 1.65;
+    margin-top: 14px;
+}
+
+/* ============ 7. CONTACT & LOCATION ============ */
+.contact-form-card {
+    background: #FFFFFF;
+    border: 1px solid var(--lux-border);
+    border-radius: 18px;
+    padding: 34px;
+    box-shadow: var(--lux-shadow-xs);
+}
+
+.contact-info-card {
+    background: #FFFFFF;
+    border: 1px solid var(--lux-border);
+    border-radius: 18px;
+    padding: 34px;
+    box-shadow: var(--lux-shadow-xs);
+}

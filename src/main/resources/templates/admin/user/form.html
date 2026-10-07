@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin-layout}">
+<head>
+    <title th:text="${isEdit} ? 'Chỉnh sửa tài khoản - Grand Hotel' : 'Cấp tài khoản mới - Grand Hotel'">Quản lý Tài khoản - Grand Hotel</title>
+    <link rel="stylesheet" th:href="@{/css/admin/user-form.css}">
+</head>
+<body>
+    <div layout:fragment="content">
+
+        <!-- Top Breadcrumb -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+            <div>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-1 small">
+                        <li class="breadcrumb-item"><a th:href="@{/admin/users}" class="text-decoration-none text-muted">Tài khoản</a></li>
+                        <li class="breadcrumb-item active text-warning" aria-current="page" style="color: #d97706 !important;"
+                            th:text="${isEdit} ? 'Chỉnh sửa tài khoản' : 'Cấp mới tài khoản'">Cấp mới tài khoản</li>
+                    </ol>
+                </nav>
+                <h4 class="fw-bold text-dark mb-0">
+                    <i class="fa-solid fa-user-shield text-warning me-2" style="color: #d97706 !important;"></i>
+                    <span th:text="${isEdit} ? 'Chỉnh sửa Tài khoản #' + ${user.id} : 'Cấp mới Tài khoản Nhân viên'">Cấp mới Tài khoản</span>
+                </h4>
+            </div>
+            <div>
+                <a th:href="@{/admin/users}" class="btn btn-light border rounded-3 px-3">
+                    <i class="fa-solid fa-arrow-left me-2"></i> Quay lại danh sách
+                </a>
+            </div>
+        </div>
+
+        <!-- Form Card Container -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 mx-auto" style="max-width: 850px; background: #ffffff;">
+            <form th:action="${isEdit} ? @{/admin/users/edit/{id}(id=${user.id})} : @{/admin/users/create}" 
+                  th:object="${user}" method="post" enctype="multipart/form-data">
+
+                <div class="row g-4">
+
+                    <!-- CỘT TRÁI: Thông tin đăng nhập & Phân quyền -->
+                    <div class="col-12 col-md-6 border-end-md">
+                        <div class="form-section-title">
+                            <i class="fa-solid fa-key text-warning me-2" style="color: #d97706 !important;"></i>1. Thông tin Đăng nhập & Vai trò
+                        </div>
+
+                        <!-- Tên đăng nhập (username) -->
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold text-dark">Tên đăng nhập (Username) <span class="text-danger">*</span></label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-light text-muted">@</span>
+                                <input type="text" th:field="*{username}" class="form-control bg-light" 
+                                       placeholder="vd: le_tan_an, ketoan_mai" required minlength="3" maxlength="50"
+                                       pattern="^[a-zA-Z0-9_.]+$">
+                            </div>
+                            <div class="form-text small" style="font-size: 11px;">Chỉ bao gồm chữ cái, số, dấu gạch dưới và dấu chấm.</div>
+                        </div>
+
+                        <!-- Mật khẩu (password) -->
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold text-dark">
+                                Mật khẩu <span th:if="${!isEdit}" class="text-danger">*</span>
+                                <span th:if="${isEdit}" class="text-muted fw-normal">(để trống nếu không đổi)</span>
+                            </label>
+                            <div class="input-group input-group-sm">
+                                <input type="password" name="rawPassword" id="inputPassword" class="form-control bg-light" 
+                                       placeholder="••••••••" th:required="${!isEdit}" minlength="6">
+                                <button type="button" class="btn btn-outline-secondary" onclick="togglePasswordVisibility('inputPassword', this)">
+                                    <i class="fa-regular fa-eye"></i>
+                                </button>
+                            </div>
+                            <div class="form-text small" style="font-size: 11px;">Mật khẩu tối thiểu 6 ký tự bảo mật.</div>
+                        </div>
+
+                        <!-- Danh sách Vai trò (Roles) -->
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold text-dark d-block mb-2">Vai trò / Quyền hạn <span class="text-danger">*</span></label>
+                            <div class="d-flex flex-column gap-2 p-2.5 bg-light rounded-3 border">
+                                <div th:each="r : ${roles}" class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="roleIds" th:value="${r.id}" 
+                                           th:id="'role_' + ${r.id}"
+                                           th:checked="${user.roles != null and user.roles.contains(r)}">
+                                    <label class="form-check-label small fw-semibold" th:for="'role_' + ${r.id}">
+                                        <span th:text="${r.displayName}">Quản trị viên</span>
+                                        <span class="text-muted fw-normal" style="font-size: 11.5px;" th:text="' - ' + ${r.description}">Quản trị hệ thống</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CỘT PHẢI: Thông tin cá nhân & Avatar -->
+                    <div class="col-12 col-md-6">
+                        <div class="form-section-title">
+                            <i class="fa-solid fa-id-card text-warning me-2" style="color: #d97706 !important;"></i>2. Thông tin Cá nhân & Ảnh đại diện
+                        </div>
+
+                        <!-- Avatar Cá nhân (Cloudinary) -->
+                        <div class="text-center mb-3">
+                            <div class="avatar-upload-wrapper" onclick="document.getElementById('avatarInput').click()" title="Nhấn để đổi ảnh đại diện">
+                                <img id="avatarPreview"
+                                     th:src="${user.avatarUrl != null and !user.avatarUrl.isEmpty()} ? ${user.avatarUrl} : ''"
+                                     alt="Avatar"
+                                     class="avatar-preview-img"
+                                     th:classappend="${user.avatarUrl == null or user.avatarUrl.isEmpty()} ? 'd-none' : ''" />
+
+                                <div id="avatarPlaceholder" class="avatar-placeholder"
+                                     th:classappend="${user.avatarUrl != null and !user.avatarUrl.isEmpty()} ? 'd-none' : ''">
+                                    <i class="fa-solid fa-user" style="font-size: 32px;"></i>
+                                </div>
+
+                                <div class="avatar-edit-badge">
+                                    <i class="fa-solid fa-camera"></i>
+                                </div>
+                            </div>
+                            <div class="text-muted small" style="font-size: 11.5px;">Ảnh đại diện (JPG, PNG, WEBP, tối đa 5MB)</div>
+                            <input type="file" id="avatarInput" name="avatarFile" accept="image/jpeg,image/png,image/webp"
+                                   class="d-none"
+                                   data-single-preview="#avatarPreview"
+                                   data-placeholder="#avatarPlaceholder">
+                        </div>
+
+                        <!-- Họ và tên (fullName) -->
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold text-dark">Họ và tên đầy đủ <span class="text-danger">*</span></label>
+                            <input type="text" th:field="*{fullName}" class="form-control form-control-sm bg-light" 
+                                   placeholder="vd: Nguyễn Văn An" required maxlength="100">
+                        </div>
+
+                        <!-- Email -->
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold text-dark">Email liên hệ <span class="text-danger">*</span></label>
+                            <input type="email" th:field="*{email}" class="form-control form-control-sm bg-light" 
+                                   placeholder="vd: an.nguyen@grandhotel.vn" required maxlength="100">
+                        </div>
+
+                        <!-- Số điện thoại -->
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold text-dark">Số điện thoại</label>
+                            <input type="tel" th:field="*{phone}" class="form-control form-control-sm bg-light" 
+                                   placeholder="0912345678" maxlength="20">
+                        </div>
+
+                        <!-- Trạng thái kích hoạt & Khóa tài khoản -->
+                        <div class="p-3 bg-light rounded-3 border mb-3">
+                            <div class="form-check form-switch mb-2">
+                                <input class="form-check-input" type="checkbox" th:field="*{enabled}" id="enabledSwitch">
+                                <label class="form-check-label small fw-semibold text-dark" for="enabledSwitch">Kích hoạt hoạt động (Enabled)</label>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" th:field="*{accountNonLocked}" id="lockSwitch">
+                                <label class="form-check-label small fw-semibold text-dark" for="lockSwitch">Tài khoản bình thường (Không bị khóa)</label>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- Cụm nút Submit & Cancel -->
+                <div class="d-flex justify-content-end gap-2 pt-3 border-top mt-4">
+                    <a th:href="@{/admin/users}" class="btn btn-light rounded-3 px-3.5 py-2">Hủy bỏ</a>
+                    <button type="submit" class="btn gold-btn px-4 py-2 rounded-3 fw-semibold">
+                        <i class="fa-solid fa-floppy-disk me-2"></i>
+                        <span th:text="${isEdit} ? 'Cập nhật tài khoản' : 'Lưu tài khoản'">Lưu tài khoản</span>
+                    </button>
+                </div>
+
+            </form>
+        </div>
+
+    </div>
+
+    <!-- Script toggle password & image upload preview -->
+    <th:block layout:fragment="script">
+        <script th:src="@{/js/image-upload.js}"></script>
+        <script th:src="@{/js/admin/user-form.js}"></script>
+    </th:block>
+</body>
+</html>

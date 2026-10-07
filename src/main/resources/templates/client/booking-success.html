@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/client-layout}">
+<head>
+    <title>Đặt phòng thành công - Grand Hotel</title>
+    <link rel="stylesheet" th:href="@{/css/client-booking-success.css}">
+</head>
+<body>
+    <div layout:fragment="content">
+
+        <div class="container py-5">
+            <div class="success-card-lux text-center">
+                
+                <!-- Icon Success -->
+                <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 76px; height: 76px; background: #ecfdf5; color: #059669; font-size: 36px;">
+                    <i class="fa-solid fa-circle-check"></i>
+                </div>
+
+                <span class="text-success fw-bold text-uppercase small" style="letter-spacing: 1.5px;">GIAO DỊCH HOÀN TẤT</span>
+                <h2 class="serif-title fw-bold text-dark display-6 mt-1 mb-2">Chúc Mừng Quý Khách Đã Đặt Phòng Thành Công!</h2>
+                <p class="text-muted small mb-4">Mã đơn đặt phòng đã được ghi nhận vào hệ thống của Grand Hotel.</p>
+
+                <!-- Mã Đặt phòng -->
+                <div class="code-box-gold mb-4">
+                    <div class="text-muted small text-uppercase fw-semibold" style="font-size: 11px;">MÃ ĐẶT PHÒNG CỦA BẠN</div>
+                    <div class="fw-bold fs-3" style="color: #b45309; font-family: 'JetBrains Mono', monospace;" th:text="${booking.bookingCode}">BK-20260823-1001</div>
+                </div>
+
+                <!-- Bảng chi tiết đơn đặt -->
+                <div class="card border bg-light rounded-4 text-start p-4 mb-4">
+                    <h6 class="fw-bold text-dark mb-3 pb-2 border-bottom">
+                        <i class="fa-solid fa-circle-info text-warning me-2" style="color: #d97706 !important;"></i> Thông tin Chuyến lưu trú
+                    </h6>
+                    <div class="row g-3 small">
+                        <div class="col-6 col-md-4">
+                            <span class="text-muted d-block">Khách hàng:</span>
+                            <strong class="text-dark" th:text="${booking.customer != null ? booking.customer.fullName : 'Khách hàng'}">Nguyễn Văn An</strong>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <span class="text-muted d-block">Số điện thoại:</span>
+                            <strong class="text-dark" th:text="${booking.customer != null ? booking.customer.phone : ''}">0912345678</strong>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <span class="text-muted d-block">Trạng thái đơn:</span>
+                            <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill px-2.5 py-1" style="color: #d97706 !important;">
+                                Chờ nhận phòng (PENDING)
+                            </span>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <span class="text-muted d-block">Nhận phòng (Check-in):</span>
+                            <strong class="text-dark" th:text="${#temporals.format(booking.checkIn, 'dd/MM/yyyy 14:00')}">23/08/2026 14:00</strong>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <span class="text-muted d-block">Trả phòng (Check-out):</span>
+                            <strong class="text-dark" th:text="${#temporals.format(booking.checkOut, 'dd/MM/yyyy 12:00')}">25/08/2026 12:00</strong>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <span class="text-muted d-block">Tổng tiền phòng:</span>
+                            <strong style="color: #b45309; font-family: 'JetBrains Mono', monospace;" th:text="${#numbers.formatDecimal(booking.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                2,400,000 đ
+                            </strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hộp Chuyển khoản VietQR -->
+                <div class="p-4 bg-white border rounded-4 shadow-sm text-start mb-4">
+                    <div class="row g-4 align-items-center">
+                        <div class="col-12 col-md-4 text-center">
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=GRANDHOTEL_RESERVATION" class="img-fluid rounded-3 border p-1" style="max-width: 140px;" alt="VietQR">
+                            <div class="text-muted small mt-1" style="font-size: 11px;">Quét mã VietQR chuyển khoản</div>
+                        </div>
+                        <div class="col-12 col-md-8 small">
+                            <h6 class="fw-bold text-dark mb-2"><i class="fa-solid fa-building-columns text-primary me-2"></i> Thông tin Chuyển khoản Ngân hàng</h6>
+                            <div class="mb-1 text-muted">Ngân hàng: <strong class="text-dark">MB Bank (Ngân hàng Quân Đội)</strong></div>
+                            <div class="mb-1 text-muted">Số tài khoản: <strong class="text-dark" style="font-family: monospace;">0988 888 8888</strong></div>
+                            <div class="mb-1 text-muted">Chủ tài khoản: <strong class="text-dark">CONG TY CP KHACH SAN GRAND HOTEL</strong></div>
+                            <div class="mb-1 text-muted">Nội dung CK: <strong class="text-danger" style="font-family: monospace;" th:text="${booking.bookingCode}">BK-20260823-1001</strong></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nút điều hướng -->
+                <div class="d-flex justify-content-center gap-3">
+                    <a th:href="@{/my-bookings}" class="btn btn-outline-dark rounded-pill px-4 py-2.5 fw-semibold small">
+                        <i class="fa-solid fa-suitcase me-2"></i> Chuyến đi của tôi
+                    </a>
+                    <a th:href="@{/}" class="btn gold-btn rounded-pill px-4 py-2.5 fw-semibold small">
+                        <i class="fa-solid fa-house me-2"></i> Về Trang chủ
+                    </a>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

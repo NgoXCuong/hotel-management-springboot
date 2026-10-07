@@ -1,0 +1,31 @@
+.result-card-lux {
+    background: #ffffff;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 28px;
+    padding: 48px 36px;
+    box-shadow: 0 10px 35px rgba(0,0,0,0.06);
+    max-width: 840px;
+    margin: 0 auto;
+}
+
+.code-box-gold {
+    background: #fffbeb;
+    border: 2px dashed #d97706;
+    border-radius: 16px;
+    padding: 16px 24px;
+    display: inline-flex;
+    align-items: center;
+    gap: 16px;
+}
+
+@media print {
+    .navbar, .luxury-footer, .no-print {
+        display: none !important;
+    }
+
+    .result-card-lux {
+        border: none;
+        box-shadow: none;
+        padding: 0;
+    }
+}

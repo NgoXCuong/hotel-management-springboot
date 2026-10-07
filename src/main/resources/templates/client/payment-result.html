@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/client-layout}">
+<head>
+    <title>Kết quả Đặt phòng - Grand Hotel</title>
+    <link rel="stylesheet" th:href="@{/css/client-payment-result.css}">
+</head>
+<body>
+    <div layout:fragment="content">
+
+        <div class="container py-5">
+            <div class="result-card-lux text-center">
+
+                <!-- ============ TRƯỜNG HỢP 1: THÀNH CÔNG ============ -->
+                <div th:if="${success}">
+                    
+                    <!-- Icon Success -->
+                    <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3 shadow-sm" 
+                         style="width: 80px; height: 80px; background: #ecfdf5; color: #059669; font-size: 38px;">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+
+                    <span class="text-success fw-bold text-uppercase small" style="letter-spacing: 2px;">GIAO DỊCH GHI NHẬN THÀNH CÔNG</span>
+                    <h2 class="fw-bold text-dark display-6 mt-1 mb-2" style="font-weight: 800 !important;">Chúc Mừng Quý Khách Đã Đặt Phòng Thành Công!</h2>
+                    <p class="text-secondary small mb-4 fw-semibold">Đơn đặt phòng của Quý khách đã được tiếp nhận trên hệ thống Grand Hotel.</p>
+
+                    <!-- Trạng thái Thanh toán Online -->
+                    <div th:if="${paid}" class="alert alert-success border-0 rounded-4 p-3 mb-4 d-inline-flex align-items-center gap-2" style="background: #ecfdf5; color: #065f46;">
+                        <i class="fa-solid fa-circle-check fs-4 text-success"></i>
+                        <span class="fw-bold">ĐÃ THANH TOÁN TIỀN CỌC TRỰC TUYẾN THÀNH CÔNG (Trạng thái đơn: ĐÃ DUYỆT / CONFIRMED)</span>
+                    </div>
+
+                    <!-- Mã Đặt phòng -->
+                    <div class="code-box-gold mb-4 text-start">
+                        <div>
+                            <div class="text-muted small text-uppercase fw-bold" style="font-size: 11px;">MÃ ĐƠN ĐẶT PHÒNG CỦA BẠN</div>
+                            <div class="fw-bold fs-3" style="color: #b45309; font-family: 'JetBrains Mono', monospace;" id="bookingCodeText" th:text="${booking.bookingCode}">
+                                BK-20260824-001
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-warning rounded-pill px-3 fw-bold no-print" onclick="copyBookingCode()" style="color: #b45309; border-color: #f59e0b;">
+                            <i class="fa-regular fa-copy me-1"></i> Sao chép mã
+                        </button>
+                    </div>
+
+                    <!-- Bảng chi tiết đơn đặt -->
+                    <div class="card border bg-light rounded-4 text-start p-4 mb-4" style="border-color: #cbd5e1 !important;">
+                        <h6 class="fw-bold text-dark mb-3 pb-2 border-bottom">
+                            <i class="fa-solid fa-circle-info text-warning me-2" style="color: #d97706 !important;"></i> Thông tin Chi tiết Kỳ nghỉ
+                        </h6>
+                        <div class="row g-3 small">
+                            <div class="col-6 col-md-4">
+                                <span class="text-muted d-block fw-semibold">Khách hàng đại diện:</span>
+                                <strong class="text-dark" th:text="${booking.customer != null ? booking.customer.fullName : 'Quý khách'}">Nguyễn Văn An</strong>
+                            </div>
+                            <div class="col-6 col-md-4">
+                                <span class="text-muted d-block fw-semibold">Số điện thoại:</span>
+                                <strong class="text-dark" th:text="${booking.customer != null ? booking.customer.phone : ''}">0912345678</strong>
+                            </div>
+                            <div class="col-6 col-md-4">
+                                <span class="text-muted d-block fw-semibold">Trạng thái đơn:</span>
+                                <span class="badge rounded-pill px-2.5 py-1 border" th:classappend="${booking.status.badgeClass}" th:text="${booking.status.displayName}">
+                                    Chờ xác nhận (PENDING)
+                                </span>
+                            </div>
+                            <div class="col-6 col-md-4">
+                                <span class="text-muted d-block fw-semibold">Thời gian nhận phòng:</span>
+                                <strong class="text-dark" th:text="${#temporals.format(booking.checkIn, 'dd/MM/yyyy 14:00')}">24/08/2026 14:00</strong>
+                            </div>
+                            <div class="col-6 col-md-4">
+                                <span class="text-muted d-block fw-semibold">Thời gian trả phòng:</span>
+                                <strong class="text-dark" th:text="${#temporals.format(booking.checkOut, 'dd/MM/yyyy 12:00')}">25/08/2026 12:00</strong>
+                            </div>
+                            <div class="col-6 col-md-4">
+                                <span class="text-muted d-block fw-semibold">Số khách lưu trú:</span>
+                                <strong class="text-dark" th:text="${booking.numberOfGuests} + ' người'">2 người</strong>
+                            </div>
+                            <div class="col-6 col-md-4">
+                                <span class="text-muted d-block fw-semibold">Tổng tiền phòng:</span>
+                                <strong class="text-dark" style="font-family: 'JetBrains Mono', monospace;" th:text="${#numbers.formatDecimal(booking.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                    1,200,000 đ
+                                </strong>
+                            </div>
+                            <div class="col-6 col-md-4">
+                                <span class="text-muted d-block fw-semibold">Tiền cọc 30%:</span>
+                                <strong style="color: #b45309; font-family: 'JetBrains Mono', monospace;" th:text="${#numbers.formatDecimal(booking.depositAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                    360,000 đ
+                                </strong>
+                            </div>
+                            <div class="col-6 col-md-4">
+                                <span class="text-muted d-block fw-semibold">Phương thức:</span>
+                                <strong class="text-primary" th:text="${method}">BANK_TRANSFER</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ============ PHÂN HỆ THANH TOÁN 1: VIETQR CHUYỂN KHOẢN ============ -->
+                    <div th:if="${method == 'BANK_TRANSFER' and !paid}" class="p-4 bg-white border rounded-4 shadow-sm text-start mb-4" style="border-color: #cbd5e1 !important;">
+                        <div class="row g-4 align-items-center">
+                            <div class="col-12 col-md-4 text-center">
+                                <img th:src="${vietQrUrl}" 
+                                     class="img-fluid rounded-3 border p-1 shadow-sm" style="max-width: 170px;" alt="Mã VietQR Chuyển khoản">
+                                <div class="text-muted small mt-2 fw-semibold" style="font-size: 11.5px;">Quét VietQR trên app ngân hàng</div>
+                            </div>
+                            <div class="col-12 col-md-8 small">
+                                <h6 class="fw-bold text-dark mb-2.5"><i class="fa-solid fa-building-columns text-primary me-2"></i> Chuyển khoản Ngân hàng (VietQR Napas 247)</h6>
+                                <div class="mb-1.5 text-secondary">Ngân hàng: <strong class="text-dark">MB Bank (Ngân hàng TMCP Quân Đội)</strong></div>
+                                <div class="mb-1.5 text-secondary">Số tài khoản: <strong class="text-dark" id="accNoText" style="font-family: monospace; font-size: 15px;">0388545085</strong> 
+                                    <button class="btn btn-sm btn-link p-0 text-decoration-none fw-bold ms-1" onclick="copyText('accNoText', 'số tài khoản')"><i class="fa-regular fa-copy"></i></button>
+                                </div>
+                                <div class="mb-1.5 text-secondary">Chủ tài khoản: <strong class="text-dark">NGO XUAN CUONG</strong></div>
+                                <div class="mb-1.5 text-secondary">Số tiền cọc: <strong class="text-warning" style="color: #b45309 !important; font-family: monospace; font-size: 15px;" th:text="${#numbers.formatDecimal(booking.depositAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">360,000 đ</strong></div>
+                                <div class="mb-2 text-secondary">Nội dung chuyển khoản: <strong class="text-danger" style="font-family: monospace; font-size: 15px;" th:text="${booking.bookingCode}">BK-20260824-001</strong></div>
+
+                                <div class="p-2.5 rounded-3 bg-light border text-muted" style="font-size: 11.5px;">
+                                    <i class="fa-solid fa-spinner fa-spin text-primary me-1"></i> Đang chờ giao dịch... Hệ thống SePay sẽ tự động xác nhận đơn ngay khi nhận được chuyển khoản.
+                                </div>
+
+                                <div class="mt-3 pt-2 border-top d-flex align-items-center gap-2 flex-wrap">
+                                    <button type="button" class="btn btn-sm btn-success rounded-pill px-3.5 py-2 fw-bold shadow-sm" id="btnManualConfirm" onclick="confirmPaymentDeposit()">
+                                        <i class="fa-solid fa-circle-check me-1.5"></i> Tôi đã chuyển khoản (Xác nhận ngay)
+                                    </button>
+                                    <span class="text-muted" style="font-size: 11.5px;">Bấm để xác nhận ngay lập tức sau khi hoàn tất chuyển khoản</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ============ PHÂN HỆ THANH TOÁN 2: VÍ MOMO QR ============ -->
+                    <div th:if="${method == 'MOMO' and !paid}" class="p-4 bg-white border rounded-4 shadow-sm text-start mb-4" style="border-color: #cbd5e1 !important;">
+                        <div class="row g-4 align-items-center">
+                            <div class="col-12 col-md-4 text-center">
+                                <img th:src="${momoQrUrl}" 
+                                     class="img-fluid rounded-3 border p-1 shadow-sm" style="max-width: 170px;" alt="Mã MoMo QR">
+                                <div class="text-muted small mt-2 fw-semibold" style="font-size: 11.5px;">Quét mã QR trên App MoMo</div>
+                            </div>
+                            <div class="col-12 col-md-8 small">
+                                <h6 class="fw-bold mb-2.5" style="color: #d82d8b;"><i class="fa-solid fa-wallet me-2"></i> Thanh toán qua Ví Điện Tử MoMo</h6>
+                                <div class="mb-1.5 text-secondary">Ví MoMo nhận: <strong class="text-dark">0912345678</strong> (GRAND HOTEL RESORT)</div>
+                                <div class="mb-1.5 text-secondary">Số tiền cọc: <strong class="text-danger" style="font-family: monospace; font-size: 15px;" th:text="${#numbers.formatDecimal(booking.depositAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">360,000 đ</strong></div>
+                                <div class="mb-2 text-secondary">Lời nhắn / Nội dung: <strong class="text-dark" style="font-family: monospace; font-size: 15px;" th:text="'GRANDHOTEL ' + ${booking.bookingCode}">GRANDHOTEL BK-001</strong></div>
+
+                                <div class="p-2.5 rounded-3 bg-light border text-muted" style="font-size: 11.5px;">
+                                    <i class="fa-solid fa-bolt text-warning me-1"></i> Mở ứng dụng MoMo &rarr; Chọn Quét Mã &rarr; Nhập số tiền và hoàn tất giao dịch.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ============ PHÂN HỆ THANH TOÁN 3: TẠI QUẦY LỄ TÂN ============ -->
+                    <div th:if="${method == 'CASH'}" class="p-4 bg-light border rounded-4 text-start mb-4" style="border-color: #cbd5e1 !important;">
+                        <h6 class="fw-bold text-dark mb-2"><i class="fa-solid fa-handshake text-success me-2"></i> Thanh toán trực tiếp khi nhận phòng</h6>
+                        <p class="text-secondary small mb-0">
+                            Quý khách vui lòng cung cấp mã đơn đặt phòng <strong><span th:text="${booking.bookingCode}">BK-001</span></strong> cho nhân viên Lễ tân tại sảnh khách sạn khi làm thủ tục Check-in để thanh toán tiền phòng (Tiền mặt hoặc quẹt thẻ POS).
+                        </p>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex justify-content-center gap-3 no-print flex-wrap">
+                        <a th:href="@{/my-account?tab=bookings}" class="btn btn-outline-dark rounded-pill px-4 py-2.5 fw-bold small">
+                            <i class="fa-solid fa-suitcase me-2"></i> Xem đơn trong Tài khoản
+                        </a>
+                        <button type="button" class="btn btn-light border rounded-pill px-4 py-2.5 fw-bold small" onclick="window.print()">
+                            <i class="fa-solid fa-print me-2"></i> In phiếu xác nhận
+                        </button>
+                        <a th:href="@{/}" class="btn gold-btn rounded-pill px-4 py-2.5 fw-bold small shadow-sm">
+                            <i class="fa-solid fa-house me-2"></i> Về Trang chủ
+                        </a>
+                    </div>
+
+                </div>
+
+                <!-- ============ TRƯỜNG HỢP 2: THẤT BẠI ============ -->
+                <div th:unless="${success}">
+                    
+                    <!-- Icon Failed -->
+                    <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3 shadow-sm" 
+                         style="width: 80px; height: 80px; background: #fef2f2; color: #ef4444; font-size: 38px;">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+
+                    <span class="text-danger fw-bold text-uppercase small" style="letter-spacing: 2px;">GIAO DỊCH CHƯA HOÀN TẤT</span>
+                    <h2 class="fw-bold text-dark display-6 mt-1 mb-2" style="font-weight: 800 !important;">Không Thể Hoàn Tất Giao Dịch</h2>
+                    <p class="text-secondary small mb-4 fw-semibold" th:text="${message != null ? message : 'Rất tiếc, đã có sự cố xảy ra trong quá trình xử lý đặt phòng của Quý khách.'}">
+                        Đã có sự cố trong quá trình xử lý.
+                    </p>
+
+                    <div class="p-4 bg-light rounded-4 border text-start mb-4 small text-secondary" style="border-color: #cbd5e1 !important;">
+                        <div class="fw-bold text-dark mb-2">Các nguyên nhân có thể xảy ra:</div>
+                        <ul class="mb-0 ps-3">
+                            <li>Bạn đã hủy phiên giao dịch hoặc đóng ứng dụng quét mã MoMo / Ngân hàng.</li>
+                            <li>Tài khoản ngân hàng không đủ số dư hoặc thông tin thanh toán không chính xác.</li>
+                            <li>Thời gian giao dịch vượt quá 15 phút quy định.</li>
+                        </ul>
+                    </div>
+
+                    <div class="d-flex justify-content-center gap-3 no-print">
+                        <a th:href="@{/rooms}" class="btn gold-btn rounded-pill px-4 py-2.5 fw-bold small shadow-sm">
+                            <i class="fa-solid fa-rotate-left me-2"></i> Thử đặt phòng lại
+                        </a>
+                        <a th:href="@{/contact}" class="btn btn-outline-dark rounded-pill px-4 py-2.5 fw-bold small">
+                            <i class="fa-solid fa-headset me-2"></i> Hotline hỗ trợ 1900 8888
+                        </a>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <th:block layout:fragment="script">
+        <script th:src="@{/js/client-payment-result.js}"></script>
+    </th:block>
+</body>
+</html>

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/client-layout}">
+<head>
+    <title layout:fragment="title">Dịch vụ & Tiện ích - Grand Hotel</title>
+    <link rel="stylesheet" th:href="@{/css/client-services.css}">
+</head>
+<body>
+    <div layout:fragment="content">
+
+        <!-- 1. Page Header Banner -->
+        <div class="page-header-banner">
+            <div class="container">
+                <span class="badge rounded-pill px-3 py-1 text-uppercase fw-bold small mb-2"
+                      style="color: #fde68a !important; background: rgba(217, 119, 6, 0.3) !important; border: 1px solid rgba(253, 230, 138, 0.4);">
+                    <i class="fa-solid fa-bell-concierge me-1.5 text-warning"></i> DỊCH VỤ & TIỆN ÍCH 5 SAO
+                </span>
+                <h1 class="fw-bold text-white display-5 mt-1" style="font-weight: 800 !important;">Dịch Vụ &amp; Tiện Ích Nghỉ Dưỡng</h1>
+                <p class="text-light opacity-90 mb-0" style="font-size: 15px; max-width: 640px; margin: 0 auto;">
+                    Tận hưởng trọn vẹn kỳ nghỉ với những dịch vụ độc quyền và tiện ích đẳng cấp thế giới ngay tại Grand Hotel.
+                </p>
+            </div>
+        </div>
+
+        <!-- 2. Danh sách Dịch vụ -->
+        <section class="py-5">
+            <div class="container py-3">
+                <div class="text-center mb-5">
+                    <span class="section-tag">DANH MỤC DỊCH VỤ</span>
+                    <h2 class="serif-title fw-bold text-dark display-6 mt-1 mb-0">Trải Nghiệm Dịch Vụ Độc Quyền</h2>
+                    <p class="text-muted" style="max-width: 600px; margin: 0 auto;">Từ ẩm thực tinh hoa đến spa trị liệu, mọi dịch vụ đều được thiết kế riêng cho Quý khách.</p>
+                </div>
+
+                <div class="row g-4">
+                    <div th:each="svc : ${services}" class="col-12 col-md-6 col-lg-4">
+                        <div class="service-card">
+                            <div class="service-card-img-wrap">
+                                <img th:if="${svc.imageUrl != null and !svc.imageUrl.isEmpty()}" th:src="${svc.imageUrl}" th:alt="${svc.name}">
+                                <img th:unless="${svc.imageUrl != null and !svc.imageUrl.isEmpty()}"
+                                     src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=800&q=80" th:alt="${svc.name}">
+                                <span class="badge bg-dark bg-opacity-75 text-white position-absolute top-0 start-0 m-3 px-3 py-1 rounded-pill small fw-semibold">
+                                    <i class="fa-solid fa-tag me-1.5 text-warning"></i>
+                                    <span th:text="${#numbers.formatDecimal(svc.price, 0, 'COMMA', 0, 'POINT')} + ' đ'">500,000 đ</span>
+                                </span>
+                            </div>
+                            <div class="p-4 d-flex flex-column flex-grow-1">
+                                <h5 class="fw-bold text-dark mb-2" th:text="${svc.name}">Massage thư giãn</h5>
+                                <p class="text-muted small mb-0 flex-grow-1" style="line-height: 1.6;" th:text="${svc.description}">
+                                    Liệu trình massage thư giãn toàn thân.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div th:if="${#lists.isEmpty(services)}" class="col-12 text-center py-5 text-muted">
+                        <i class="fa-solid fa-bell-concierge mb-3" style="font-size: 48px; opacity: 0.3;"></i>
+                        <h5 class="fw-bold text-dark">Danh mục dịch vụ đang được cập nhật</h5>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. Tiện nghi phòng -->
+        <section class="py-5" style="background: #f8fafc; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;">
+            <div class="container py-3">
+                <div class="text-center mb-5">
+                    <span class="section-tag">TIỆN NGHI PHÒNG</span>
+                    <h2 class="serif-title fw-bold text-dark display-6 mt-1 mb-0">Mọi Tiện Nghi Trong Tầm Tay</h2>
+                    <p class="text-muted" style="max-width: 600px; margin: 0 auto;">Hệ thống tiện nghi hiện đại được trang bị đồng bộ trong mọi hạng phòng.</p>
+                </div>
+
+                <div class="row g-3">
+                    <div th:each="am : ${amenities}" class="col-6 col-md-4 col-lg-3">
+                        <div class="amenity-card">
+                            <div class="amenity-icon-circle">
+                                <i th:classappend="${am.icon != null ? am.icon : 'fa-solid fa-check'}" class="text-warning" style="color: #d97706 !important;"></i>
+                            </div>
+                            <div>
+                                <div class="fw-semibold text-dark small" th:text="${am.name}">Wifi tốc độ cao</div>
+                                <div class="text-muted" style="font-size: 11.5px;" th:text="${am.description}">Miễn phí toàn khu resort</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. CTA -->
+        <section class="py-5">
+            <div class="container">
+                <div class="p-5 rounded-4 text-center text-white shadow"
+                     style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border: 1px solid rgba(255,255,255,0.1);">
+                    <h3 class="fw-bold mb-2" style="font-weight: 800 !important;">Sẵn Sàng Trải Nghiệm Kỳ Nghỉ Thượng Lưu?</h3>
+                    <p class="text-light opacity-75 mb-4" style="max-width: 560px; margin: 0 auto 24px;">
+                        Đặt phòng ngay hôm nay để nhận ưu đãi đặc biệt và tận hưởng trọn vẹn các dịch vụ 5 sao của chúng tôi.
+                    </p>
+                    <div class="d-flex justify-content-center gap-3 flex-wrap">
+                        <a th:href="@{/rooms}" class="btn gold-btn rounded-pill px-4 py-2.5 fw-bold small shadow">
+                            <i class="fa-solid fa-calendar-check me-1.5"></i> Đặt phòng ngay
+                        </a>
+                        <a th:href="@{/contact}" class="btn btn-outline-light rounded-pill px-4 py-2.5 fw-bold small">
+                            <i class="fa-solid fa-headset me-1.5"></i> Liên hệ tư vấn
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+</body>
+</html>

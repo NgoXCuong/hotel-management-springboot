@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin-layout}">
+<head>
+    <title layout:fragment="title" th:text="${roomType.id == null ? 'Thêm mới Loại phòng' : 'Cập nhật Loại phòng'}"></title>
+    <link rel="stylesheet" th:href="@{/css/admin/room-type-form.css}">
+</head>
+<body>
+    <div layout:fragment="content">
+        
+        <div class="page-header">
+            <h1 class="page-title" th:text="${roomType.id == null ? 'Thêm mới Loại phòng' : 'Cập nhật Loại phòng'}"></h1>
+        </div>
+
+        <form th:action="@{${roomType.id == null ? '/admin/room-types/create' : '/admin/room-types/edit/' + roomType.id}}" 
+              th:object="${roomType}" method="post" enctype="multipart/form-data">
+            
+            <input type="hidden" th:field="*{id}" />
+
+            <div class="row g-4">
+                <!-- Cột trái (Form chính - 8 phần) -->
+                <div class="col-12 col-lg-8">
+                    <div class="card-custom p-4">
+                        <div class="row mb-4 g-3">
+                            <!-- Tên loại phòng: 50% -->
+                            <div style="width: 50%;">
+                                <label for="name" class="form-label fw-semibold">Tên loại phòng <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="name" th:field="*{name}" placeholder="VD: Deluxe Ocean View"
+                                       th:classappend="${#fields.hasErrors('name')} ? 'is-invalid' : ''" required>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+                            </div>
+
+                            <!-- Giá mỗi đêm: 35% -->
+                            <div style="width: 35%;">
+                                <label for="pricePerNight" class="form-label fw-semibold">Giá mỗi đêm <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <input type="number" step="0.01" class="form-control" id="pricePerNight" th:field="*{pricePerNight}" placeholder="0.00"
+                                           th:classappend="${#fields.hasErrors('pricePerNight')} ? 'is-invalid' : ''" required>
+                                    <span class="input-group-text bg-light">VNĐ</span>
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('pricePerNight')}" th:errors="*{pricePerNight}"></div>
+                                </div>
+                            </div>
+
+                            <!-- Số khách tối đa: 15% -->
+                            <div style="width: 15%;">
+                                <label for="maxGuests" class="form-label fw-semibold">Số khách tối đa <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="maxGuests" th:field="*{maxGuests}" placeholder="1"
+                                           th:classappend="${#fields.hasErrors('maxGuests')} ? 'is-invalid' : ''" required min="1" max="10">
+                                    <span class="input-group-text bg-light"><i class="fa-solid fa-user"></i></span>
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('maxGuests')}" th:errors="*{maxGuests}"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Gallery Hình ảnh (Cloudinary) -->
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">
+                                <i class="fa-solid fa-images text-warning me-1" style="color: #d97706 !important;"></i>
+                                Bộ sưu tập Hình ảnh loại phòng (Gallery)
+                            </label>
+                            
+                            <!-- Vùng upload ảnh mới -->
+                            <div class="gallery-upload-box mb-3" onclick="document.getElementById('galleryInput').click()">
+                                <i class="fa-solid fa-cloud-arrow-up text-warning mb-2" style="font-size: 32px; color: #d97706 !important;"></i>
+                                <div class="fw-semibold text-dark mb-1">Nhấn vào đây để tải ảnh lên Cloudinary</div>
+                                <div class="text-muted small">Hỗ trợ chọn nhiều ảnh (JPG, PNG, WEBP). Tối đa 5MB / ảnh.</div>
+                                <input type="file" id="galleryInput" name="imageFiles" multiple accept="image/jpeg,image/png,image/webp"
+                                       class="d-none" data-gallery-preview="#newImagesPreviewContainer">
+                            </div>
+
+                            <!-- Preview ảnh chuẩn bị upload mới -->
+                            <div class="mb-3">
+                                <div class="small fw-semibold text-muted mb-2">Ảnh mới chọn (sẽ upload khi bấm Lưu):</div>
+                                <div id="newImagesPreviewContainer" class="d-flex flex-wrap gap-2 min-vh-0"></div>
+                            </div>
+
+                            <!-- Ảnh hiện có (nếu đang ở chế độ Chỉnh sửa) -->
+                            <div th:if="${roomType.images != null and !roomType.images.isEmpty()}" class="mt-4 pt-3 border-top">
+                                <div class="small fw-semibold text-muted mb-2">Ảnh hiện có trong cơ sở dữ liệu:</div>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <div th:each="img : ${roomType.images}" class="existing-image-item">
+                                        <img th:src="${img.imageUrl}" alt="Room image" class="w-100 h-100" style="object-fit: cover;">
+                                        <span th:if="${img.isPrimary}" class="badge bg-warning position-absolute top-0 start-0 m-1" style="font-size: 9px;">Ảnh chính</span>
+                                        <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1 p-0 rounded-circle d-flex align-items-center justify-content-center"
+                                                style="width: 22px; height: 22px; font-size: 11px;"
+                                                title="Xóa ảnh này"
+                                                th:onclick="'removeExistingImage(this, \'' + ${img.imageUrl} + '\')'">
+                                            &times;
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="description" class="form-label fw-semibold">Mô tả chi tiết</label>
+                            <textarea class="form-control" id="description" th:field="*{description}" rows="4" placeholder="Nhập thông tin diện tích, ban công..."
+                                      th:classappend="${#fields.hasErrors('description')} ? 'is-invalid' : ''"></textarea>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></div>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" id="activeStatus" th:field="*{active}" checked style="cursor: pointer;">
+                                <label class="form-check-label fw-semibold" for="activeStatus" style="cursor: pointer;">Hoạt động (Kinh doanh)</label>
+                            </div>
+                        </div>
+
+                        <hr class="my-4 text-muted">
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a th:href="@{/admin/room-types}" class="btn btn-outline-secondary">
+                                <i class="fa-solid fa-arrow-left me-2"></i> Quay lại
+                            </a>
+                            <div class="d-flex gap-2">
+                                <a th:href="@{/admin/room-types}" class="btn btn-light border">Hủy bỏ</a>
+                                <button type="submit" class="btn btn-gold-custom">
+                                    <i class="fa-solid fa-floppy-disk me-2"></i> Lưu thông tin
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cột phải (Amenities - 4 phần) -->
+                <div class="col-12 col-lg-4">
+                    <div class="card-custom p-4 h-100 bg-light border-0">
+                        <label class="form-label fw-semibold mb-3">Tiện nghi (Amenities)</label>
+                        <div class="bg-white p-3 rounded-3" style="border: 1px solid #e2e8f0; max-height: 400px; overflow-y: auto;">
+                            <div th:if="${allAmenities != null and !allAmenities.isEmpty()}">
+                                <div class="form-check mb-2" th:each="amenity : ${allAmenities}">
+                                    <input class="form-check-input" type="checkbox" th:value="${amenity.id}" th:id="'amenity_' + ${amenity.id}" th:field="*{amenities}">
+                                    <label class="form-check-label" th:for="'amenity_' + ${amenity.id}">
+                                        <i th:if="${amenity.icon != null}" th:class="${amenity.icon} + ' me-2 text-muted'"></i>
+                                        <span th:text="${amenity.name}"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div th:unless="${allAmenities != null and !allAmenities.isEmpty()}" class="text-muted text-center py-4">
+                                <i class="fa-solid fa-box-open mb-2" style="font-size: 24px;"></i>
+                                <p class="mb-0" style="font-size: 13px;">Chưa có tiện nghi nào.<br>Vui lòng thêm tiện nghi trước.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+    </div>
+
+    <th:block layout:fragment="script">
+        <script th:src="@{/js/image-upload.js}"></script>
+    </th:block>
+</body>
+</html>

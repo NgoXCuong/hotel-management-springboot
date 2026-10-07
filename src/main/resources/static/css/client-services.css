@@ -1,0 +1,84 @@
+/* ==========================================================================
+   GRAND HOTEL - SERVICES & AMENITIES STYLES
+   Quiet Luxury & Warm Editorial Theme (Aman & Six Senses Style)
+   ========================================================================== */
+
+.page-header-banner {
+    position: relative;
+    background: linear-gradient(180deg, rgba(23, 21, 19, 0.6) 0%, rgba(23, 21, 19, 0.85) 100%),
+                url('https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=2000&q=85') center center / cover no-repeat;
+    padding: 70px 0 90px;
+    color: #FAF8F5;
+    text-align: center;
+}
+
+.service-card {
+    background: #FFFFFF;
+    border: 1px solid var(--lux-border);
+    border-radius: 18px;
+    overflow: hidden;
+    transition: var(--lux-transition);
+    box-shadow: var(--lux-shadow-xs);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.service-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--lux-shadow-md);
+    border-color: var(--lux-gold);
+}
+
+.service-card-img-wrap {
+    position: relative;
+    height: 220px;
+    width: 100%;
+    overflow: hidden;
+    background-color: var(--lux-dark);
+}
+
+.service-card-img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.service-card:hover .service-card-img-wrap img {
+    transform: scale(1.06);
+}
+
+.amenity-card {
+    background: #FFFFFF;
+    border: 1px solid var(--lux-border);
+    border-radius: 14px;
+    padding: 18px 20px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: var(--lux-transition);
+    box-shadow: var(--lux-shadow-xs);
+}
+
+.amenity-card:hover {
+    border-color: var(--lux-gold);
+    background-color: var(--lux-gold-light);
+    box-shadow: var(--lux-shadow-sm);
+    transform: translateY(-3px);
+}
+
+.amenity-icon-circle {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    background: var(--lux-gold-light);
+    border: 1px solid rgba(197, 168, 128, 0.35);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: var(--lux-gold-dark);
+}

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin-layout}">
+<head>
+    <title layout:fragment="title">Quản lý Tiện nghi</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Quản lý Tiện nghi phòng</h1>
+                <p class="text-muted mt-1 mb-0 fs-6">Danh mục các trang thiết bị và tiện ích phòng (Wifi, Bồn tắm, Minibar, Điều hòa...)</p>
+            </div>
+            <a th:href="@{/admin/amenities/create}" class="btn btn-warning" style="background: var(--accent-gold); color: #fff; border: none; font-weight: 500;">
+                <i class="fa-solid fa-plus me-2"></i> Thêm tiện nghi mới
+            </a>
+        </div>
+
+        <!-- Toolbar: Search & Filter -->
+        <div class="card-custom mb-4 bg-white p-3 border-0 shadow-sm rounded-3">
+            <form th:action="@{/admin/amenities}" method="get" class="row g-2 align-items-center">
+                <div class="col-12 col-md-5">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white text-muted border-end-0"><i class="fa-solid fa-magnifying-glass"></i></span>
+                        <input type="text" name="name" class="form-control border-start-0 ps-0" placeholder="Tìm kiếm tên tiện nghi..." th:value="${paramName}">
+                    </div>
+                </div>
+                <div class="col-12 col-md-4">
+                    <select name="status" class="form-select">
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="active" th:selected="${'active' == paramStatus}">Đang áp dụng</option>
+                        <option value="inactive" th:selected="${'inactive' == paramStatus}">Tạm ngưng</option>
+                    </select>
+                </div>
+                <div class="col-12 col-md-3">
+                    <button type="submit" class="btn btn-outline-secondary w-100"><i class="fa-solid fa-filter me-2"></i> Lọc danh sách</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="card-custom border-0 shadow-sm rounded-3 overflow-hidden">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0" style="font-size: 14.5px;">
+                    <thead class="table-custom-header">
+                        <tr>
+                            <th class="py-3 border-bottom-0 text-center" style="width: 80px;">ID</th>
+                            <th class="py-3 border-bottom-0 text-center" style="width: 100px;">Icon</th>
+                            <th class="py-3 border-bottom-0">Tên tiện nghi</th>
+                            <th class="py-3 border-bottom-0">Class Icon</th>
+                            <th class="py-3 border-bottom-0">Mô tả</th>
+                            <th class="py-3 border-bottom-0 text-center">Trạng thái</th>
+                            <th class="pe-4 py-3 border-bottom-0 text-center" style="width: 120px;">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="a : ${amenities}">
+                            <td class="text-center text-secondary" th:text="${a.id}">1</td>
+                            <td class="text-center">
+                                <div class="bg-light border rounded mx-auto d-flex align-items-center justify-content-center text-secondary shadow-sm" style="width: 45px; height: 45px; font-size: 18px;">
+                                    <i th:class="${a.icon != null and !a.icon.isEmpty() ? a.icon : 'fa-solid fa-circle-question'}"></i>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="fw-bold text-dark fs-6" th:text="${a.name}">Wifi tốc độ cao</div>
+                            </td>
+                            <td>
+                                <code class="text-muted bg-light px-2 py-1 rounded border" th:text="${a.icon != null and !a.icon.isEmpty() ? a.icon : 'N/A'}">fa-solid fa-wifi</code>
+                            </td>
+                            <td>
+                                <div class="text-muted text-truncate" style="max-width: 250px; font-size: 13px;" th:text="${a.description != null and !a.description.isEmpty() ? a.description : '--'}">--</div>
+                            </td>
+                            <td class="text-center">
+                                <span th:if="${a.active}" class="badge rounded-pill px-3 py-2 border" style="background-color: #d1fae5; color: #047857; border-color: #a7f3d0 !important;"><i class="fa-solid fa-check me-2"></i> Đang áp dụng</span>
+                                <span th:unless="${a.active}" class="badge rounded-pill px-3 py-2 border" style="background-color: #fee2e2; color: #b91c1c; border-color: #fecaca !important;"><i class="fa-solid fa-ban me-2"></i> Tạm ngưng</span>
+                            </td>
+                            <td class="pe-4 text-center">
+                                <a th:href="@{/admin/amenities/edit/{id}(id=${a.id})}" class="btn btn-sm btn-light text-primary border me-1" title="Chỉnh sửa">
+                                    <i class="fa-solid fa-pen"></i>
+                                </a>
+                                <form th:action="@{/admin/amenities/toggle-status/{id}(id=${a.id})}" method="post" style="display:inline;">
+                                    <button type="submit" class="btn btn-sm btn-light border" 
+                                            th:classappend="${a.active ? 'text-danger' : 'text-success'}" 
+                                            th:title="${a.active ? 'Tạm ngưng' : 'Mở lại'}"
+                                            onclick="return confirm('Bạn có chắc chắn muốn thay đổi trạng thái của tiện nghi này?');">
+                                        <i class="fa-solid" th:classappend="${a.active ? 'fa-lock' : 'fa-lock-open'}"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(amenities)}">
+                            <td colspan="7" class="text-center py-5 text-muted">Không tìm thấy tiện nghi nào phù hợp điều kiện lọc.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

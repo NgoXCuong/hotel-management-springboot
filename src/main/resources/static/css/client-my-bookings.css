@@ -1,0 +1,38 @@
+.stay-card-lux {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 18px;
+    padding: 24px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+    transition: all 0.25s ease;
+    margin-bottom: 20px;
+}
+
+.stay-card-lux:hover {
+    border-color: #fde68a;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+}
+
+.star-rating-select {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: center;
+    gap: 8px;
+}
+
+.star-rating-select input {
+    display: none;
+}
+
+.star-rating-select label {
+    font-size: 28px;
+    color: #cbd5e1;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.star-rating-select input:checked ~ label,
+.star-rating-select label:hover,
+.star-rating-select label:hover ~ label {
+    color: #f59e0b;
+}

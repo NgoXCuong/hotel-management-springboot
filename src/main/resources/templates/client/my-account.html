@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layout/client-layout}">
+  <head>
+    <title>Trung tâm Tài khoản - Grand Hotel</title>
+    <link rel="stylesheet" th:href="@{/css/client-my-account.css}" />
+  </head>
+  <body>
+    <div layout:fragment="content">
+      <div class="container py-4">
+        <!-- 1. Header Profile Banner -->
+        <div class="account-card-lux mb-4">
+          <div
+            class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3"
+          >
+            <div class="d-flex align-items-center gap-3">
+              <div
+                class="rounded-circle bg-warning-subtle text-warning d-flex align-items-center justify-content-center fw-bold fs-2 border border-warning-subtle flex-shrink-0"
+                style="width: 68px; height: 68px; color: #b45309 !important"
+              >
+                <span
+                  th:text="${user != null and user.fullName != null ? #strings.substring(user.fullName, 0, 1) : 'U'}"
+                  >U</span
+                >
+              </div>
+              <div>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                  <h4
+                    class="serif-title fw-bold text-dark mb-0"
+                    th:text="${user != null ? user.fullName : 'Quý khách'}"
+                  >
+                    Nguyễn Văn An
+                  </h4>
+                  <span
+                    class="badge bg-warning text-dark rounded-pill px-2.5 py-1 small fw-bold"
+                    >VIP Member</span
+                  >
+                </div>
+                <div class="text-muted small">
+                  <span th:text="${user != null ? user.email : ''}"
+                    >an.nguyen@gmail.com</span
+                  >
+                  &bull;
+                  <span th:text="${user != null ? user.phone : ''}"
+                    >0912345678</span
+                  >
+                </div>
+              </div>
+            </div>
+
+            <div class="d-flex gap-2">
+              <a
+                th:href="@{/rooms}"
+                class="btn gold-btn rounded-pill px-4 py-2 small fw-semibold shadow-sm"
+              >
+                <i class="fa-solid fa-plus me-1.5"></i> Đặt phòng mới
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Main Account Body: Sidebar + Tabs Content -->
+        <div class="row g-4">
+          <!-- Left Sidebar -->
+          <div class="col-12 col-lg-3">
+            <div class="account-card-lux p-3">
+              <div
+                class="nav flex-column account-nav-pills"
+                id="accountTab"
+                role="tablist"
+              >
+                <!-- Tab 1: Profile -->
+                <button
+                  class="nav-link text-start"
+                  th:classappend="${activeTab == 'profile' or activeTab == null ? 'active' : ''}"
+                  id="profile-tab"
+                  data-bs-toggle="pill"
+                  data-bs-target="#tab-profile"
+                  type="button"
+                  role="tab"
+                >
+                  <i class="fa-solid fa-id-card-clip fs-5"></i>
+                  <span>Hồ sơ cá nhân</span>
+                </button>
+
+                <!-- Tab 2: Bookings -->
+                <button
+                  class="nav-link text-start"
+                  th:classappend="${activeTab == 'bookings' ? 'active' : ''}"
+                  id="bookings-tab"
+                  data-bs-toggle="pill"
+                  data-bs-target="#tab-bookings"
+                  type="button"
+                  role="tab"
+                >
+                  <i class="fa-solid fa-suitcase-rolling fs-5"></i>
+                  <span>Chuyến đi của tôi</span>
+                  <span
+                    class="badge rounded-pill bg-light border text-dark ms-auto"
+                    th:text="${#lists.size(bookings)}"
+                    >0</span
+                  >
+                </button>
+
+                <!-- Tab 3: Reviews -->
+                <button
+                  class="nav-link text-start"
+                  th:classappend="${activeTab == 'reviews' ? 'active' : ''}"
+                  id="reviews-tab"
+                  data-bs-toggle="pill"
+                  data-bs-target="#tab-reviews"
+                  type="button"
+                  role="tab"
+                >
+                  <i class="fa-solid fa-star fs-5"></i>
+                  <span>Đánh giá của tôi</span>
+                  <span
+                    class="badge rounded-pill bg-light border text-dark ms-auto"
+                    th:text="${#lists.size(reviews)}"
+                    >0</span
+                  >
+                </button>
+
+                <!-- Tab 4: Password -->
+                <button
+                  class="nav-link text-start"
+                  th:classappend="${activeTab == 'password' ? 'active' : ''}"
+                  id="password-tab"
+                  data-bs-toggle="pill"
+                  data-bs-target="#tab-password"
+                  type="button"
+                  role="tab"
+                >
+                  <i class="fa-solid fa-lock fs-5"></i>
+                  <span>Đổi mật khẩu</span>
+                </button>
+
+                <!-- Tab 5: Notifications -->
+                <button
+                  class="nav-link text-start"
+                  th:classappend="${activeTab == 'notifications' ? 'active' : ''}"
+                  id="notifications-tab"
+                  data-bs-toggle="pill"
+                  data-bs-target="#tab-notifications"
+                  type="button"
+                  role="tab"
+                >
+                  <i class="fa-solid fa-bell fs-5"></i>
+                  <span>Thông báo hệ thống</span>
+                  <span class="badge rounded-pill bg-danger text-white ms-auto"
+                    >2</span
+                  >
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Content Panel -->
+          <div class="col-12 col-lg-9">
+            <div class="tab-content" id="accountTabContent">
+              <!-- ============ TAB 1: HỒ SƠ CÁ NHÂN ============ -->
+              <div
+                class="tab-pane fade"
+                th:classappend="${activeTab == 'profile' or activeTab == null ? 'show active' : ''}"
+                id="tab-profile"
+                role="tabpanel"
+              >
+                <div class="account-card-lux">
+                  <h5
+                    class="serif-title fw-bold text-dark mb-4 pb-2 border-bottom"
+                  >
+                    <i
+                      class="fa-solid fa-user-pen text-warning me-2"
+                      style="color: #d97706 !important"
+                    ></i>
+                    Thông tin Hồ sơ Cá nhân
+                  </h5>
+
+                  <form th:action="@{/my-account/profile}" method="post">
+                    <div class="row g-3">
+                      <div class="col-12 col-md-6">
+                        <label class="form-label small fw-semibold text-dark"
+                          >Họ và tên <span class="text-danger">*</span></label
+                        >
+                        <input
+                          type="text"
+                          name="fullName"
+                          class="form-control form-control-sm bg-light"
+                          th:value="${customer != null ? customer.fullName : (user != null ? user.fullName : '')}"
+                          required
+                        />
+                      </div>
+
+                      <div class="col-12 col-md-6">
+                        <label class="form-label small fw-semibold text-dark"
+                          >Số điện thoại
+                          <span class="text-danger">*</span></label
+                        >
+                        <input
+                          type="tel"
+                          name="phone"
+                          class="form-control form-control-sm bg-light"
+                          th:value="${customer != null ? customer.phone : (user != null ? user.phone : '')}"
+                          required
+                        />
+                      </div>
+
+                      <div class="col-12 col-md-6">
+                        <label class="form-label small fw-semibold text-dark"
+                          >Địa chỉ Email</label
+                        >
+                        <input
+                          type="email"
+                          name="email"
+                          class="form-control form-control-sm bg-light"
+                          th:value="${customer != null ? customer.email : (user != null ? user.email : '')}"
+                        />
+                      </div>
+
+                      <div class="col-12 col-md-6">
+                        <label class="form-label small fw-semibold text-dark"
+                          >Số CCCD / Hộ chiếu</label
+                        >
+                        <input
+                          type="text"
+                          name="identityNumber"
+                          class="form-control form-control-sm bg-light"
+                          th:value="${customer != null ? customer.identityNumber : ''}"
+                          placeholder="001201009988"
+                        />
+                      </div>
+
+                      <div class="col-12 col-md-6">
+                        <label class="form-label small fw-semibold text-dark"
+                          >Ngày sinh</label
+                        >
+                        <input
+                          type="date"
+                          name="dateOfBirth"
+                          class="form-control form-control-sm bg-light"
+                          th:value="${customer != null ? customer.dateOfBirth : ''}"
+                        />
+                      </div>
+
+                      <div class="col-12 col-md-6">
+                        <label class="form-label small fw-semibold text-dark"
+                          >Giới tính</label
+                        >
+                        <select
+                          name="gender"
+                          class="form-select form-select-sm bg-light"
+                        >
+                          <option value="">-- Chọn giới tính --</option>
+                          <option
+                            value="MALE"
+                            th:selected="${customer != null and customer.gender != null and customer.gender.name() == 'MALE'}"
+                          >
+                            Nam
+                          </option>
+                          <option
+                            value="FEMALE"
+                            th:selected="${customer != null and customer.gender != null and customer.gender.name() == 'FEMALE'}"
+                          >
+                            Nữ
+                          </option>
+                          <option
+                            value="OTHER"
+                            th:selected="${customer != null and customer.gender != null and customer.gender.name() == 'OTHER'}"
+                          >
+                            Khác
+                          </option>
+                        </select>
+                      </div>
+
+                      <div class="col-12">
+                        <label class="form-label small fw-semibold text-dark"
+                          >Địa chỉ thường trú</label
+                        >
+                        <input
+                          type="text"
+                          name="address"
+                          class="form-control form-control-sm bg-light"
+                          th:value="${customer != null ? customer.address : ''}"
+                          placeholder="Địa chỉ đường, phường/xã, quận/huyện, tỉnh/thành"
+                        />
+                      </div>
+
+                      <div class="col-12 pt-3">
+                        <button
+                          type="submit"
+                          class="btn gold-btn px-4 py-2 rounded-3 fw-semibold small shadow-sm"
+                        >
+                          <i class="fa-solid fa-floppy-disk me-1.5"></i> Lưu
+                          thay đổi hồ sơ
+                        </button>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              </div>
+
+              <!-- ============ TAB 2: CHUYẾN ĐI CỦA TÔI ============ -->
+              <div
+                class="tab-pane fade"
+                th:classappend="${activeTab == 'bookings' ? 'show active' : ''}"
+                id="tab-bookings"
+                role="tabpanel"
+              >
+                <div class="account-card-lux">
+                  <div
+                    class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-4 pb-2 border-bottom"
+                  >
+                    <h5 class="serif-title fw-bold text-dark mb-0">
+                      <i
+                        class="fa-solid fa-suitcase-rolling text-warning me-2"
+                        style="color: #d97706 !important"
+                      ></i>
+                      Lịch sử Chuyến lưu trú
+                    </h5>
+
+                    <!-- Filter buttons -->
+                    <div class="d-flex gap-2 flex-wrap">
+                      <button
+                        class="btn btn-sm btn-dark rounded-pill px-3 py-1 fw-semibold filter-status-btn"
+                        onclick="filterBookings('ALL', this)"
+                      >
+                        Tất cả
+                      </button>
+                      <button
+                        class="btn btn-sm btn-light border rounded-pill px-3 py-1 fw-semibold filter-status-btn"
+                        onclick="filterBookings('PENDING', this)"
+                      >
+                        Chờ duyệt
+                      </button>
+                      <button
+                        class="btn btn-sm btn-light border rounded-pill px-3 py-1 fw-semibold filter-status-btn"
+                        onclick="filterBookings('CONFIRMED', this)"
+                      >
+                        Đã duyệt
+                      </button>
+                      <button
+                        class="btn btn-sm btn-light border rounded-pill px-3 py-1 fw-semibold filter-status-btn"
+                        onclick="filterBookings('CHECKED_OUT', this)"
+                      >
+                        Đã trả phòng
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Booking Cards List -->
+                  <div
+                    th:each="b : ${bookings}"
+                    class="booking-item-card"
+                    th:attr="data-status=${b.status.name()}"
+                  >
+                    <div
+                      class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 pb-3 border-bottom mb-3"
+                    >
+                      <div class="d-flex align-items-center gap-2">
+                        <span
+                          class="badge bg-light text-dark border fw-bold"
+                          style="font-family: monospace"
+                          th:text="${b.bookingCode}"
+                          >BK-1001</span
+                        >
+                        <span
+                          class="badge rounded-pill px-2.5 py-1 border"
+                          th:classappend="${b.status.badgeClass}"
+                          th:text="${b.status.displayName}"
+                          >Đã trả phòng</span
+                        >
+                      </div>
+                      <div class="text-muted small">
+                        Ngày đặt:
+                        <span
+                          th:text="${#temporals.format(b.createdAt, 'dd/MM/yyyy HH:mm')}"
+                          >23/08/2026</span
+                        >
+                      </div>
+                    </div>
+
+                    <div class="row g-3 align-items-center">
+                      <div class="col-12 col-md-7 small">
+                        <div
+                          class="d-flex align-items-center gap-3 flex-wrap text-dark mb-1"
+                        >
+                          <div>
+                            <i
+                              class="fa-solid fa-calendar-day text-warning me-1"
+                            ></i>
+                            Nhận:
+                            <strong
+                              th:text="${#temporals.format(b.checkIn, 'dd/MM/yyyy')}"
+                              >24/08/2026</strong
+                            >
+                          </div>
+                          <div>
+                            <i
+                              class="fa-solid fa-calendar-check text-warning me-1"
+                            ></i>
+                            Trả:
+                            <strong
+                              th:text="${#temporals.format(b.checkOut, 'dd/MM/yyyy')}"
+                              >25/08/2026</strong
+                            >
+                          </div>
+                          <div>
+                            <i
+                              class="fa-solid fa-user-group text-warning me-1"
+                            ></i>
+                            <span th:text="${b.numberOfGuests}">2</span> khách
+                          </div>
+                        </div>
+                        <div class="text-muted" style="font-size: 11.5px">
+                          Phòng gán:
+                          <strong
+                            class="text-dark"
+                            th:text="${b.roomNumbersString}"
+                            >P.101</strong
+                          >
+                        </div>
+                      </div>
+
+                      <div class="col-12 col-md-5 text-md-end">
+                        <div
+                          class="fw-bold fs-5 mb-2"
+                          style="
+                            color: #b45309;
+                            font-family: &quot;JetBrains Mono&quot;, monospace;
+                          "
+                          th:text="${#numbers.formatDecimal(b.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"
+                        >
+                          1,200,000 đ
+                        </div>
+
+                        <div class="d-flex justify-content-md-end gap-2">
+                          <!-- Nút Xem chi tiết Modal -->
+                          <button
+                            type="button"
+                            class="btn btn-sm btn-outline-dark rounded-pill px-3"
+                            th:data-bs-toggle="modal"
+                            th:data-bs-target="'#detailModal_' + ${b.id}"
+                          >
+                            <i class="fa-regular fa-eye me-1"></i> Chi tiết
+                          </button>
+
+                          <!-- Nút Hủy đơn nếu Chờ duyệt / Đã duyệt -->
+                          <button
+                            th:if="${b.status.name() == 'PENDING' or b.status.name() == 'CONFIRMED'}"
+                            type="button"
+                            class="btn btn-sm btn-outline-danger rounded-pill px-3"
+                            th:data-bs-toggle="modal"
+                            th:data-bs-target="'#cancelModal_' + ${b.id}"
+                          >
+                            <i class="fa-solid fa-ban me-1"></i> Hủy
+                          </button>
+
+                          <!-- Nút Đánh giá nếu Đã trả phòng -->
+                          <button
+                            th:if="${b.status.name() == 'CHECKED_OUT'}"
+                            type="button"
+                            class="btn btn-sm gold-btn rounded-pill px-3 fw-semibold"
+                            th:data-bs-toggle="modal"
+                            th:data-bs-target="'#reviewModal_' + ${b.id}"
+                          >
+                            <i class="fa-solid fa-star me-1"></i> Đánh giá
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- ============ MODAL 1: CHI TIẾT ĐƠN ============ -->
+                    <div
+                      class="modal fade"
+                      th:id="'detailModal_' + ${b.id}"
+                      tabindex="-1"
+                      aria-hidden="true"
+                    >
+                      <div class="modal-dialog modal-dialog-centered modal-lg">
+                        <div
+                          class="modal-content border-0 shadow rounded-4 overflow-hidden"
+                        >
+                          <div class="modal-header border-0 bg-light p-4 pb-3">
+                            <h5
+                              class="modal-title serif-title fw-bold text-dark"
+                            >
+                              <i
+                                class="fa-solid fa-receipt text-warning me-2"
+                                style="color: #d97706 !important"
+                              ></i>
+                              Chi tiết Đơn đặt phòng #<span
+                                th:text="${b.bookingCode}"
+                                >BK-1001</span
+                              >
+                            </h5>
+                            <button
+                              type="button"
+                              class="btn-close"
+                              data-bs-dismiss="modal"
+                              aria-label="Close"
+                            ></button>
+                          </div>
+                          <div class="modal-body p-4 small">
+                            <div class="row g-3 mb-4">
+                              <div class="col-6 col-md-3">
+                                <span class="text-muted d-block"
+                                  >Trạng thái:</span
+                                ><span
+                                  class="badge rounded-pill"
+                                  th:classappend="${b.status.badgeClass}"
+                                  th:text="${b.status.displayName}"
+                                  >Đã trả phòng</span
+                                >
+                              </div>
+                              <div class="col-6 col-md-3">
+                                <span class="text-muted d-block"
+                                  >Nhận phòng:</span
+                                ><strong
+                                  class="text-dark"
+                                  th:text="${#temporals.format(b.checkIn, 'dd/MM/yyyy 14:00')}"
+                                  >24/08/2026</strong
+                                >
+                              </div>
+                              <div class="col-6 col-md-3">
+                                <span class="text-muted d-block"
+                                  >Trả phòng:</span
+                                ><strong
+                                  class="text-dark"
+                                  th:text="${#temporals.format(b.checkOut, 'dd/MM/yyyy 12:00')}"
+                                  >25/08/2026</strong
+                                >
+                              </div>
+                              <div class="col-6 col-md-3">
+                                <span class="text-muted d-block">Số đêm:</span
+                                ><strong
+                                  class="text-dark"
+                                  th:text="${b.numberOfNights} + ' đêm'"
+                                  >1 đêm</strong
+                                >
+                              </div>
+                            </div>
+
+                            <!-- Phòng gán -->
+                            <div class="p-3 bg-light rounded-3 border mb-3">
+                              <h6 class="fw-bold text-dark mb-2">
+                                Hạng phòng & Phòng lưu trú
+                              </h6>
+                              <div
+                                th:each="br : ${b.bookingRooms}"
+                                class="d-flex justify-content-between"
+                              >
+                                <span
+                                  th:text="${br.room != null and br.room.roomType != null ? br.room.roomType.name : 'Phòng khách sạn'} + ' (Phòng ' + ${br.room != null ? br.room.roomNumber : ''} + ')'"
+                                  >Deluxe King</span
+                                >
+                                <strong
+                                  style="font-family: monospace"
+                                  th:text="${#numbers.formatDecimal(br.subtotal, 0, 'COMMA', 0, 'POINT')} + ' đ'"
+                                  >1,200,000 đ</strong
+                                >
+                              </div>
+                            </div>
+
+                            <!-- Tài chính -->
+                            <div class="p-3 bg-light rounded-3 border">
+                              <div
+                                class="d-flex justify-content-between text-muted mb-1"
+                              >
+                                <span>Tiền phòng:</span>
+                                <span
+                                  th:text="${#numbers.formatDecimal(b.roomTotalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"
+                                  >1,200,000 đ</span
+                                >
+                              </div>
+                              <div
+                                class="d-flex justify-content-between text-muted mb-1"
+                                th:if="${b.discountAmount.compareTo(T(java.math.BigDecimal).ZERO) > 0}"
+                              >
+                                <span>Giảm giá Voucher:</span>
+                                <span
+                                  class="text-success"
+                                  th:text="'-' + ${#numbers.formatDecimal(b.discountAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"
+                                  >-0 đ</span
+                                >
+                              </div>
+                              <div
+                                class="d-flex justify-content-between text-muted mb-1"
+                              >
+                                <span>Đã đặt cọc:</span>
+                                <span
+                                  class="text-warning"
+                                  th:text="${#numbers.formatDecimal(b.depositAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"
+                                  >360,000 đ</span
+                                >
+                              </div>
+                              <div
+                                class="d-flex justify-content-between align-items-center pt-2 border-top"
+                              >
+                                <strong class="text-dark"
+                                  >TỔNG THANH TOÁN:</strong
+                                >
+                                <strong
+                                  class="fs-5 text-warning"
+                                  style="
+                                    color: #b45309 !important;
+                                    font-family: monospace;
+                                  "
+                                  th:text="${#numbers.formatDecimal(b.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"
+                                  >1,200,000 đ</strong
+                                >
+                              </div>
+                            </div>
+                          </div>
+                          <div class="modal-footer border-0 bg-light p-3 px-4">
+                            <button
+                              type="button"
+                              class="btn btn-sm btn-dark rounded-3"
+                              data-bs-dismiss="modal"
+                            >
+                              Đóng
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- ============ MODAL 2: HỦY ĐƠN ĐẶT PHÒNG ============ -->
+                    <div
+                      th:if="${b.status.name() == 'PENDING' or b.status.name() == 'CONFIRMED'}"
+                      class="modal fade"
+                      th:id="'cancelModal_' + ${b.id}"
+                      tabindex="-1"
+                      aria-hidden="true"
+                    >
+                      <div class="modal-dialog modal-dialog-centered">
+                        <div
+                          class="modal-content border-0 shadow rounded-4 overflow-hidden"
+                        >
+                          <form
+                            th:action="@{/my-account/bookings/{id}/cancel(id=${b.id})}"
+                            method="post"
+                          >
+                            <div
+                              class="modal-header border-0 bg-light p-4 pb-3"
+                            >
+                              <h5 class="modal-title fw-bold text-danger">
+                                <i
+                                  class="fa-solid fa-triangle-exclamation me-2"
+                                ></i>
+                                Xác nhận Hủy Đơn Đặt Phòng
+                              </h5>
+                              <button
+                                type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal"
+                                aria-label="Close"
+                              ></button>
+                            </div>
+                            <div class="modal-body p-4 small">
+                              <p class="text-muted mb-3">
+                                Bạn có chắc chắn muốn hủy đơn đặt phòng
+                                <strong
+                                  >#<span th:text="${b.bookingCode}"
+                                    >BK-1001</span
+                                  ></strong
+                                >
+                                không?
+                              </p>
+                              <div class="mb-3">
+                                <label
+                                  class="form-label small fw-semibold text-dark"
+                                  >Lý do hủy đơn</label
+                                >
+                                <textarea
+                                  name="reason"
+                                  class="form-control form-control-sm bg-light"
+                                  rows="2"
+                                  placeholder="Ví dụ: Thay đổi lịch trình công tác..."
+                                  required
+                                ></textarea>
+                              </div>
+                            </div>
+                            <div
+                              class="modal-footer border-0 bg-light p-3 px-4"
+                            >
+                              <button
+                                type="button"
+                                class="btn btn-sm btn-light border rounded-3"
+                                data-bs-dismiss="modal"
+                              >
+                                Giữ lại đơn
+                              </button>
+                              <button
+                                type="submit"
+                                class="btn btn-sm btn-danger rounded-3 fw-semibold"
+                              >
+                                Xác nhận Hủy Đơn
+                              </button>
+                            </div>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- ============ MODAL 3: GỬI ĐÁNH GIÁ ============ -->
+                    <div
+                      th:if="${b.status.name() == 'CHECKED_OUT'}"
+                      class="modal fade"
+                      th:id="'reviewModal_' + ${b.id}"
+                      tabindex="-1"
+                      aria-hidden="true"
+                    >
+                      <div class="modal-dialog modal-dialog-centered">
+                        <div
+                          class="modal-content border-0 shadow rounded-4 overflow-hidden"
+                        >
+                          <form
+                            th:action="@{/my-account/reviews}"
+                            method="post"
+                          >
+                            <input
+                              type="hidden"
+                              name="bookingId"
+                              th:value="${b.id}"
+                            />
+                            <div
+                              class="modal-header border-0 bg-light p-4 pb-3"
+                            >
+                              <h5
+                                class="modal-title serif-title fw-bold text-dark"
+                              >
+                                <i
+                                  class="fa-solid fa-star text-warning me-2"
+                                  style="color: #d97706 !important"
+                                ></i>
+                                Đánh giá Kỳ nghỉ của Quý khách
+                              </h5>
+                              <button
+                                type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal"
+                                aria-label="Close"
+                              ></button>
+                            </div>
+                            <div class="modal-body p-4 text-center">
+                              <p class="text-muted small mb-3">
+                                Đơn đặt phòng:
+                                <strong th:text="${b.bookingCode}"
+                                  >BK-1001</strong
+                                >. Quý khách cảm thấy hài lòng như thế nào?
+                              </p>
+
+                              <div class="star-rating-select mb-4">
+                                <input
+                                  type="radio"
+                                  name="rating"
+                                  value="5"
+                                  th:id="'star5_' + ${b.id}"
+                                  checked
+                                />
+                                <label th:for="'star5_' + ${b.id}"
+                                  ><i class="fa-solid fa-star"></i
+                                ></label>
+                                <input
+                                  type="radio"
+                                  name="rating"
+                                  value="4"
+                                  th:id="'star4_' + ${b.id}"
+                                />
+                                <label th:for="'star4_' + ${b.id}"
+                                  ><i class="fa-solid fa-star"></i
+                                ></label>
+                                <input
+                                  type="radio"
+                                  name="rating"
+                                  value="3"
+                                  th:id="'star3_' + ${b.id}"
+                                />
+                                <label th:for="'star3_' + ${b.id}"
+                                  ><i class="fa-solid fa-star"></i
+                                ></label>
+                                <input
+                                  type="radio"
+                                  name="rating"
+                                  value="2"
+                                  th:id="'star2_' + ${b.id}"
+                                />
+                                <label th:for="'star2_' + ${b.id}"
+                                  ><i class="fa-solid fa-star"></i
+                                ></label>
+                                <input
+                                  type="radio"
+                                  name="rating"
+                                  value="1"
+                                  th:id="'star1_' + ${b.id}"
+                                />
+                                <label th:for="'star1_' + ${b.id}"
+                                  ><i class="fa-solid fa-star"></i
+                                ></label>
+                              </div>
+
+                              <div class="text-start">
+                                <label
+                                  class="form-label small fw-semibold text-dark"
+                                  >Chia sẻ cảm nhận chi tiết</label
+                                >
+                                <textarea
+                                  name="comment"
+                                  class="form-control form-control-sm bg-light"
+                                  rows="3"
+                                  placeholder="Chia sẻ về không gian phòng, phục vụ, bữa sáng..."
+                                  required
+                                ></textarea>
+                              </div>
+                            </div>
+                            <div
+                              class="modal-footer border-0 bg-light p-3 px-4"
+                            >
+                              <button
+                                type="button"
+                                class="btn btn-sm btn-light border rounded-3"
+                                data-bs-dismiss="modal"
+                              >
+                                Hủy
+                              </button>
+                              <button
+                                type="submit"
+                                class="btn gold-btn btn-sm px-4 rounded-3 fw-semibold"
+                              >
+                                <i class="fa-solid fa-paper-plane me-1.5"></i>
+                                Gửi phản hồi
+                              </button>
+                            </div>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Empty State -->
+                  <div
+                    th:if="${#lists.isEmpty(bookings)}"
+                    class="text-center py-5"
+                  >
+                    <i
+                      class="fa-solid fa-suitcase-rolling text-muted mb-3"
+                      style="font-size: 48px; opacity: 0.3"
+                    ></i>
+                    <h6 class="text-dark fw-bold mb-1">
+                      Quý khách chưa có chuyến lưu trú nào
+                    </h6>
+                    <p class="text-muted small mb-4">
+                      Hãy đặt phòng ngay để tận hưởng kỳ nghỉ thiên đường tại
+                      Grand Hotel!
+                    </p>
+                    <a
+                      th:href="@{/rooms}"
+                      class="btn gold-btn rounded-pill px-4 py-2 small fw-semibold"
+                    >
+                      Khám phá các hạng phòng &rarr;
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ============ TAB 3: ĐÁNH GIÁ CỦA TÔI ============ -->
+              <div
+                class="tab-pane fade"
+                th:classappend="${activeTab == 'reviews' ? 'show active' : ''}"
+                id="tab-reviews"
+                role="tabpanel"
+              >
+                <div class="account-card-lux">
+                  <h5
+                    class="serif-title fw-bold text-dark mb-4 pb-2 border-bottom"
+                  >
+                    <i
+                      class="fa-solid fa-star text-warning me-2"
+                      style="color: #d97706 !important"
+                    ></i>
+                    Lịch sử Đánh giá của Tôi
+                  </h5>
+
+                  <div
+                    th:each="rev : ${reviews}"
+                    class="p-3 bg-light rounded-4 border mb-3"
+                  >
+                    <div
+                      class="d-flex justify-content-between align-items-center mb-2"
+                    >
+                      <div>
+                        <th:block
+                          th:each="i : ${#numbers.sequence(1, rev.rating)}"
+                        >
+                          <i
+                            class="fa-solid fa-star text-warning"
+                            style="font-size: 13px"
+                          ></i>
+                        </th:block>
+                      </div>
+                      <span
+                        class="text-muted small"
+                        th:text="${#temporals.format(rev.createdAt, 'dd/MM/yyyy')}"
+                        >24/08/2026</span
+                      >
+                    </div>
+                    <p
+                      class="text-dark small mb-0"
+                      style="line-height: 1.6; font-style: italic"
+                      th:text="'&ldquo;' + ${rev.comment} + '&rdquo;'"
+                    >
+                      &ldquo;Trải nghiệm tuyệt vời tại khách sạn!&rdquo;
+                    </p>
+                  </div>
+
+                  <div
+                    th:if="${#lists.isEmpty(reviews)}"
+                    class="text-center py-5 text-muted small"
+                  >
+                    <i
+                      class="fa-regular fa-star mb-2"
+                      style="font-size: 36px; opacity: 0.3"
+                    ></i>
+                    <div>
+                      Bạn chưa có đánh giá nào. Đánh giá sẽ mở sau khi bạn hoàn
+                      tất chuyến đi!
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ============ TAB 4: ĐỔI MẬT KHẨU ============ -->
+              <div
+                class="tab-pane fade"
+                th:classappend="${activeTab == 'password' ? 'show active' : ''}"
+                id="tab-password"
+                role="tabpanel"
+              >
+                <div class="account-card-lux">
+                  <h5
+                    class="serif-title fw-bold text-dark mb-4 pb-2 border-bottom"
+                  >
+                    <i
+                      class="fa-solid fa-lock text-warning me-2"
+                      style="color: #d97706 !important"
+                    ></i>
+                    Đổi Mật khẩu Tài khoản
+                  </h5>
+
+                  <form
+                    th:action="@{/my-account/password}"
+                    method="post"
+                    style="max-width: 480px"
+                  >
+                    <div class="mb-3">
+                      <label class="form-label small fw-semibold text-dark"
+                        >Mật khẩu hiện tại
+                        <span class="text-danger">*</span></label
+                      >
+                      <input
+                        type="password"
+                        name="currentPassword"
+                        class="form-control form-control-sm bg-light"
+                        placeholder="Nhập mật khẩu đang dùng"
+                        required
+                      />
+                    </div>
+
+                    <div class="mb-3">
+                      <label class="form-label small fw-semibold text-dark"
+                        >Mật khẩu mới <span class="text-danger">*</span></label
+                      >
+                      <input
+                        type="password"
+                        name="newPassword"
+                        class="form-control form-control-sm bg-light"
+                        placeholder="Tối thiểu 6 ký tự"
+                        required
+                        minlength="6"
+                      />
+                    </div>
+
+                    <div class="mb-4">
+                      <label class="form-label small fw-semibold text-dark"
+                        >Xác nhận mật khẩu mới
+                        <span class="text-danger">*</span></label
+                      >
+                      <input
+                        type="password"
+                        name="confirmPassword"
+                        class="form-control form-control-sm bg-light"
+                        placeholder="Nhập lại mật khẩu mới"
+                        required
+                        minlength="6"
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      class="btn gold-btn px-4 py-2 rounded-3 fw-semibold small shadow-sm"
+                    >
+                      <i class="fa-solid fa-key me-1.5"></i> Cập nhật mật khẩu
+                    </button>
+                  </form>
+                </div>
+              </div>
+
+              <!-- ============ TAB 5: THÔNG BÁO ============ -->
+              <div
+                class="tab-pane fade"
+                th:classappend="${activeTab == 'notifications' ? 'show active' : ''}"
+                id="tab-notifications"
+                role="tabpanel"
+              >
+                <div class="account-card-lux">
+                  <h5
+                    class="serif-title fw-bold text-dark mb-4 pb-2 border-bottom"
+                  >
+                    <i
+                      class="fa-solid fa-bell text-warning me-2"
+                      style="color: #d97706 !important"
+                    ></i>
+                    Thông báo từ Hệ thống
+                  </h5>
+
+                  <div class="list-group list-group-flush small">
+                    <div
+                      th:each="n : ${notifications}"
+                      class="list-group-item px-0 py-3 d-flex gap-3 align-items-start border-bottom"
+                    >
+                      <div
+                        class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                        style="width: 40px; height: 40px; background: #fffbeb; color: #d97706;"
+                      >
+                        <i th:classappend="${n.icon != null ? n.icon : 'fa-solid fa-bell'}"></i>
+                      </div>
+                      <div>
+                        <div class="fw-bold text-dark" th:text="${n.title}">Thông báo</div>
+                        <div class="text-muted" th:text="${n.message}">Nội dung thông báo</div>
+                        <div class="text-muted mt-1" style="font-size: 11px">
+                          <i class="fa-regular fa-clock me-1"></i>
+                          <span th:text="${#temporals.format(n.createdAt, 'dd/MM/yyyy HH:mm')}">Hôm nay</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div
+                      th:if="${#lists.isEmpty(notifications)}"
+                      class="text-center py-5 text-muted"
+                    >
+                      <i class="fa-regular fa-bell-slash d-block mb-2" style="font-size: 36px; opacity: 0.35;"></i>
+                      <div class="fw-semibold">Không có thông báo nào</div>
+                      <div class="small" style="font-size: 12px;">Các cập nhật về đơn đặt phòng sẽ hiển thị tại đây</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <th:block layout:fragment="script">
+      <script th:src="@{/js/client-my-account.js}"></script>
+    </th:block>
+  </body>
+</html>

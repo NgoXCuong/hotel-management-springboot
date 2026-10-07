@@ -1,0 +1,84 @@
+/* ============ BASE & VARIABLES (QUIET LUXURY EXECUTIVE) ============ */
+:root {
+    --bg-body: #FAF8F5;
+    --bg-sidebar: #FFFFFF;
+    --bg-header: rgba(250, 248, 245, 0.94);
+    --border-color: rgba(229, 224, 216, 0.85);
+    --text-main: #1C1917;
+    --text-muted: #78716C;
+    --accent-gold: #C5A880;
+    --accent-gold-dark: #9A7B56;
+    --accent-gold-light: #F7F3EC;
+    --sidebar-width: 260px;
+    --header-height: 70px;
+}
+
+body {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--bg-body);
+    color: var(--text-main);
+    overflow-x: hidden;
+}
+
+/* ============ PAGE CONTENT & TYPOGRAPHY ============ */
+.page-content {
+    padding: 28px 32px;
+    flex: 1;
+    width: 100%;
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.page-title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--text-main);
+    margin: 0;
+    letter-spacing: -0.3px;
+}
+
+.card-custom {
+    background: #FFFFFF;
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    box-shadow: 0 4px 18px rgba(28, 25, 23, 0.04);
+    overflow: hidden;
+}
+
+.btn-gold-custom {
+    background: linear-gradient(135deg, #C5A880 0%, #A68760 100%);
+    color: #FFFFFF;
+    border: none;
+    font-weight: 600;
+    transition: all 0.25s ease;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(166, 135, 96, 0.25);
+}
+
+.btn-gold-custom:hover {
+    background: linear-gradient(135deg, #A68760 0%, #876944 100%);
+    color: #FFFFFF;
+    transform: translateY(-1px);
+}
+
+/* ============ BUTTON & ICON SPACING ============ */
+.me-1\.5 {
+    margin-right: 0.5rem !important;
+}
+
+.btn i.me-1,
+.btn i.me-1\.5,
+.dropdown-item i.me-1,
+.dropdown-item i.me-1\.5,
+.nav-link i.me-1,
+.nav-link i.me-1\.5 {
+    margin-right: 0.5rem !important;
+}

@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin-layout}">
+<head>
+    <title th:text="'Chi tiết Đơn đặt ' + ${booking.bookingCode} + ' - Grand Hotel'">Chi tiết Đơn đặt phòng - Grand Hotel</title>
+    <link rel="stylesheet" th:href="@{/css/admin/booking-view.css}">
+</head>
+<body>
+    <div layout:fragment="content">
+
+        <!-- Top Breadcrumb & Actions -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4 no-print">
+            <div>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-1 small">
+                        <li class="breadcrumb-item"><a th:href="@{/admin/bookings}" class="text-decoration-none text-muted">Đặt phòng</a></li>
+                        <li class="breadcrumb-item active text-warning" aria-current="page" style="color: #d97706 !important;">Chi tiết đơn lưu trú</li>
+                    </ol>
+                </nav>
+                <h4 class="fw-bold text-dark mb-0">
+                    <i class="fa-solid fa-receipt text-warning me-2" style="color: #d97706 !important;"></i> Chi tiết Đơn đặt & Vận hành Lễ tân
+                </h4>
+            </div>
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-outline-secondary rounded-3 px-3" onclick="window.print()">
+                    <i class="fa-solid fa-print me-2"></i> In phiếu xác nhận
+                </button>
+                <a th:href="@{/admin/bookings}" class="btn btn-light border rounded-3 px-3">
+                    <i class="fa-solid fa-arrow-left me-2"></i> Quay lại danh sách
+                </a>
+            </div>
+        </div>
+
+        <!-- 1. Header Toolbar & Cụm hành động nhanh theo trạng thái -->
+        <div class="detail-hero-card mb-4">
+            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+                <div>
+                    <div class="d-flex align-items-center flex-wrap gap-2.5 mb-2">
+                        <h3 class="fw-bold text-dark mb-0" style="font-family: 'JetBrains Mono', monospace;" th:text="${booking.bookingCode}">
+                            BK-20260415-089
+                        </h3>
+                        
+                        <!-- Badge Trạng thái nổi bật -->
+                        <span class="badge rounded-pill px-3 py-1.5 border fs-6" 
+                              th:classappend="${booking.status.badgeClass}">
+                            <i class="fa-solid me-2" th:classappend="${booking.status.icon}"></i>
+                            <span th:text="${booking.status.displayName}">Đang lưu trú</span>
+                        </span>
+
+                        <!-- Badge Nguồn đặt -->
+                        <span class="badge bg-light text-secondary border px-3 py-1.5 rounded-pill small">
+                            <i class="fa-solid me-2" th:classappend="${booking.source.icon} + ' ' + ${booking.source.colorClass}"></i>
+                            <span th:text="${booking.source.displayName}">Khách tại quầy</span>
+                        </span>
+                    </div>
+
+                    <div class="text-muted small d-flex flex-wrap gap-3">
+                        <span><i class="fa-regular fa-clock me-2"></i>Tạo lúc: <strong th:text="${#temporals.format(booking.createdAt, 'dd/MM/yyyy HH:mm')}">23/08/2026 09:00</strong></span>
+                        <span><i class="fa-solid fa-user-tie me-2"></i>Tiếp nhận: <strong th:text="${booking.createdBy != null ? booking.createdBy.fullName : 'Hệ thống'}">Lễ tân</strong></span>
+                        <span><i class="fa-solid fa-bed me-2"></i>Phòng: <strong class="text-dark" th:text="${booking.getRoomNumbersString()}">P.101</strong></span>
+                    </div>
+                </div>
+
+                <!-- Cụm nút thao tác theo trạng thái -->
+                <div class="d-flex flex-wrap gap-2 no-print">
+                    <!-- 1. Nếu CONFIRMED / PENDING: Nút 'Tiếp nhận Check-in' màu xanh lá -->
+                    <form th:if="${booking.status.name() == 'PENDING' or booking.status.name() == 'CONFIRMED'}" 
+                          th:action="@{/admin/bookings/{id}/check-in(id=${booking.id})}" method="post">
+                        <button type="submit" class="btn btn-success px-3.5 py-2 rounded-3 fw-semibold shadow-sm" 
+                                onclick="return confirm('Xác nhận cho khách nhận phòng (Check-in) ngay bây giờ?');"
+                                style="background-color: #10b981; border-color: #10b981;">
+                            <i class="fa-solid fa-key me-2"></i> Tiếp nhận Check-in
+                        </button>
+                    </form>
+
+                    <!-- 2. Nếu CHECKED_IN: Nút '+ Thêm dịch vụ' và Nút 'Tiến hành Check-out' -->
+                    <button th:if="${booking.status.name() == 'CHECKED_IN'}" 
+                            type="button" class="btn btn-outline-primary px-3 py-2 rounded-3 fw-semibold" 
+                            data-bs-toggle="modal" data-bs-target="#addServiceModal">
+                        <i class="fa-solid fa-plus-circle me-2"></i> + Thêm dịch vụ
+                    </button>
+
+                    <form th:if="${booking.status.name() == 'CHECKED_IN'}" 
+                          th:action="@{/admin/bookings/{id}/check-out(id=${booking.id})}" method="post">
+                        <button type="submit" class="btn gold-btn px-3.5 py-2 rounded-3 fw-semibold" 
+                                onclick="return confirm('Xác nhận khách hoàn tất thanh toán và trả phòng (Check-out)?');">
+                            <i class="fa-solid fa-right-from-bracket me-2"></i> Tiến hành Check-out
+                        </button>
+                    </form>
+
+                    <!-- Nút Hủy đơn nếu chưa trả phòng và chưa hủy -->
+                    <button th:if="${booking.status.name() != 'CHECKED_OUT' and booking.status.name() != 'CANCELLED'}" 
+                            type="button" class="btn btn-outline-danger px-3 py-2 rounded-3 fw-semibold" 
+                            data-bs-toggle="modal" data-bs-target="#cancelModal">
+                        <i class="fa-regular fa-circle-xmark me-2"></i> Hủy đơn
+                    </button>
+                </div>
+            </div>
+
+            <!-- Cảnh báo nếu ĐÃ HỦY -->
+            <div th:if="${booking.status.name() == 'CANCELLED'}" class="alert alert-danger rounded-3 mt-3 mb-0 border-0">
+                <i class="fa-solid fa-ban me-2"></i>
+                <strong>Đơn đặt đã bị hủy lúc:</strong> <span th:text="${#temporals.format(booking.cancelledAt, 'dd/MM/yyyy HH:mm')}">23/08/2026 10:00</span>
+                <div class="mt-1" th:if="${booking.cancellationReason}">
+                    <strong>Lý do hủy:</strong> <span th:text="${booking.cancellationReason}">Khách đổi lịch trình</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Bố cục 2 Cột (Tỷ lệ 8:4) -->
+        <div class="row g-4">
+
+            <!-- CỘT TRÁI (8): Chi tiết dịch vụ & Phòng lưu trú -->
+            <div class="col-12 col-lg-8">
+                
+                <!-- CARD 1: Danh sách phòng đã gán (booking_rooms) -->
+                <div class="card border-0 shadow-sm rounded-4 p-4 mb-4" style="background: #ffffff;">
+                    <div class="section-header">
+                        <div>
+                            <i class="fa-solid fa-door-open text-warning me-2" style="color: #d97706 !important;"></i> Danh sách Phòng đã gán
+                        </div>
+                        <span class="badge bg-light text-secondary border px-2.5 py-1" style="font-size: 11.5px;">
+                            <i class="fa-regular fa-moon me-2"></i><span th:text="${booking.getNumberOfNights()} + ' đêm'">2 đêm</span>
+                        </span>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle mb-0" style="font-size: 13.5px;">
+                            <thead class="table-light small text-uppercase text-muted">
+                                <tr>
+                                    <th class="ps-3 py-2.5">Số phòng</th>
+                                    <th class="py-2.5">Hạng / Loại phòng</th>
+                                    <th class="py-2.5 text-end">Giá niêm yết / Đêm</th>
+                                    <th class="py-2.5 text-center">Số đêm</th>
+                                    <th class="py-2.5 text-end pe-3">Thành tiền phòng</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="br : ${booking.bookingRooms}">
+                                    <td class="ps-3 fw-bold text-dark fs-6">
+                                        <i class="fa-solid fa-bed text-muted me-2" style="font-size: 13px;"></i>
+                                        Phòng <span th:text="${br.room.roomNumber}">101</span>
+                                        <span class="badge bg-light text-secondary border ms-1" style="font-size: 11px;">Tầng <span th:text="${br.room.floor}">1</span></span>
+                                    </td>
+                                    <td>
+                                        <span class="fw-medium text-dark" th:text="${br.room.roomType.name}">Deluxe King Room</span>
+                                    </td>
+                                    <td class="text-end" th:text="${#numbers.formatDecimal(br.pricePerNight, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                        1,200,000 đ
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge bg-warning-subtle text-warning border-warning-subtle fw-semibold px-2 py-1" th:text="${br.numberOfNights} + ' đêm'">
+                                            2 đêm
+                                        </span>
+                                    </td>
+                                    <td class="text-end pe-3 fw-bold text-dark" th:text="${#numbers.formatDecimal(br.subtotal, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                        2,400,000 đ
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(booking.bookingRooms)}">
+                                    <td colspan="5" class="text-center text-muted py-4">Chưa có thông tin phòng gán cho đơn đặt này.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- CARD 2: Dịch vụ đã sử dụng (booking_services) -->
+                <div class="card border-0 shadow-sm rounded-4 p-4 mb-4" style="background: #ffffff;">
+                    <div class="section-header">
+                        <div>
+                            <i class="fa-solid fa-bell-concierge text-warning me-2" style="color: #d97706 !important;"></i> Dịch vụ phát sinh đã sử dụng
+                        </div>
+                        <button th:if="${booking.status.name() == 'CHECKED_IN'}" 
+                                type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 no-print" 
+                                data-bs-toggle="modal" data-bs-target="#addServiceModal">
+                            <i class="fa-solid fa-plus me-2"></i> Thêm dịch vụ
+                        </button>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle mb-0" style="font-size: 13.5px;">
+                            <thead class="table-light small text-uppercase text-muted">
+                                <tr>
+                                    <th class="ps-3 py-2.5">Tên dịch vụ</th>
+                                    <th class="py-2.5">Thời gian sử dụng</th>
+                                    <th class="py-2.5 text-end">Đơn giá</th>
+                                    <th class="py-2.5 text-center">Số lượng</th>
+                                    <th class="py-2.5 text-end">Thành tiền</th>
+                                    <th class="py-2.5 pe-3 text-center no-print" style="width: 70px;">Xóa</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="bs : ${booking.bookingServices}">
+                                    <td class="ps-3">
+                                        <div class="fw-bold text-dark" th:text="${bs.service != null ? bs.service.name : 'Dịch vụ'}">Nước suối Lavie</div>
+                                        <div class="text-muted small" th:if="${bs.note != null and !bs.note.isEmpty()}" th:text="'Ghi chú: ' + ${bs.note}" style="font-size: 11.5px;">Ghi chú: Giao tại phòng 101</div>
+                                    </td>
+                                    <td>
+                                        <span class="small text-muted" th:text="${#temporals.format(bs.usedAt, 'dd/MM/yyyy HH:mm')}">23/08/2026 15:30</span>
+                                        <div class="small text-muted" style="font-size: 11px;" th:if="${bs.createdBy != null}" th:text="'NV: ' + ${bs.createdBy.fullName}">NV: Lễ tân</div>
+                                    </td>
+                                    <td class="text-end" th:text="${#numbers.formatDecimal(bs.pricePerUnit, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                        20,000 đ
+                                    </td>
+                                    <td class="text-center fw-bold text-dark" th:text="${bs.quantity}">
+                                        2
+                                    </td>
+                                    <td class="text-end fw-bold text-dark" th:text="${#numbers.formatDecimal(bs.subtotal, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                        40,000 đ
+                                    </td>
+                                    <td class="pe-3 text-center no-print">
+                                        <!-- Nút Xóa dịch vụ nếu CHECKED_IN -->
+                                        <form th:if="${booking.status.name() == 'CHECKED_IN'}" 
+                                              th:action="@{/admin/bookings/{id}/remove-service/{serviceItemId}(id=${booking.id}, serviceItemId=${bs.id})}" method="post">
+                                            <button type="submit" class="btn btn-sm btn-light text-danger border" 
+                                                    title="Xóa dịch vụ này" 
+                                                    onclick="return confirm('Bạn có chắc chắn muốn xóa dịch vụ này khỏi đơn đặt phòng?');">
+                                                <i class="fa-regular fa-trash-can"></i>
+                                            </button>
+                                        </form>
+                                        <span th:unless="${booking.status.name() == 'CHECKED_IN'}" class="text-muted small">--</span>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(booking.bookingServices)}">
+                                    <td colspan="6" class="text-center text-muted py-4">
+                                        <i class="fa-solid fa-mug-hot text-muted me-2" style="opacity: 0.4;"></i>
+                                        Chưa có dịch vụ phát sinh nào trong thời gian lưu trú.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- CARD 3: Lịch sử thanh toán & Đặt cọc (payments) -->
+                <div class="card border-0 shadow-sm rounded-4 p-4" style="background: #ffffff;">
+                    <div class="section-header">
+                        <div>
+                            <i class="fa-solid fa-credit-card text-warning me-2" style="color: #d97706 !important;"></i> Lịch sử Thanh toán & Đặt cọc
+                        </div>
+                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1" style="font-size: 11.5px;">
+                            <i class="fa-solid fa-circle-check me-2"></i> Đã xác thực
+                        </span>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle mb-0" style="font-size: 13.5px;">
+                            <thead class="table-light small text-uppercase text-muted">
+                                <tr>
+                                    <th class="ps-3 py-2.5">Mã giao dịch</th>
+                                    <th class="py-2.5">Phương thức</th>
+                                    <th class="py-2.5 text-end">Số tiền</th>
+                                    <th class="py-2.5">Thời gian thanh toán</th>
+                                    <th class="py-2.5">Người tiếp nhận</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="pm : ${booking.payments}">
+                                    <td class="ps-3 fw-bold text-dark">
+                                        <span class="badge bg-light text-dark border" th:text="${pm.transactionCode != null ? pm.transactionCode : 'PM-' + pm.id}">TXN-001</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-secondary border">
+                                            <i class="fa-solid me-2" th:classappend="${pm.paymentMethod.icon} + ' ' + ${pm.paymentMethod.colorClass}"></i>
+                                            <span th:text="${pm.paymentMethod.displayName}">Tiền mặt</span>
+                                        </span>
+                                    </td>
+                                    <td class="text-end fw-bold text-success" th:text="${#numbers.formatDecimal(pm.amount, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                        1,000,000 đ
+                                    </td>
+                                    <td>
+                                        <span class="small text-muted" th:text="${#temporals.format(pm.paidAt != null ? pm.paidAt : pm.createdAt, 'dd/MM/yyyy HH:mm')}">23/08/2026 10:00</span>
+                                    </td>
+                                    <td>
+                                        <span class="small text-muted" th:text="${pm.processedBy != null ? pm.processedBy.fullName : 'Hệ thống'}">Lễ tân</span>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(booking.payments)}">
+                                    <td colspan="5" class="text-center text-muted py-4">Chưa có bản ghi thanh toán / đặt cọc nào.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- CỘT PHẢI (4): Hồ sơ khách hàng & Bảng tính tiền sticky -->
+            <div class="col-12 col-lg-4">
+
+                <!-- CARD 1: Thông tin khách hàng -->
+                <div class="card border-0 shadow-sm rounded-4 p-4 mb-4" style="background: #ffffff;">
+                    <div class="section-header">
+                        <div>
+                            <i class="fa-solid fa-user-circle text-warning me-2" style="color: #d97706 !important;"></i> Hồ sơ Khách hàng
+                        </div>
+                        <a th:href="@{/admin/customers/view/{id}(id=${booking.customer.id})}" class="btn btn-sm btn-light border px-2 py-0.5 text-primary small no-print">
+                            <i class="fa-regular fa-eye me-2"></i> Hồ sơ
+                        </a>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-3 mb-3 pb-3 border-bottom">
+                        <div class="rounded-circle bg-light d-flex align-items-center justify-content-center text-secondary border fw-bold fs-4" style="width: 52px; height: 52px;">
+                            <span th:text="${#strings.substring(booking.customer.fullName, 0, 1)}">A</span>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold text-dark mb-0" th:text="${booking.customer.fullName}">Nguyễn Văn An</h6>
+                            <div class="text-muted small mt-0.5">
+                                <a th:href="'tel:' + ${booking.customer.phone}" class="text-decoration-none text-dark fw-medium">
+                                    <i class="fa-solid fa-phone text-warning me-2" style="color: #d97706 !important;"></i>
+                                    <span th:text="${booking.customer.phone}">0912345678</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="small text-muted mb-2 d-flex justify-content-between">
+                        <span>Số CCCD / Hộ chiếu:</span>
+                        <strong class="text-dark" th:text="${booking.customer.identityNumber != null ? booking.customer.identityNumber : 'Chưa cập nhật'}">001201009988</strong>
+                    </div>
+                    <div class="small text-muted mb-2 d-flex justify-content-between">
+                        <span>Email:</span>
+                        <strong class="text-dark" th:text="${booking.customer.email != null ? booking.customer.email : 'Chưa cập nhật'}">an.nguyen@gmail.com</strong>
+                    </div>
+                    <div class="small text-muted mb-2 d-flex justify-content-between">
+                        <span>Ngày sinh:</span>
+                        <strong class="text-dark" th:text="${booking.customer.dateOfBirth != null ? #temporals.format(booking.customer.dateOfBirth, 'dd/MM/yyyy') : 'Chưa cập nhật'}">15/08/1990</strong>
+                    </div>
+                    <div class="small text-muted mb-2 d-flex justify-content-between">
+                        <span>Quốc tịch:</span>
+                        <strong class="text-dark" th:text="${booking.customer.nationality != null ? booking.customer.nationality : 'Việt Nam'}">Việt Nam</strong>
+                    </div>
+                    <div class="small text-muted d-flex justify-content-between">
+                        <span>Địa chỉ:</span>
+                        <span class="text-dark fw-medium text-end text-truncate ms-2" style="max-width: 180px;" 
+                              th:title="${booking.customer.address}" 
+                              th:text="${booking.customer.address != null ? booking.customer.address : 'Chưa cập nhật'}">Hà Nội</span>
+                    </div>
+                </div>
+
+                <!-- CARD 2: Bảng Tổng kết tài chính (Financial Summary) -->
+                <div class="financial-card p-4">
+                    <h5 class="fw-bold text-dark mb-3 pb-2 border-bottom">
+                        <i class="fa-solid fa-calculator text-warning me-2" style="color: #d97706 !important;"></i> Tổng kết Tài chính
+                    </h5>
+
+                    <!-- Tiền phòng -->
+                    <div class="d-flex justify-content-between align-items-center mb-2.5 small">
+                        <span class="text-muted">Tiền phòng (room_total):</span>
+                        <span class="fw-semibold text-dark fs-6" th:text="${#numbers.formatDecimal(booking.roomTotalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">2,400,000 đ</span>
+                    </div>
+
+                    <!-- Tiền dịch vụ phát sinh -->
+                    <div class="d-flex justify-content-between align-items-center mb-2.5 small">
+                        <span class="text-muted">Dịch vụ phát sinh (service_total):</span>
+                        <span class="fw-semibold text-dark fs-6" th:text="${#numbers.formatDecimal(booking.serviceTotalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">40,000 đ</span>
+                    </div>
+
+                    <!-- Giảm giá Voucher -->
+                    <div class="d-flex justify-content-between align-items-center mb-3 small">
+                        <span class="text-muted">
+                            Giảm giá voucher:
+                            <span th:if="${booking.promotion != null}" class="badge bg-warning text-dark ms-1" th:text="${booking.promotion.code}">SUMMER2026</span>
+                        </span>
+                        <span class="fw-bold text-success fs-6" th:text="'-' + ${#numbers.formatDecimal(booking.discountAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">-0 đ</span>
+                    </div>
+
+                    <hr class="my-3">
+
+                    <!-- TỔNG CỘNG THANH TOÁN (TOTAL AMOUNT) -->
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <div class="fw-bold text-dark fs-6">TỔNG CỘNG</div>
+                            <div class="text-muted small" style="font-size: 11px;">Đã gồm VAT & Phí</div>
+                        </div>
+                        <div class="price-highlight-gold" 
+                             th:text="${#numbers.formatDecimal(booking.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                            2,440,000 đ
+                        </div>
+                    </div>
+
+                    <!-- Khối Đã Cọc & Còn Lại Phải Thu -->
+                    <div class="p-3 bg-light rounded-3 mb-3 border">
+                        <div class="d-flex justify-content-between align-items-center mb-2 small">
+                            <span class="text-muted">Đã đặt cọc / Đã trả:</span>
+                            <span class="fw-bold text-success fs-6" th:text="${#numbers.formatDecimal(booking.depositAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">1,000,000 đ</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                            <span class="fw-bold text-dark small">CÒN LẠI PHẢI THU:</span>
+                            <div class="remaining-highlight" th:text="${#numbers.formatDecimal(booking.getRemainingAmount(), 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                1,440,000 đ
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Voucher Card nếu có -->
+                    <div th:if="${booking.promotion != null}" class="p-3 rounded-3 border mb-3" style="background: #fffbeb; border-color: #fde68a !important;">
+                        <div class="fw-bold text-warning small mb-1" style="color: #d97706 !important;">
+                            <i class="fa-solid fa-tag me-2"></i> Voucher áp dụng
+                        </div>
+                        <div class="text-dark small fw-semibold" th:text="${booking.promotion.name}">Chào hè rực rỡ 2026</div>
+                        <div class="text-muted small mt-0.5" th:text="'Mã Code: ' + ${booking.promotion.code}">Mã Code: SUMMER2026</div>
+                    </div>
+
+                    <!-- Ghi chú lưu trú -->
+                    <div th:if="${booking.note != null and !booking.note.isEmpty()}" class="p-3 bg-light rounded-3 text-muted small border">
+                        <div class="fw-bold text-dark mb-1"><i class="fa-regular fa-comment me-2"></i> Ghi chú:</div>
+                        <div th:text="${booking.note}">Khách yêu cầu tầng yên tĩnh</div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- MODAL THÊM DỊCH VỤ PHÁT SINH (#addServiceModal) -->
+        <div class="modal fade" id="addServiceModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content rounded-4 border-0 shadow">
+                    <form th:action="@{/admin/bookings/{id}/add-service(id=${booking.id})}" method="post">
+                        <div class="modal-header border-0 pb-0">
+                            <h5 class="modal-title fw-bold text-dark">
+                                <i class="fa-solid fa-bell-concierge text-warning me-2" style="color: #d97706 !important;"></i> Thêm Dịch vụ phát sinh
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        
+                        <div class="modal-body py-4">
+                            <!-- Chọn Dịch vụ -->
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold text-dark">
+                                    Chọn dịch vụ <span class="text-danger">*</span>
+                                </label>
+                                <select name="serviceId" class="form-select" required id="modalServiceSelect">
+                                    <option value="">-- Chọn dịch vụ khách sạn --</option>
+                                    <option th:each="s : ${activeServices}" 
+                                            th:value="${s.id}" 
+                                            th:text="${s.name} + ' (' + ${#numbers.formatDecimal(s.price, 0, 'COMMA', 0, 'POINT')} + ' đ)'">
+                                        Nước suối Lavie (20,000 đ)
+                                    </option>
+                                </select>
+                            </div>
+
+                            <!-- Số lượng có nút tăng giảm -->
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold text-dark">
+                                    Số lượng <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group" style="max-width: 180px;">
+                                    <button class="qty-control-btn rounded-start" type="button" onclick="decreaseQty()">-</button>
+                                    <input type="number" name="quantity" id="serviceQtyInput" class="form-control text-center fw-bold" value="1" min="1" max="99" required>
+                                    <button class="qty-control-btn rounded-end" type="button" onclick="increaseQty()">+</button>
+                                </div>
+                            </div>
+
+                            <!-- Ghi chú thêm -->
+                            <div class="mb-2">
+                                <label class="form-label small fw-semibold text-dark">Ghi chú (nếu có)</label>
+                                <input type="text" name="note" class="form-control" placeholder="Vd: Giao tại phòng lúc 16h, ướp lạnh...">
+                            </div>
+                        </div>
+
+                        <div class="modal-footer border-0 pt-0">
+                            <button type="button" class="btn btn-light rounded-3 px-3" data-bs-dismiss="modal">Đóng</button>
+                            <button type="submit" class="btn gold-btn rounded-3 px-4 fw-semibold">
+                                <i class="fa-solid fa-check me-2"></i> Xác nhận thêm dịch vụ
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL HỦY ĐƠN ĐẶT PHÒNG (#cancelModal) -->
+        <div class="modal fade" id="cancelModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content rounded-4 border-0 shadow">
+                    <form th:action="@{/admin/bookings/{id}/cancel(id=${booking.id})}" method="post">
+                        <div class="modal-header border-0 pb-0">
+                            <h5 class="modal-title fw-bold text-dark">
+                                <i class="fa-solid fa-triangle-exclamation text-danger me-2"></i>Hủy đơn đặt phòng
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body py-4">
+                            <p class="text-muted mb-3">
+                                Bạn có chắc chắn muốn hủy đơn đặt phòng <span class="fw-bold text-dark" th:text="${booking.bookingCode}"></span>?
+                            </p>
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold text-dark">Lý do hủy đơn <span class="text-danger">*</span></label>
+                                <textarea name="reason" class="form-control" rows="3" placeholder="Nhập lý do khách hủy hoặc khách sạn hủy..." required></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer border-0 pt-0">
+                            <button type="button" class="btn btn-light rounded-3 px-3" data-bs-dismiss="modal">Đóng</button>
+                            <button type="submit" class="btn btn-danger rounded-3 px-4 fw-semibold">Xác nhận Hủy đơn</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Script điều khiển số lượng -->
+    <th:block layout:fragment="script">
+        <script th:src="@{/js/admin/booking-view.js}"></script>
+    </th:block>
+</body>
+</html>

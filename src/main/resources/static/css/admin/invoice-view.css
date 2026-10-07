@@ -1,0 +1,35 @@
+.gold-btn {
+    background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+    color: #ffffff !important;
+    border: none;
+    box-shadow: 0 4px 12px rgba(217, 119, 6, 0.25);
+    transition: all 0.25s ease;
+}
+.gold-btn:hover {
+    background: linear-gradient(135deg, #b45309 0%, #92400e 100%);
+    box-shadow: 0 6px 16px rgba(217, 119, 6, 0.35);
+    transform: translateY(-1px);
+}
+.price-highlight-gold {
+    font-family: 'JetBrains Mono', 'Segoe UI', monospace;
+    font-size: 24px;
+    font-weight: 800;
+    color: #b45309;
+}
+.remaining-highlight {
+    font-family: 'JetBrains Mono', 'Segoe UI', monospace;
+    font-size: 19px;
+    font-weight: 700;
+    color: #dc2626;
+}
+.section-header {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #1e293b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}

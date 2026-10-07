@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin-layout}">
+<head>
+    <title layout:fragment="title" th:text="'Hồ sơ Khách hàng - ' + ${customer.fullName}"></title>
+    <link rel="stylesheet" th:href="@{/css/admin/customer-view.css}">
+</head>
+<body>
+    <div layout:fragment="content">
+        
+        <!-- 1. Top Breadcrumb -->
+        <div class="mb-3">
+            <a th:href="@{/admin/customers}" class="text-decoration-none text-muted small fw-medium">
+                <i class="fa-solid fa-arrow-left me-2"></i> Quay lại danh sách khách hàng
+            </a>
+        </div>
+
+        <!-- 2. Hero Profile Header Banner -->
+        <div class="profile-hero-card">
+            <div class="d-flex flex-column flex-xl-row justify-content-between align-items-xl-center gap-4">
+                
+                <!-- Left Identity -->
+                <div class="d-flex align-items-center gap-3.5">
+                    <div class="profile-avatar-lg" 
+                         th:text="${customer.fullName != null and !customer.fullName.isEmpty() ? #strings.substring(customer.fullName, 0, 1).toUpperCase() : 'C'}">
+                        A
+                    </div>
+                    <div>
+                        <div class="d-flex align-items-center gap-2 flex-wrap mb-1.5">
+                            <h3 class="fw-bold text-dark mb-0 fs-4" th:text="${customer.fullName}">Nguyễn Văn An</h3>
+                            <span class="badge bg-light text-dark border px-2.5 py-1 font-monospace" th:text="${customer.customerCode}">CUST-000128</span>
+                            
+                            <span th:if="${customer.hasUserAccount()}" class="badge rounded-pill border px-2.5 py-1" 
+                                  style="background: #fef3c7; color: #b45309; border-color: #fde68a !important; font-size: 12px;">
+                                <i class="fa-solid fa-crown me-1 text-warning"></i> Thành viên
+                            </span>
+                            <span th:unless="${customer.hasUserAccount()}" class="badge rounded-pill bg-light text-secondary border px-2.5 py-1" style="font-size: 12px;">
+                                <i class="fa-regular fa-user me-1 text-muted"></i> Khách vãng lai
+                            </span>
+
+                            <span th:if="${customer.active}" class="badge rounded-pill px-2.5 py-1 border" 
+                                  style="background-color: #ecfdf5; color: #059669; border-color: #a7f3d0 !important; font-size: 12px;">
+                                <i class="fa-solid fa-circle-check me-1"></i> Hoạt động
+                            </span>
+                            <span th:unless="${customer.active}" class="badge rounded-pill px-2.5 py-1 border" 
+                                  style="background-color: #fef2f2; color: #dc2626; border-color: #fecaca !important; font-size: 12px;">
+                                <i class="fa-solid fa-lock me-1"></i> Đã khóa
+                            </span>
+                        </div>
+
+                        <!-- Quick Meta Line -->
+                        <div class="text-muted d-flex align-items-center gap-3 flex-wrap small">
+                            <a th:href="'tel:' + ${customer.phone}" class="text-decoration-none text-muted">
+                                <i class="fa-solid fa-phone me-1 text-warning" style="color: #d97706 !important;"></i>
+                                <span class="fw-semibold text-dark" th:text="${customer.phone}">0912345678</span>
+                            </a>
+                            <span th:if="${customer.email != null and !customer.email.isEmpty()}">
+                                <i class="fa-regular fa-envelope me-1 text-muted"></i>
+                                <span th:text="${customer.email}">an.nguyen@example.com</span>
+                            </span>
+                            <span>
+                                <i class="fa-solid fa-earth-americas me-1 text-muted"></i>
+                                <span th:text="${customer.nationality}">Việt Nam</span>
+                            </span>
+                            <span>
+                                <i class="fa-solid fa-calendar-plus me-1 text-muted"></i>
+                                Tiếp nhận: <span th:text="${customer.createdAt != null ? #temporals.format(customer.createdAt, 'dd/MM/yyyy') : '--'}">20/08/2026</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Action Buttons -->
+                <div class="d-flex gap-2 align-items-center flex-wrap">
+                    <button type="button" class="btn btn-outline-primary rounded-3 px-3.5 py-2 fw-semibold"
+                            th:data-id="${customer.id}"
+                            th:data-code="${customer.customerCode}"
+                            th:data-name="${customer.fullName}"
+                            th:data-phone="${customer.phone}"
+                            th:data-email="${customer.email}"
+                            th:data-dob="${customer.dateOfBirth}"
+                            th:data-identity="${customer.identityNumber}"
+                            th:data-gender="${customer.gender != null ? customer.gender.name() : 'MALE'}"
+                            th:data-nationality="${customer.nationality}"
+                            th:data-address="${customer.address}"
+                            th:data-active="${customer.active}"
+                            onclick="openEditCustomerModal(this)">
+                        <i class="fa-solid fa-pen me-2"></i> Chỉnh sửa hồ sơ
+                    </button>
+                    
+                    <form th:action="@{/admin/customers/toggle-status/{id}(id=${customer.id})}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-light border rounded-3 px-3.5 py-2 fw-semibold" 
+                                th:classappend="${customer.active ? 'text-danger' : 'text-success'}"
+                                onclick="return confirm('Bạn có chắc chắn muốn thay đổi trạng thái hồ sơ này?');">
+                            <i class="fa-solid me-2" th:classappend="${customer.active ? 'fa-lock' : 'fa-lock-open'}"></i>
+                            <span th:text="${customer.active ? 'Khóa hồ sơ' : 'Mở khóa'}">Khóa hồ sơ</span>
+                        </button>
+                    </form>
+
+                    <a th:href="@{/admin/bookings/create(customerId=${customer.id})}" class="btn btn-dark rounded-3 px-3.5 py-2 fw-semibold">
+                        <i class="fa-solid fa-plus me-2"></i> Tạo đơn đặt phòng
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Băng 4 Thẻ Chỉ số nhanh (KPI Summary Strip) -->
+        <div class="row g-3 mb-4">
+            <!-- KPI 1: Đơn đặt -->
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="stat-banner-card">
+                    <div class="stat-icon-circle" style="background: #eff6ff; color: #2563eb;">
+                        <i class="fa-solid fa-calendar-check"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small fw-medium" style="font-size: 12px;">Tổng lượt đặt phòng</div>
+                        <div class="fw-bold fs-4 text-dark mb-0">
+                            <span th:text="${totalBookings != null ? totalBookings : 0}">0</span> <span class="fs-6 fw-normal text-muted">đơn</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KPI 2: Đêm nghỉ -->
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="stat-banner-card">
+                    <div class="stat-icon-circle" style="background: #f5f3ff; color: #7c3aed;">
+                        <i class="fa-solid fa-moon"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small fw-medium" style="font-size: 12px;">Tổng số đêm lưu trú</div>
+                        <div class="fw-bold fs-4 text-dark mb-0">
+                            <span th:text="${totalNights != null ? totalNights : 0}">0</span> <span class="fs-6 fw-normal text-muted">đêm</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KPI 3: Chi tiêu -->
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="stat-banner-card">
+                    <div class="stat-icon-circle" style="background: #fffbeb; color: #d97706;">
+                        <i class="fa-solid fa-sack-dollar"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small fw-medium" style="font-size: 12px;">Tổng chi tiêu tích lũy</div>
+                        <div class="gold-amount-highlight mb-0" 
+                             th:text="${totalSpent != null ? (#numbers.formatDecimal(totalSpent, 0, 'COMMA', 0, 'POINT') + ' đ') : '0 đ'}">
+                            0 đ
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KPI 4: Trạng thái tài khoản -->
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="stat-banner-card">
+                    <div class="stat-icon-circle" style="background: #ecfdf5; color: #059669;">
+                        <i class="fa-solid fa-circle-user"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small fw-medium" style="font-size: 12px;">Tài khoản trực tuyến</div>
+                        <div class="fw-bold fs-6 text-dark mb-0 text-truncate" style="max-width: 140px;">
+                            <span th:if="${customer.hasUserAccount()}" th:text="${customer.user.username}">annguyen</span>
+                            <span th:unless="${customer.hasUserAccount()}" class="text-muted fw-normal">Chưa liên kết</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Main Detail Content (2 Cột cân đối: 7 / 5) -->
+        <div class="row g-4 mb-4">
+
+            <!-- CỘT TRÁI (7): Bảng thông tin cá nhân & định danh chi tiết -->
+            <div class="col-12 col-lg-7">
+                <div class="content-card-lux h-100">
+                    <div class="card-header-title">
+                        <div>
+                            <i class="fa-solid fa-address-card text-warning me-2" style="color: #d97706 !important;"></i>
+                            Thông tin Hồ sơ Khách hàng
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <!-- Họ và tên -->
+                        <div class="col-12 col-sm-6">
+                            <div class="info-cell-box">
+                                <div class="info-cell-label"><i class="fa-solid fa-user text-warning me-1.5" style="color: #d97706 !important;"></i> Họ và tên</div>
+                                <div class="info-cell-value" th:text="${customer.fullName}">Nguyễn Văn An</div>
+                            </div>
+                        </div>
+
+                        <!-- Số điện thoại -->
+                        <div class="col-12 col-sm-6">
+                            <div class="info-cell-box">
+                                <div class="info-cell-label"><i class="fa-solid fa-phone text-warning me-1.5" style="color: #d97706 !important;"></i> Số điện thoại</div>
+                                <div class="info-cell-value" th:text="${customer.phone}">0912345678</div>
+                            </div>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="col-12 col-sm-6">
+                            <div class="info-cell-box">
+                                <div class="info-cell-label"><i class="fa-regular fa-envelope text-warning me-1.5" style="color: #d97706 !important;"></i> Địa chỉ Email</div>
+                                <div class="info-cell-value" th:text="${customer.email != null and !customer.email.isEmpty() ? customer.email : 'Chưa cập nhật'}">an.nguyen@example.com</div>
+                            </div>
+                        </div>
+
+                        <!-- Số CCCD / Hộ chiếu -->
+                        <div class="col-12 col-sm-6">
+                            <div class="info-cell-box">
+                                <div class="info-cell-label"><i class="fa-regular fa-id-card text-warning me-1.5" style="color: #d97706 !important;"></i> Số CCCD / Hộ chiếu</div>
+                                <div class="info-cell-value font-monospace" th:text="${customer.identityNumber != null and !customer.identityNumber.isEmpty() ? customer.identityNumber : 'Chưa cập nhật'}">001200001234</div>
+                            </div>
+                        </div>
+
+                        <!-- Giới tính -->
+                        <div class="col-12 col-sm-6">
+                            <div class="info-cell-box">
+                                <div class="info-cell-label"><i class="fa-solid fa-venus-mars text-warning me-1.5" style="color: #d97706 !important;"></i> Giới tính</div>
+                                <div class="info-cell-value">
+                                    <span th:if="${customer.gender != null}">
+                                        <i class="fa-solid me-1.5" th:classappend="${customer.gender.icon} + ' ' + ${customer.gender.colorClass}"></i>
+                                        <span th:text="${customer.gender.displayName}">Nam</span>
+                                    </span>
+                                    <span th:unless="${customer.gender != null}" class="text-muted">Chưa xác định</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ngày sinh -->
+                        <div class="col-12 col-sm-6">
+                            <div class="info-cell-box">
+                                <div class="info-cell-label"><i class="fa-regular fa-calendar text-warning me-1.5" style="color: #d97706 !important;"></i> Ngày sinh</div>
+                                <div class="info-cell-value" th:text="${customer.dateOfBirth != null ? #temporals.format(customer.dateOfBirth, 'dd/MM/yyyy') : 'Chưa cập nhật'}">15/08/1990</div>
+                            </div>
+                        </div>
+
+                        <!-- Quốc tịch -->
+                        <div class="col-12 col-sm-6">
+                            <div class="info-cell-box">
+                                <div class="info-cell-label"><i class="fa-solid fa-earth-americas text-warning me-1.5" style="color: #d97706 !important;"></i> Quốc tịch</div>
+                                <div class="info-cell-value" th:text="${customer.nationality}">Việt Nam</div>
+                            </div>
+                        </div>
+
+                        <!-- Ngày tiếp nhận -->
+                        <div class="col-12 col-sm-6">
+                            <div class="info-cell-box">
+                                <div class="info-cell-label"><i class="fa-solid fa-clock-rotate-left text-warning me-1.5" style="color: #d97706 !important;"></i> Ngày tiếp nhận hồ sơ</div>
+                                <div class="info-cell-value text-muted" th:text="${customer.createdAt != null ? #temporals.format(customer.createdAt, 'dd/MM/yyyy HH:mm:ss') : '--'}">20/08/2026 10:30:00</div>
+                            </div>
+                        </div>
+
+                        <!-- Địa chỉ liên hệ -->
+                        <div class="col-12">
+                            <div class="info-cell-box">
+                                <div class="info-cell-label"><i class="fa-solid fa-location-dot text-warning me-1.5" style="color: #d97706 !important;"></i> Địa chỉ thường trú / Liên hệ</div>
+                                <div class="info-cell-value" th:text="${customer.address != null and !customer.address.isEmpty() ? customer.address : 'Chưa cập nhật địa chỉ'}">128 Phố Huế, P. Ngô Thì Nhậm, Q. Hai Bà Trưng, Hà Nội</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CỘT PHẢI (5): Tài khoản liên kết & Thao tác hỗ trợ -->
+            <div class="col-12 col-lg-5">
+                
+                <!-- Box 1: Tài khoản trực tuyến -->
+                <div class="content-card-lux mb-4">
+                    <div class="card-header-title">
+                        <div>
+                            <i class="fa-solid fa-user-gear text-primary me-2"></i>
+                            Tài khoản Thành viên Trực tuyến
+                        </div>
+                    </div>
+                    
+                    <div th:if="${customer.hasUserAccount()}">
+                        <div class="d-flex justify-content-between align-items-center py-2.5 border-bottom small">
+                            <span class="text-muted">Tên đăng nhập:</span>
+                            <strong class="text-dark font-monospace fs-6" th:text="${customer.user.username}">annguyen90</strong>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center py-2.5 border-bottom small">
+                            <span class="text-muted">Email tài khoản:</span>
+                            <span class="fw-semibold text-dark text-truncate ms-2" th:text="${customer.user.email}">an@hotel.com</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center py-2.5 border-bottom small">
+                            <span class="text-muted">Trạng thái tài khoản:</span>
+                            <span th:if="${customer.user.enabled}" class="badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1">Kích hoạt</span>
+                            <span th:unless="${customer.user.enabled}" class="badge bg-danger-subtle text-danger border border-danger-subtle px-2.5 py-1">Đã khóa</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center pt-2.5 small">
+                            <span class="text-muted">Đăng nhập gần nhất:</span>
+                            <span class="text-muted" th:text="${customer.user.lastLoginAt != null ? #temporals.format(customer.user.lastLoginAt, 'dd/MM/yyyy HH:mm') : 'Chưa đăng nhập'}">--</span>
+                        </div>
+                    </div>
+
+                    <div th:unless="${customer.hasUserAccount()}" class="text-center py-4 text-muted">
+                        <i class="fa-regular fa-circle-user mb-2 fs-2" style="opacity: 0.35;"></i>
+                        <h6 class="text-dark fw-bold mb-1">Chưa đăng ký tài khoản online</h6>
+                        <p class="text-muted small mb-0">Hồ sơ khách hàng được lễ tân tiếp nhận và tạo trực tiếp tại quầy.</p>
+                    </div>
+                </div>
+
+                <!-- Box 2: Lối tắt thao tác nhanh -->
+                <div class="content-card-lux mb-0">
+                    <div class="card-header-title">
+                        <div>
+                            <i class="fa-solid fa-bolt text-warning me-2" style="color: #d97706 !important;"></i>
+                            Lối tắt Thao tác Lễ tân
+                        </div>
+                    </div>
+                    <div class="d-grid gap-2.5">
+                        <a th:href="@{/admin/bookings/create(customerId=${customer.id})}" class="btn btn-light border d-flex align-items-center justify-content-between p-3 text-start">
+                            <div>
+                                <div class="fw-bold text-dark"><i class="fa-solid fa-calendar-plus text-primary me-2"></i> Tạo đơn đặt phòng mới</div>
+                                <div class="text-muted small" style="font-size: 11.5px;">Điền sẵn thông tin khách hàng vào đơn</div>
+                            </div>
+                            <i class="fa-solid fa-chevron-right text-muted small"></i>
+                        </a>
+                        <a th:href="@{/admin/invoices(keyword=${customer.customerCode})}" class="btn btn-light border d-flex align-items-center justify-content-between p-3 text-start">
+                            <div>
+                                <div class="fw-bold text-dark"><i class="fa-solid fa-file-invoice-dollar text-success me-2"></i> Lịch sử hóa đơn thanh toán</div>
+                                <div class="text-muted small" style="font-size: 11.5px;">Tra cứu các hóa đơn đã xuất cho khách</div>
+                            </div>
+                            <i class="fa-solid fa-chevron-right text-muted small"></i>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- 5. Bảng Lịch sử các Đơn đặt phòng (Full-width Bottom Card) -->
+        <div class="content-card-lux">
+            <div class="card-header-title">
+                <div>
+                    <i class="fa-solid fa-hotel text-warning me-2" style="color: #d97706 !important;"></i>
+                    Lịch sử các Đơn đặt phòng tại Khách sạn
+                </div>
+                <a th:href="@{/admin/bookings/create(customerId=${customer.id})}" class="btn btn-sm btn-dark rounded-3 px-3">
+                    <i class="fa-solid fa-plus me-1.5"></i> Đặt phòng mới
+                </a>
+            </div>
+
+            <!-- Bảng danh sách đơn đặt phòng -->
+            <div class="table-responsive" th:if="${bookings != null and !bookings.isEmpty()}">
+                <table class="table table-hover align-middle mb-0" style="font-size: 13.5px;">
+                    <thead class="table-light small text-uppercase text-muted" style="font-size: 11.5px;">
+                        <tr>
+                            <th class="ps-3 py-3">Mã Đơn</th>
+                            <th class="py-3">Thời gian lưu trú</th>
+                            <th class="py-3">Số khách</th>
+                            <th class="py-3 text-end">Tổng tiền</th>
+                            <th class="py-3 text-center">Trạng thái</th>
+                            <th class="py-3 text-center pe-3">Xem chi tiết</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="b : ${bookings}">
+                            <td class="ps-3 fw-bold text-dark font-monospace fs-6" th:text="${b.bookingCode}">BK-1001</td>
+                            <td class="small text-muted">
+                                <span class="fw-semibold text-dark" th:text="${#temporals.format(b.checkIn, 'dd/MM/yyyy')}">23/08/2026</span> &rarr; 
+                                <span class="fw-semibold text-dark" th:text="${#temporals.format(b.checkOut, 'dd/MM/yyyy')}">25/08/2026</span>
+                            </td>
+                            <td><span class="badge bg-light text-dark border" th:text="${b.numberOfGuests} + ' khách'">2 khách</span></td>
+                            <td class="text-end fw-bold" style="color: #b45309; font-family: 'JetBrains Mono', monospace; font-size: 15px;" 
+                                th:text="${#numbers.formatDecimal(b.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                2,400,000 đ
+                            </td>
+                            <td class="text-center">
+                                <span class="badge rounded-pill px-3 py-1 border" th:classappend="${b.status.badgeClass}" style="font-size: 11.5px;" th:text="${b.status.displayName}">Đang ở</span>
+                            </td>
+                            <td class="text-center pe-3">
+                                <a th:href="@{/admin/bookings/{id}(id=${b.id})}" class="btn btn-sm btn-light border text-primary px-2.5" title="Xem chi tiết đơn">
+                                    <i class="fa-solid fa-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Trạng thái trống nếu chưa có đơn đặt -->
+            <div th:if="${bookings == null or bookings.isEmpty()}" class="text-center py-5 bg-light rounded-3 border">
+                <i class="fa-solid fa-suitcase-rolling text-muted mb-3" style="font-size: 36px; opacity: 0.35;"></i>
+                <h6 class="text-dark fw-bold mb-1">Khách hàng chưa có lịch sử đặt phòng nào</h6>
+                <p class="text-muted small mb-3">Bấm nút bên dưới để tạo đơn đặt phòng trực tiếp cho khách hàng này.</p>
+                <a th:href="@{/admin/bookings/create(customerId=${customer.id})}" class="btn btn-dark rounded-3 px-4 py-2 small fw-semibold">
+                    <i class="fa-solid fa-plus me-1.5"></i> Tạo đơn đặt phòng ngay
+                </a>
+            </div>
+        </div>
+
+        <!-- MODAL CHỈNH SỬA HỒ SƠ KHÁCH HÀNG -->
+        <div class="modal fade" id="editCustomerModal" tabindex="-1" aria-labelledby="editCustomerModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content border-0 shadow rounded-4 overflow-hidden">
+                    <form th:action="@{/admin/customers/save}" method="post" id="customerForm">
+                        <input type="hidden" name="id" id="modalCustomerId" th:value="${customer.id}">
+                        <input type="hidden" name="customerCode" id="modalCustomerCode" th:value="${customer.customerCode}">
+
+                        <div class="modal-header border-0 bg-light p-4 pb-3">
+                            <h5 class="modal-title fw-bold text-dark" id="editCustomerModalLabel">
+                                <i class="fa-solid fa-user-pen text-warning me-2" style="color: #d97706 !important;"></i>
+                                Chỉnh sửa Hồ sơ Khách hàng
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+
+                        <div class="modal-body p-4 pt-3">
+                            <div class="row g-3">
+                                <!-- Họ và tên -->
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label small fw-semibold text-dark">Họ và tên <span class="text-danger">*</span></label>
+                                    <input type="text" name="fullName" id="modalFullName" class="form-control form-control-sm bg-light" 
+                                           placeholder="Nguyễn Văn An" required th:value="${customer.fullName}">
+                                </div>
+
+                                <!-- Số điện thoại -->
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label small fw-semibold text-dark">Số điện thoại <span class="text-danger">*</span></label>
+                                    <input type="tel" name="phone" id="modalPhone" class="form-control form-control-sm bg-light" 
+                                           placeholder="0912345678" required th:value="${customer.phone}">
+                                </div>
+
+                                <!-- Email -->
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label small fw-semibold text-dark">Địa chỉ Email</label>
+                                    <input type="email" name="email" id="modalEmail" class="form-control form-control-sm bg-light" 
+                                           placeholder="an.nguyen@example.com" th:value="${customer.email}">
+                                </div>
+
+                                <!-- CCCD / Hộ chiếu -->
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label small fw-semibold text-dark">Số CCCD / Hộ chiếu</label>
+                                    <input type="text" name="identityNumber" id="modalIdentityNumber" class="form-control form-control-sm bg-light" 
+                                           placeholder="001200001234" th:value="${customer.identityNumber}">
+                                </div>
+
+                                <!-- Giới tính -->
+                                <div class="col-12 col-md-4">
+                                    <label class="form-label small fw-semibold text-dark">Giới tính</label>
+                                    <select name="gender" id="modalGender" class="form-select form-select-sm bg-light">
+                                        <option value="MALE" th:selected="${customer.gender != null and customer.gender.name() == 'MALE'}">Nam</option>
+                                        <option value="FEMALE" th:selected="${customer.gender != null and customer.gender.name() == 'FEMALE'}">Nữ</option>
+                                        <option value="OTHER" th:selected="${customer.gender != null and customer.gender.name() == 'OTHER'}">Khác</option>
+                                    </select>
+                                </div>
+
+                                <!-- Ngày sinh -->
+                                <div class="col-12 col-md-4">
+                                    <label class="form-label small fw-semibold text-dark">Ngày sinh</label>
+                                    <input type="date" name="dateOfBirth" id="modalDateOfBirth" class="form-control form-control-sm bg-light" 
+                                           th:value="${customer.dateOfBirth}">
+                                </div>
+
+                                <!-- Quốc tịch -->
+                                <div class="col-12 col-md-4">
+                                    <label class="form-label small fw-semibold text-dark">Quốc tịch</label>
+                                    <input type="text" name="nationality" id="modalNationality" class="form-control form-control-sm bg-light" 
+                                           placeholder="Việt Nam" th:value="${customer.nationality}">
+                                </div>
+
+                                <!-- Địa chỉ -->
+                                <div class="col-12">
+                                    <label class="form-label small fw-semibold text-dark">Địa chỉ liên hệ</label>
+                                    <input type="text" name="address" id="modalAddress" class="form-control form-control-sm bg-light" 
+                                           placeholder="Số nhà, Tên đường, Phường/Xã, Quận/Huyện, Tỉnh/TP..." th:value="${customer.address}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer border-0 bg-light p-3 px-4">
+                            <button type="button" class="btn btn-sm btn-light border rounded-3" data-bs-dismiss="modal">Hủy</button>
+                            <button type="submit" class="btn btn-sm btn-dark rounded-3 px-4 fw-semibold">
+                                <i class="fa-solid fa-floppy-disk me-2"></i> Lưu thay đổi
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Script tương tác Modal -->
+    <th:block layout:fragment="script">
+        <script th:src="@{/js/admin/customer-view.js}"></script>
+    </th:block>
+
+</body>
+</html>

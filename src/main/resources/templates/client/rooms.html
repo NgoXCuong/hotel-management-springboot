@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/client-layout}">
+<head>
+    <title layout:fragment="title">Bộ Sưu Tập Hạng Phòng Nghỉ - Grand Hotel</title>
+    <link rel="stylesheet" th:href="@{/css/client-rooms.css}">
+</head>
+<body>
+    <div layout:fragment="content">
+
+        <!-- 1. Header Banner -->
+        <div class="rooms-header-banner">
+            <div class="container">
+                <div class="rooms-header-badge">
+                    <i class="fa-solid fa-crown me-1" style="color: #E7D7C1;"></i> Không Gian Nghỉ Dưỡng Thượng Lưu
+                </div>
+                <h1 class="rooms-header-title">Bộ Sưu Tập Hạng Phòng Nghỉ</h1>
+                <p class="text-light opacity-75 mb-0" style="font-size: 14.5px; font-weight: 400; max-width: 620px; margin: 0 auto; letter-spacing: 0.1px;">
+                    Đa dạng lựa chọn từ Deluxe thanh lịch đến Grand Suite & Villa hướng biển đẳng cấp 5 sao quốc tế.
+                </p>
+            </div>
+        </div>
+
+        <div class="rooms-wide-container">
+
+            <!-- 2. BỘ LỌC TỔNG HỢP CAO CẤP (THE GRAND SANCTUARY FILTER SUITE) -->
+            <div class="luxury-filter-suite">
+                <form th:action="@{/rooms}" method="get" id="masterRoomsFilterForm">
+
+                    <!-- TẦNG 1: FLOATING SEARCH CAPSULE (THANH TÌM KIẾM NGUYÊN KHỐI PHÂN ĐOẠN) -->
+                    <div class="luxury-search-capsule">
+                        
+                        <!-- Phân đoạn 1: Tên hạng phòng -->
+                        <div class="search-segment segment-keyword">
+                            <div class="segment-label">
+                                <i class="fa-solid fa-magnifying-glass text-gold"></i>
+                                <span>Hạng phòng</span>
+                            </div>
+                            <input type="text" name="keyword" class="segment-input" 
+                                   placeholder="Tất cả hoặc nhập Deluxe, Suite, Villa..." th:value="${keyword}">
+                        </div>
+
+                        <div class="segment-divider d-none d-lg-block"></div>
+
+                        <!-- Phân đoạn 2: Ngày nhận phòng -->
+                        <div class="search-segment segment-date">
+                            <div class="segment-label">
+                                <i class="fa-regular fa-calendar-plus text-gold"></i>
+                                <span>Nhận phòng</span>
+                            </div>
+                            <input type="date" name="checkIn" id="filterCheckIn" class="segment-input" 
+                                   th:value="${checkIn}">
+                        </div>
+
+                        <div class="segment-divider d-none d-lg-block"></div>
+
+                        <!-- Phân đoạn 3: Ngày trả phòng -->
+                        <div class="search-segment segment-date">
+                            <div class="segment-label">
+                                <i class="fa-regular fa-calendar-check text-gold"></i>
+                                <span>Trả phòng</span>
+                            </div>
+                            <input type="date" name="checkOut" id="filterCheckOut" class="segment-input" 
+                                   th:value="${checkOut}">
+                        </div>
+
+                        <div class="segment-divider d-none d-lg-block"></div>
+
+                        <!-- Phân đoạn 4: Số lượng khách -->
+                        <div class="search-segment segment-guests">
+                            <div class="segment-label">
+                                <i class="fa-solid fa-user-group text-gold"></i>
+                                <span>Số khách</span>
+                            </div>
+                            <select name="guests" class="segment-input segment-select">
+                                <option value="">Tất cả số khách</option>
+                                <option value="1" th:selected="${guests == 1}">1 Khách (Single)</option>
+                                <option value="2" th:selected="${guests == 2}">2 Khách (Couple)</option>
+                                <option value="3" th:selected="${guests == 3}">3 Khách (Triple)</option>
+                                <option value="4" th:selected="${guests == 4}">4+ Khách (Family)</option>
+                            </select>
+                        </div>
+
+                        <!-- Phân đoạn 5: Nút Tìm kiếm (Gold CTA) -->
+                        <div class="search-btn-segment">
+                            <button type="submit" class="capsule-search-btn">
+                                <i class="fa-solid fa-magnifying-glass me-2"></i>
+                                <span>Tìm phòng</span>
+                            </button>
+                        </div>
+
+                    </div>
+
+                    <!-- TẦNG 2: REFINEMENT TOOLBAR (MỨC GIÁ, TIỆN ÍCH, SẮP XẾP & NÚT THAO TÁC) -->
+                    <div class="refinement-toolbar">
+                        
+                        <!-- Cụm Khoảng giá -->
+                        <div class="refine-price-group">
+                            <span class="refine-tag-label">
+                                <i class="fa-solid fa-tag text-gold me-1"></i> Mức giá (VNĐ):
+                            </span>
+                            <div class="refine-price-inputs">
+                                <input type="number" name="minPrice" class="refine-input" 
+                                       placeholder="Từ giá (₫)" th:value="${minPrice}">
+                                <span class="refine-dash">&ndash;</span>
+                                <input type="number" name="maxPrice" class="refine-input" 
+                                       placeholder="Đến giá (₫)" th:value="${maxPrice}">
+                            </div>
+                        </div>
+
+                        <!-- Cụm Tiện ích, Sắp xếp & Thao tác -->
+                        <div class="refine-actions-group">
+                            <!-- Dropdown Tiện ích (Thay thế dãy tag dài) -->
+                            <div class="refine-sort-wrapper">
+                                <span class="refine-tag-label">
+                                    <i class="fa-solid fa-sparkles text-gold me-1"></i> Tiện ích:
+                                </span>
+                                <select name="amenityId" class="refine-select" onchange="this.form.submit()">
+                                    <option value="" th:selected="${amenityId == null}">Tất cả tiện ích</option>
+                                    <option th:each="am : ${amenities}" 
+                                            th:value="${am.id}" 
+                                            th:text="${am.name}" 
+                                            th:selected="${amenityId != null and am.id == amenityId}">
+                                        Wifi tốc độ cao
+                                    </option>
+                                </select>
+                            </div>
+
+                            <!-- Dropdown Sắp xếp -->
+                            <div class="refine-sort-wrapper">
+                                <span class="refine-tag-label d-none d-sm-inline">
+                                    <i class="fa-solid fa-arrow-down-short-wide text-gold me-1"></i> Sắp xếp:
+                                </span>
+                                <select name="sortBy" class="refine-select" onchange="this.form.submit()">
+                                    <option value="" th:selected="${sortBy == null or sortBy == ''}">Mặc định (Nổi bật nhất)</option>
+                                    <option value="price_asc" th:selected="${sortBy == 'price_asc'}">Giá: Thấp đến Cao</option>
+                                    <option value="price_desc" th:selected="${sortBy == 'price_desc'}">Giá: Cao đến Thấp</option>
+                                    <option value="guests_desc" th:selected="${sortBy == 'guests_desc'}">Sức chứa khách nhiều nhất</option>
+                                </select>
+                            </div>
+
+                            <a th:if="${hasFilter}"
+                               th:href="@{/rooms}" class="refine-reset-btn" title="Đặt lại tất cả tiêu chí lọc">
+                                <i class="fa-solid fa-rotate-left me-1"></i> Xóa lọc
+                            </a>
+
+                            <button type="submit" class="refine-apply-btn">
+                                <i class="fa-solid fa-sliders me-1.5"></i> Áp dụng
+                            </button>
+                        </div>
+
+                    </div>
+
+                </form>
+            </div>
+
+            <!-- 3. Khu vực danh sách phòng (Full Width 12 Cột) -->
+            <div class="py-5">
+                
+                <!-- Thanh tổng kết trạng thái tìm kiếm / danh sách phòng -->
+                <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 p-3 bg-white rounded-3 border mb-4 shadow-sm" style="border-color: var(--lux-border) !important;">
+                    <div>
+                        <!-- Trạng thái 1: Khi ĐÃ tìm kiếm hoặc áp dụng bộ lọc -->
+                        <div th:if="${hasFilter}">
+                            <span class="fw-bold text-dark fs-6">
+                                <i class="fa-solid fa-filter me-1.5" style="color: var(--lux-gold-dark);"></i>
+                                Tìm thấy <span class="fw-bold" style="color: var(--lux-gold-dark);" th:text="${totalItems}">0</span> hạng phòng phù hợp
+                            </span>
+                            
+                            <!-- Nếu người dùng ĐÃ chọn ngày -->
+                            <div th:if="${hasDateFilter}" class="text-muted small mt-0.5">
+                                <i class="fa-regular fa-calendar-check me-1" style="color: var(--lux-gold-dark);"></i>
+                                Thời gian lưu trú: <strong class="text-dark" th:text="${#temporals.format(checkIn, 'dd/MM/yyyy')}">24/08/2026</strong> &rarr; 
+                                <strong class="text-dark" th:text="${#temporals.format(checkOut, 'dd/MM/yyyy')}">25/08/2026</strong> 
+                                (<strong class="text-dark" th:text="${nights} + ' đêm'">1 đêm</strong>)
+                            </div>
+
+                            <!-- Nếu lọc tiêu chí khác nhưng CHƯA chọn ngày -->
+                            <div th:unless="${hasDateFilter}" class="text-muted small mt-0.5">
+                                <i class="fa-solid fa-circle-info me-1" style="color: var(--lux-gold-dark);"></i>
+                                Đang lọc theo tiêu chí &bull; Vui lòng chọn ngày nhận & trả phòng ở trên để kiểm tra phòng trống chính xác
+                            </div>
+                        </div>
+
+                        <!-- Trạng thái 2: Khi VỪA MỚI VÀO TRANG (CHƯA TÌM GÌ) -->
+                        <div th:unless="${hasFilter}">
+                            <span class="fw-bold text-dark fs-6">
+                                <i class="fa-solid fa-hotel me-1.5" style="color: var(--lux-gold-dark);"></i>
+                                Tất cả hạng phòng (<span class="fw-bold" style="color: var(--lux-gold-dark);" th:text="${totalItems}">0</span> hạng phòng)
+                            </span>
+                            <div class="text-muted small mt-0.5">
+                                <i class="fa-solid fa-circle-info me-1" style="color: var(--lux-gold-dark);"></i>
+                                Khám phá toàn bộ không gian nghỉ dưỡng tại Grand Hotel &bull; Chọn ngày nhận & trả phòng để kiểm tra tình trạng phòng trống
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1.5 small fw-bold">
+                        <i class="fa-solid fa-shield-check me-1"></i> Đảm bảo giá tốt nhất
+                    </div>
+                </div>
+
+                <!-- Grid Danh sách phòng (12 Cột, 3 Thẻ / Hàng) -->
+                <div class="row g-4">
+                    <div th:each="rt : ${roomTypes}" class="col-12 col-md-6 col-lg-4">
+                        <div class="room-card-modern">
+                            
+                            <!-- 1. Ảnh phòng & Badges -->
+                            <div class="room-card-img-wrap">
+                                <img th:if="${rt.images != null and !rt.images.isEmpty()}" th:src="${rt.images[0].imageUrl}" th:alt="${rt.name}">
+                                <img th:unless="${rt.images != null and !rt.images.isEmpty()}" src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80" th:alt="${rt.name}">
+                                
+                                <!-- Top Left Badge: Sức chứa -->
+                                <span class="badge bg-dark bg-opacity-75 text-white position-absolute top-0 start-0 m-3 px-3 py-1.5 rounded-pill small fw-semibold">
+                                    <i class="fa-solid fa-user-group me-2 text-warning"></i> Tối đa <span th:text="${rt.maxGuests}">2</span> khách
+                                </span>
+
+                                <!-- Top Right Badge: 5 Sao -->
+                                <span class="badge bg-warning text-dark position-absolute top-0 end-0 m-3 px-2.5 py-1 rounded-pill small fw-bold shadow-sm">
+                                    <i class="fa-solid fa-star"></i> 5.0
+                                </span>
+
+                                <!-- Overlay Hết phòng: CHỈ hiển thị khi người dùng ĐÃ lọc ngày và không còn phòng -->
+                                <div th:if="${hasDateFilter and (availableCountByType[rt.id] == null or availableCountByType[rt.id] == 0)}"
+                                     class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+                                     style="background: rgba(28, 25, 23, 0.65); z-index: 5;">
+                                    <span class="badge bg-danger text-white px-3.5 py-2 rounded-pill fs-6 fw-bold shadow-lg">
+                                        <i class="fa-solid fa-ban me-2"></i> Hết phòng trong khoảng ngày này
+                                    </span>
+                                </div>
+
+                                <!-- Quick View Button Trigger -->
+                                <button type="button" class="btn btn-sm btn-light position-absolute bottom-0 end-0 m-3 px-3 py-1 rounded-pill shadow-sm small fw-bold"
+                                        th:data-bs-toggle="modal" th:data-bs-target="'#quickViewModal_' + ${rt.id}">
+                                    <i class="fa-regular fa-images me-1" style="color: var(--lux-gold-dark);"></i> Xem nhanh
+                                </button>
+                            </div>
+
+                            <!-- 2. Nội dung chi tiết phòng -->
+                            <div class="p-4 d-flex flex-column justify-content-between flex-grow-1">
+                                <div>
+                                    <h3 class="room-card-name">
+                                        <a th:href="@{/rooms/{id}(id=${rt.id}, checkIn=${checkIn}, checkOut=${checkOut}, guests=${guests})}" 
+                                           class="text-decoration-none text-dark" th:text="${rt.name}">Deluxe King Room</a>
+                                    </h3>
+
+                                    <p class="text-secondary small mb-3" style="line-height: 1.6; font-size: 13px;" 
+                                       th:text="${rt.description != null ? #strings.abbreviate(rt.description, 110) : 'Không gian nghỉ dưỡng thanh lịch, ban công view biển lãng mạn cùng trang thiết bị tiện nghi cao cấp 5 sao.'}">
+                                        Không gian nghỉ dưỡng thoải mái, thoáng mát...
+                                    </p>
+
+                                    <!-- Tiện nghi nổi bật -->
+                                    <div class="d-flex flex-wrap gap-2 mb-4">
+                                        <span th:each="am, iter : ${rt.amenities}" th:if="${iter.index < 3}" class="room-spec-chip">
+                                            <i th:classappend="${am.icon != null ? am.icon : 'fa-solid fa-check'}"></i>
+                                            <span th:text="${am.name}">Wifi</span>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- 3. Khu vực Giá & Nút hành động -->
+                                <div class="pt-3 border-top" style="border-color: var(--lux-border) !important;">
+                                    <div class="d-flex justify-content-between align-items-end mb-3">
+                                        <div>
+                                            <div class="text-muted" style="font-size: 11px;">Đơn giá mỗi đêm (đã gồm VAT):</div>
+                                            <div class="room-price-title" 
+                                                 th:text="${#numbers.formatDecimal(rt.pricePerNight, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                                1,200,000 đ
+                                            </div>
+                                        </div>
+
+                                        <!-- Tạm tính tổng tiền (Chỉ hiển thị khi đã chọn ngày và > 1 đêm) -->
+                                        <div class="text-end" th:if="${hasDateFilter and nights > 1}">
+                                            <div class="text-muted" style="font-size: 11px;">Tổng <span th:text="${nights}">2</span> đêm:</div>
+                                            <div class="fw-bold fs-6 text-dark"
+                                                 th:text="${#numbers.formatDecimal(rt.pricePerNight.multiply(T(java.math.BigDecimal).valueOf(nights)), 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                                2,400,000 đ
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex gap-2">
+                                        <a th:href="@{/rooms/{id}(id=${rt.id}, checkIn=${checkIn}, checkOut=${checkOut}, guests=${guests})}" 
+                                           class="gold-outline-btn px-3 py-2 small flex-grow-1 text-center justify-content-center" style="white-space: nowrap;">
+                                            Chi tiết
+                                        </a>
+
+                                        <!-- Nút Đặt phòng khi CÒN phòng hoặc CHƯA chọn ngày -->
+                                        <a th:if="${!hasDateFilter or (availableCountByType[rt.id] != null and availableCountByType[rt.id] > 0)}"
+                                           th:href="@{/booking/checkout(roomTypeId=${rt.id}, checkIn=${checkIn != null ? checkIn : defaultCheckIn}, checkOut=${checkOut != null ? checkOut : defaultCheckOut}, guests=${guests != null ? guests : 2})}" 
+                                           class="gold-btn px-3.5 py-2 small flex-grow-1 text-center justify-content-center" style="white-space: nowrap;">
+                                            <i class="fa-solid fa-calendar-check me-2"></i> Đặt ngay
+                                        </a>
+
+                                        <!-- Nút Hết phòng khi ĐÃ chọn ngày và không còn phòng -->
+                                        <button th:if="${hasDateFilter and (availableCountByType[rt.id] == null or availableCountByType[rt.id] == 0)}"
+                                                type="button" disabled
+                                                class="btn btn-secondary rounded-pill px-3.5 py-2 small fw-bold flex-grow-1 text-center justify-content-center" style="white-space: nowrap;">
+                                            <i class="fa-solid fa-ban me-2"></i> Hết phòng
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- ============ MODAL XEM NHANH (QUICK VIEW) ============ -->
+                        <div class="modal fade" th:id="'quickViewModal_' + ${rt.id}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered modal-lg">
+                                <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                                    <div class="modal-header border-0 bg-light p-4 pb-3">
+                                        <div>
+                                            <h4 class="modal-title fw-bold text-dark" th:text="${rt.name}">Deluxe King Room</h4>
+                                            <div class="text-muted small mt-1">
+                                                <i class="fa-solid fa-user-group me-1" style="color: var(--lux-gold-dark);"></i> Sức chứa: <strong class="text-dark" th:text="${rt.maxGuests} + ' khách'">2 khách</strong> &bull; 
+                                                <i class="fa-solid fa-tag ms-2 me-1" style="color: var(--lux-gold-dark);"></i> Giá: <strong style="color: var(--lux-gold-dark);" th:text="${#numbers.formatDecimal(rt.pricePerNight, 0, 'COMMA', 0, 'POINT')} + ' đ / đêm'">1,200,000 đ</strong>
+                                            </div>
+                                        </div>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body p-4">
+                                        <!-- Ảnh lớn -->
+                                        <img th:if="${rt.images != null and !rt.images.isEmpty()}" th:src="${rt.images[0].imageUrl}" class="modal-room-main-img mb-3" th:alt="${rt.name}">
+                                        <img th:unless="${rt.images != null and !rt.images.isEmpty()}" src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80" class="modal-room-main-img mb-3" th:alt="${rt.name}">
+
+                                        <h6 class="fw-bold text-dark mb-2">Mô tả không gian</h6>
+                                        <p class="text-secondary small mb-4" style="line-height: 1.7;" th:text="${rt.description}">
+                                            Mô tả phòng chi tiết...
+                                        </p>
+
+                                        <h6 class="fw-bold text-dark mb-2">Tiện nghi phòng</h6>
+                                        <div class="row g-2 mb-3">
+                                            <div th:each="am : ${rt.amenities}" class="col-6 col-md-4">
+                                                <div class="p-2 bg-light rounded-3 border small d-flex align-items-center gap-2" style="border-color: var(--lux-border) !important;">
+                                                    <i th:classappend="${am.icon != null ? am.icon : 'fa-solid fa-check'}" style="color: var(--lux-gold-dark);"></i>
+                                                    <span class="text-dark fw-semibold" th:text="${am.name}">Wifi</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer border-0 bg-light p-3 px-4 d-flex justify-content-between">
+                                        <a th:href="@{/rooms/{id}(id=${rt.id}, checkIn=${checkIn}, checkOut=${checkOut}, guests=${guests})}" class="btn btn-outline-dark rounded-pill px-4 small fw-semibold">
+                                            Trang chi tiết đầy đủ &rarr;
+                                        </a>
+                                        <a th:if="${!hasDateFilter or (availableCountByType[rt.id] != null and availableCountByType[rt.id] > 0)}"
+                                            th:href="@{/booking/checkout(roomTypeId=${rt.id}, checkIn=${checkIn != null ? checkIn : defaultCheckIn}, checkOut=${checkOut != null ? checkOut : defaultCheckOut}, guests=${guests != null ? guests : 2})}" class="gold-btn px-4 small">
+                                             <i class="fa-solid fa-lock me-2"></i> Tiến hành đặt phòng
+                                         </a>
+                                         <button th:if="${hasDateFilter and (availableCountByType[rt.id] == null or availableCountByType[rt.id] == 0)}"
+                                                 type="button" disabled class="btn btn-secondary rounded-pill px-4 small fw-bold">
+                                             <i class="fa-solid fa-ban me-2"></i> Hết phòng
+                                         </button>
+                                     </div>
+                                 </div>
+                             </div>
+                         </div>
+
+                     </div>
+                 </div>
+
+                 <!-- Phân trang (Pagination) -->
+                 <nav th:if="${totalPages != null and totalPages > 1}" aria-label="Phân trang phòng" class="mt-4">
+                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                         <div class="text-muted small fw-semibold">
+                             Trang <span th:text="${currentPage}">1</span> / <span th:text="${totalPages}">1</span>
+                             &mdash; Hiển thị <span th:text="${pageSize}">12</span> hạng phòng mỗi trang
+                         </div>
+                         <ul class="pagination rooms-pagination mb-0">
+                             <!-- Previous -->
+                             <li class="page-item" th:classappend="${currentPage <= 1 ? 'disabled' : ''}">
+                                 <a class="page-link" th:href="@{/rooms(keyword=${keyword}, checkIn=${checkIn}, checkOut=${checkOut}, guests=${guests}, minPrice=${minPrice}, maxPrice=${maxPrice}, amenityId=${amenityId}, sortBy=${sortBy}, page=${currentPage - 1}, size=${pageSize})}">
+                                     <i class="fa-solid fa-chevron-left"></i>
+                                 </a>
+                             </li>
+
+                             <!-- Page Numbers -->
+                             <li th:each="i : ${#numbers.sequence(1, totalPages)}" class="page-item" th:classappend="${i == currentPage ? 'active' : ''}">
+                                 <a class="page-link" th:text="${i}" th:href="@{/rooms(keyword=${keyword}, checkIn=${checkIn}, checkOut=${checkOut}, guests=${guests}, minPrice=${minPrice}, maxPrice=${maxPrice}, amenityId=${amenityId}, sortBy=${sortBy}, page=${i}, size=${pageSize})}">1</a>
+                             </li>
+
+                             <!-- Next -->
+                             <li class="page-item" th:classappend="${currentPage >= totalPages ? 'disabled' : ''}">
+                                 <a class="page-link" th:href="@{/rooms(keyword=${keyword}, checkIn=${checkIn}, checkOut=${checkOut}, guests=${guests}, minPrice=${minPrice}, maxPrice=${maxPrice}, amenityId=${amenityId}, sortBy=${sortBy}, page=${currentPage + 1}, size=${pageSize})}">
+                                     <i class="fa-solid fa-chevron-right"></i>
+                                 </a>
+                             </li>
+                         </ul>
+                     </div>
+                 </nav>
+
+                 <!-- Trạng thái trống (Empty State) -->
+                 <div th:if="${#lists.isEmpty(roomTypes)}" class="card border-0 shadow-sm rounded-4 text-center py-5" style="background: #ffffff; border: 1px solid var(--lux-border) !important;">
+                     <div class="py-5">
+                         <div class="rounded-circle bg-light d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px;">
+                             <i class="fa-solid fa-bed text-muted fs-2 opacity-50"></i>
+                         </div>
+                         <h4 class="text-dark fw-bold mb-2">Không tìm thấy hạng phòng nào phù hợp</h4>
+                         <p class="text-muted small mb-4" style="max-width: 480px; margin: 0 auto;">
+                             Quý khách vui lòng thử chọn khoảng ngày khác hoặc điều chỉnh lại các tiêu chí lọc để xem thêm phòng trống.
+                         </p>
+                         <a th:href="@{/rooms}" class="gold-btn px-4 py-2.5 small">
+                             <i class="fa-solid fa-rotate-left me-2"></i> Đặt lại tất cả bộ lọc
+                         </a>
+                     </div>
+                 </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</body>
+</html>
