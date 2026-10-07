@@ -91,12 +91,14 @@ public class PublicAccountController {
                 : List.of();
 
         List<Notification> notifications = notificationService.getNotificationsForUser(user.getId());
+        long unreadNotificationCount = notificationService.countUnreadForUser(user.getId());
 
         model.addAttribute("user", user);
         model.addAttribute("customer", customer);
         model.addAttribute("bookings", bookings);
         model.addAttribute("reviews", customerReviews);
         model.addAttribute("notifications", notifications);
+        model.addAttribute("unreadNotificationCount", unreadNotificationCount);
         model.addAttribute("activeTab", tab);
 
         return "client/my-account";

@@ -41,6 +41,16 @@
             badge.classList.toggle('d-none', unreadCount === 0);
         }
 
+        const accountNotifBadge = document.getElementById('accountTabNotifBadge');
+        if (accountNotifBadge) {
+            accountNotifBadge.textContent = unreadCount;
+            if (unreadCount > 0) {
+                accountNotifBadge.className = 'badge rounded-pill bg-danger text-white ms-auto';
+            } else {
+                accountNotifBadge.className = 'badge rounded-pill bg-light border text-dark ms-auto';
+            }
+        }
+
         if (!listEl) return;
         if (!notifications || notifications.length === 0) {
             listEl.innerHTML = `
@@ -115,6 +125,17 @@
                 badge.textContent = Math.max(0, count - 1);
                 badge.classList.toggle('d-none', badge.textContent === '0');
             }
+            const accountNotifBadge = document.getElementById('accountTabNotifBadge');
+            if (accountNotifBadge) {
+                const count = parseInt(accountNotifBadge.textContent || '0', 10);
+                const nextCount = Math.max(0, count - 1);
+                accountNotifBadge.textContent = nextCount;
+                if (nextCount > 0) {
+                    accountNotifBadge.className = 'badge rounded-pill bg-danger text-white ms-auto';
+                } else {
+                    accountNotifBadge.className = 'badge rounded-pill bg-light border text-dark ms-auto';
+                }
+            }
         }).catch(function () {});
     }
 
@@ -140,6 +161,11 @@
             if (badge) {
                 badge.textContent = '0';
                 badge.classList.add('d-none');
+            }
+            const accountNotifBadge = document.getElementById('accountTabNotifBadge');
+            if (accountNotifBadge) {
+                accountNotifBadge.textContent = '0';
+                accountNotifBadge.className = 'badge rounded-pill bg-light border text-dark ms-auto';
             }
         }).catch(function () {}).finally(function () {
             if (btn) {

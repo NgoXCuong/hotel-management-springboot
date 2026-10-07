@@ -148,8 +148,12 @@
                 >
                   <i class="fa-solid fa-bell fs-5"></i>
                   <span>Thông báo hệ thống</span>
-                  <span class="badge rounded-pill bg-danger text-white ms-auto"
-                    >2</span
+                  <span
+                    id="accountTabNotifBadge"
+                    class="badge rounded-pill ms-auto"
+                    th:classappend="${unreadNotificationCount != null and unreadNotificationCount > 0 ? 'bg-danger text-white' : 'bg-light border text-dark'}"
+                    th:text="${unreadNotificationCount != null ? unreadNotificationCount : 0}"
+                    >0</span
                   >
                 </button>
               </div>
@@ -1014,15 +1018,25 @@
                 role="tabpanel"
               >
                 <div class="account-card-lux">
-                  <h5
-                    class="serif-title fw-bold text-dark mb-4 pb-2 border-bottom"
+                  <div
+                    class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom"
                   >
-                    <i
-                      class="fa-solid fa-bell text-warning me-2"
-                      style="color: #d97706 !important"
-                    ></i>
-                    Thông báo từ Hệ thống
-                  </h5>
+                    <h5 class="serif-title fw-bold text-dark mb-0">
+                      <i
+                        class="fa-solid fa-bell text-warning me-2"
+                        style="color: #d97706 !important"
+                      ></i>
+                      Thông báo từ Hệ thống
+                    </h5>
+                    <button
+                      th:if="${notifications != null and !#lists.isEmpty(notifications)}"
+                      class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 small"
+                      onclick="markAllRead()"
+                      type="button"
+                    >
+                      <i class="fa-solid fa-check-double me-1"></i> Đánh dấu đã đọc
+                    </button>
+                  </div>
 
                   <div class="list-group list-group-flush small">
                     <div
