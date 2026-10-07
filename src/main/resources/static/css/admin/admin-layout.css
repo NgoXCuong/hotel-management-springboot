@@ -161,7 +161,36 @@
 .header-right {
     display: flex;
     align-items: center;
-    gap: 24px;
+    gap: 20px;
+}
+
+/* Nút chuyển đến giao diện Website người dùng */
+.btn-view-website {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    background-color: var(--accent-gold-light);
+    color: var(--accent-gold-dark);
+    border: 1px solid rgba(197, 168, 128, 0.45);
+    font-size: 13.5px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.25s ease;
+    white-space: nowrap;
+}
+
+.btn-view-website:hover {
+    background: linear-gradient(135deg, #C5A880 0%, #A68760 100%);
+    color: #ffffff;
+    border-color: transparent;
+    box-shadow: 0 4px 12px rgba(197, 168, 128, 0.35);
+    transform: translateY(-1px);
+}
+
+.btn-view-website i {
+    font-size: 14px;
 }
 
 .user-profile {
@@ -241,5 +270,15 @@
 
     .search-bar {
         display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .btn-view-website span {
+        display: none;
+    }
+    .btn-view-website {
+        padding: 8px 12px;
+        border-radius: 10px;
     }
 }

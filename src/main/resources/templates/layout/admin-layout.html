@@ -173,6 +173,15 @@
                     <span>Tài khoản & Phân quyền</span>
                 </a>
             </li>
+
+            <!-- 6. GIAO DIỆN NGƯỜI DÙNG -->
+            <li class="sidebar-menu-header">Giao diện khách hàng</li>
+            <li>
+                <a th:href="@{/}">
+                    <i class="fa-solid fa-globe"></i>
+                    <span>Xem Website</span>
+                </a>
+            </li>
         </ul>
     </aside>
 
@@ -192,6 +201,12 @@
             </div>
 
             <div class="header-right">
+                <!-- Nút điều hướng đến Website (Giao diện người dùng) -->
+                <a th:href="@{/}" class="btn-view-website" title="Chuyển đến giao diện người dùng">
+                    <i class="fa-solid fa-globe"></i>
+                    <span>Xem Website</span>
+                </a>
+
                 <div class="user-profile">
                     <div class="user-avatar overflow-hidden">
                         <img th:if="${currentUser != null and currentUser.avatarUrl != null and !currentUser.avatarUrl.isEmpty()}" 
