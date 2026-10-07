@@ -38,11 +38,11 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.ignoringRequestMatchers("/api/sepay/**", "/api/booking/**"))
+            .csrf(csrf -> csrf.ignoringRequestMatchers("/api/sepay/**", "/api/booking/**", "/api/chatbot/**"))
             // ============ PHÂN QUYỀN URL ============
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers( "/", "/rooms/**", "/booking/**", "/api/sepay/**",
-                    "/api/booking/**", "/services/**", "/about/**", "/contact/**",
+                    "/api/booking/**", "/api/chatbot/**", "/services/**", "/about/**", "/contact/**",
                     "/reviews/**", "/auth/**", "/error", "/error/**", "/css/**",
                     "/js/**", "/images/**", "/webjars/**").permitAll()
 
